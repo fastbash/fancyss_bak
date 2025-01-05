@@ -1247,7 +1247,7 @@ function update_visibility() {
 	var a = E("ss_basic_rule_update").value == "1";
 	var b = E("ss_basic_node_update").value == "1";
 	var d = E("ss_basic_udp_upstream_mtu").value == "1";			//fancyss-full
-	var e = E("ss_china_dns").value == "12";
+	var e = E("ss_china_dns").value == "99";
 	var f = E("ss_foreign_dns").value;
 	var g = E("ss_basic_tri_reboot_time").value;
 	var h_0 = E("ss_basic_server_resolv").value;
@@ -3993,7 +3993,7 @@ function version_show() {
 	if(!db_ss["ss_basic_version_local"]) db_ss["ss_basic_version_local"] = "0.0.0"
 	$("#ss_version_show").html("<a class='hintstyle' href='javascript:void(0);'><i>当前版本：" + db_ss['ss_basic_version_local'] + "</i></a>");
 	$.ajax({
-		url: 'https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/version.json.js',
+		url: 'https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/version.json.js',
 		type: 'GET',
 		dataType: 'json',
 		success: function(res) {
@@ -4008,7 +4008,7 @@ function version_show() {
 function message_show() {
 	if (db_ss["ss_close_mesg"] == "0") return
 	$.ajax({
-		url: 'https://gist.githubusercontent.com/hq450/001dd0617a64e11a9492dcf9205a0e03/raw/fancyss_msg.json?_=' + new Date().getTime(),
+		url: 'https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/rules/fancyss_msg.json?_=' + new Date().getTime(),
 		type: 'GET',
 		dataType: 'json',
 		cache: false,
@@ -4098,7 +4098,7 @@ function update_ss() {
 	db_ss["ss_basic_action"] = "7";
 	push_data("ss_update.sh", "update",  dbus_post);
 }
-
+function check_rule() { push_data("ss_check_rule.sh", E("check_rule_value").value,  ""); }
 function tabSelect(w) {
 	for (var i = 0; i <= 10; i++) {
 		$('.show-btn' + i).removeClass('active');
@@ -4567,7 +4567,7 @@ function dns_test(s) {
 		$("#log_dig").show();
 		$("#log_resv").hide();
 		dns_log["ss_basic_logname"] = "dns_gfwlist";
-		var note1 = '1. gfwlist的域名清单来自：<a href="https://github.com/hq450/fancyss/blob/3.0/rules/gfwlist.conf" target="_blank"><em><u>https://github.com/hq450/fancyss/blob/3.0/rules/gfwlist.conf</u></em></a>，收录了常见的被gfw屏蔽的域名。';
+		var note1 = '1. gfwlist的域名清单来自：<a href="https://github.com/fastbash/fancyss/blob/3.0/rules/gfwlist.conf" target="_blank"><em><u>https://github.com/fastbash/fancyss/blob/3.0/rules/gfwlist.conf</u></em></a>，收录了常见的被gfw屏蔽的域名。';
 		var note2 = '2. 由于gfwlist清单较长，将每次随机选取100个域名进行测试！理想情况下，解析结果应该全部是海外IP地址，没有大陆IP地址！';
 		var note3 = '3. 解析结果和速度可能受节点、DNS方案、上游DNS缓存等因素影响，本测试也无法判断解析结果正确性！所以测试结果仅供参考！';
 	}
@@ -5506,7 +5506,7 @@ function save_failover() {
 														、<a href="https://github.com/EAimTY/tuic" target="_blank"><em><u>tuic</u></em></a>    				<!--fancyss-full-->
 														、<a href="https://github.com/apernet/hysteria" target="_blank"><em><u>Hysteria2</u></em></a>    	<!--fancyss-full-->
 														八种客户端的科学上网工具。
-														<a href="https://t.me/joinchat/AAAAAEC7pgV9vPdPcJ4dJw" target="_blank"><em>Telegram交流群</em></a>
+
 													</li>
 												</ul>
 												<ul id="scroll_msg" style="padding:0;margin:0;line-height:1.8;overflow: hidden;">
@@ -5604,7 +5604,7 @@ function save_failover() {
 																<a><i>当前版本：</i></a>
 															</div>
 															<div style="display:table-cell;float: left;margin-left:270px;position: absolute;padding: 5.5px 0px;">
-																<a type="button" class="ss_btn" target="_blank" href="https://github.com/hq450/fancyss/blob/3.0/Changelog.txt">更新日志</a>
+																<a type="button" class="ss_btn" target="_blank" href="https://github.com/fastbash/fancyss_bak/blob/3.0/Changelog.txt">更新日志</a>
 															</div>
 															<div style="display:table-cell;float: left;margin-left:350px;position: absolute;padding: 5.5px 0px;">
 																<a type="button" class="ss_btn" href="javascript:void(0);" onclick="pop_help()">插件帮助</a>
@@ -6505,17 +6505,17 @@ function save_failover() {
 														$('#table_rules').forms([
 															{ title: 'gfwlist域名数量', multi: [
 																{ suffix: '<em>'+ gfwl +'</em>&nbsp;条，版本：' },
-																{ suffix: '<a href="https://github.com/hq450/fancyss/blob/3.0/rules/gfwlist.conf" target="_blank">' },
+																{ suffix: '<a href="https://github.com/fastbash/fancyss/blob/3.0/rules/gfwlist.conf" target="_blank">' },
 																{ suffix: '<i><% nvram_get("update_ipset"); %></i></a>' },
 															]},
 															{ title: '大陆白名单IP段数量', multi: [
 																{ suffix: '<em>'+ chnl +'</em>&nbsp;行，包含 <em>' + chnn + '</em>&nbsp;个ip地址，版本：' },
-																{ suffix: '<a href="https://github.com/hq450/fancyss/blob/3.0/rules/chnroute.txt" target="_blank">' },
+																{ suffix: '<a href="https://github.com/fastbash/fancyss/blob/3.0/rules/chnroute.txt" target="_blank">' },
 																{ suffix: '<i><% nvram_get("update_chnroute"); %></i></a>' },
 															]},
 															{ title: '国内域名数量（cdn名单）', multi: [
 																{ suffix: '<em>'+ cdnn +'</em>&nbsp;条，版本：' },
-																{ suffix: '<a href="https://github.com/hq450/fancyss/blob/3.0/rules/cdn.txt" target="_blank">' },
+																{ suffix: '<a href="https://github.com/fastbash/fancyss/blob/3.0/rules/cdn.txt" target="_blank">' },
 																{ suffix: '<i><% nvram_get("update_cdn"); %></i></a>' },
 															]},
 															{ title: '规则定时更新任务', hint:'44', multi: [
@@ -6540,7 +6540,7 @@ function save_failover() {
 												</table>
 												<table id="table_subscribe" style="margin:8px 0px 0px 0px;" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" bordercolor="#6b8fa3" class="FormTable">
 													<script type="text/javascript">
-														var option_noded = [["7", "每天"], ["1", "周一"], ["2", "周二"], ["3", "周三"], ["4", "周四"], ["5", "周五"], ["6", "周六"], ["6", "周日"]];
+														var option_noded = [["0", "每天"], ["1", "周一"], ["2", "周二"], ["3", "周三"], ["4", "周四"], ["5", "周五"], ["6", "周六"], ["7", "周日"]];
 														var option_hy2_tfo = [["0", "强制关闭"], ["1", "强制开启"], ["2", "根据订阅"]];							//fancyss-full
 														var option_nodeh = [];
 														for (var i = 0; i < 24; i++){
@@ -6550,6 +6550,7 @@ function save_failover() {
 															_tmp[1] = _i + "点";
 															option_nodeh.push(_tmp);
 														}
+														option_nodeh.push([25, "每小时"]);
 														var ph1 = "此处填入你的机场订阅链接，通常是http://或https://开头的链接，多个链接可以分行填写！&#10;也可以增加非http开头的行作为注释，或使用空行或者符号线作为分割，订阅脚本仅会提取http://或https://开头的链接用以订阅，示例：&#10;-------------------------------------------------&#10;🚀xx机场 ssr&#10;https://abcd.airport.com/xxx&#10;&#10;🛩️yy机场 ss&#10;https://xyza.com/xxx&#10;-------------------------------------------------&#10;填写完成后点击下面的【保存并订阅】按钮开始订阅！";
 														var ph2 = "多个关键词用英文逗号分隔，如：测试,过期,剩余,曼谷,M247,D01,硅谷";
 														var ph3 = "多个关键词用英文逗号分隔，如：香港,深圳,NF,BGP";
@@ -6652,7 +6653,7 @@ function save_failover() {
 														var option_trit = [["0", "关闭"], ["2", "每隔2分钟"], ["5", "每隔5分钟"], ["10", "每隔10分钟"], ["15", "每隔15分钟"], ["20", "每隔20分钟"], ["25", "每隔25分钟"], ["30", "每隔30分钟"]];
 														var pingm = [["1", "1次/节点"], ["2", "5次/节点"], ["3", "10次/节点"], ["4", "20次/节点"]];
 														var weburl = ["developer.google.cn/generate_204", "connectivitycheck.gstatic.com/generate_204", "www.gstatic.com/generate_204"];
-														$('#table_addons').forms([
+														$('#table_addons').forms([{ td: '<tr><td class="smth" style="font-weight: bold;" colspan="2">规则测试</td></tr>'},{ title: '&nbsp;&nbsp;&nbsp;&nbsp;输入检测域名', hint:'122', multi: [{ suffix:'<input id="check_rule_value" type="text" class="input_ss_table" style="width:140px;" placeholder="example.com">'},{ suffix:'&nbsp;<input type="button" class="ss_btn" style="cursor:pointer;" onclick="check_rule();" value="检测">'}]},
 															{ td: '<tr><td class="smth" style="font-weight: bold;" colspan="2">备份/恢复</td></tr>'},
 															{ title: '导出fancyss配置', hint:'24', multi: [
 																{ suffix:'<input type="button" class="ss_btn" style="cursor:pointer;" onclick="download_route_file(1);" value="导出配置">'},

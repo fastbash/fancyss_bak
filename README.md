@@ -1,12 +1,9 @@
-# [fancyss - 科学上网](https://hq450.github.io/fancyss/)
+# [fancyss - 科学上网](https://github.com/fancyss/fancyss_bak)
 
 - Fancyss is a project providing tools to across the GFW on asuswrt/merlin based router with software center. 
 - 此项目提供用于asuswrt、asuswrt-merlin为基础的，带软件中心固件（≥384）路由器的科学上网功能。
 
 ---
-- 📺 广告1：[ChatGPT Plus、Netflix、Disney+、Spotify、YouTube等会员账号合租，95折优惠码: fancyss](https://nf.video/9QQkT)
-- 🚀 广告2：[fancyss合作top机场：<b>Nexitally/奶昔</b> | 全中转机场 / 优质线路资源 / 支持udp / 解锁流媒体，ChatGPT](https://nxboom.com/?PartnerCode=af8f126dd490446e80737444dd0064f6)
-- ✈️ 广告3：[fancyss高速机场推荐：<b>ssLinks</b> | 性价比全中转机场 / 80+线路 / 流媒体解锁，9折优惠码: fancyss](https://98a6251b6cd7471da86cca993b6dbe6f.36d.biz/#/register?code=yf6ozeEO)
 ---
 
 ## 插件特色
@@ -112,17 +109,17 @@ RT-AX86U、GT-AX6000等armv8机型（见上表），从3.0.6开始建议安装fa
 插件下载有两种方式：
 
 1. 在`packages`目录下，点击tar.gz后缀文件，下载当前最新版本的离线安装包
-2. 在[fancyss_history_package](https://github.com/hq450/fancyss_history_package)项目中，包含**历史版本**和**最新版本**的离线安装包
+2. 在[fancyss_history_package](https://github.com/fastbash/fancyss_bak_history_package)项目中，包含**历史版本**和**最新版本**的离线安装包
 
 插件离线包下载导航：
 
 | 平台   | 最新full版本下载                                             | 最新lite版本下载                                             | 历史版本下载（包含最新版）                                   |
 | ------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| hnd    | [fancyss_hnd_full](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_hnd_full.tar.gz) | [fancyss_hnd_lite](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_hnd_lite.tar.gz) | [fancyss_hnd](https://github.com/hq450/fancyss_history_package/tree/master/fancyss_hnd) |
-| hnd_v8 | [fancyss_hnd_v8_full](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_hnd_v8_full.tar.gz)  | [fancyss_hnd_v8_lite](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_hnd_v8_lite.tar.gz)  | [fancyss_hnd_v8](https://github.com/hq450/fancyss_history_package/tree/master/fancyss_hnd_v8)                                                         |
-| qca    | [fancyss_qca_full](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_qca_full.tar.gz) | [fancyss_qca_lite](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_qca_lite.tar.gz) | [fancyss_qca](https://github.com/hq450/fancyss_history_package/tree/master/fancyss_qca) |
-| arm    | [fancyss_arm_full](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_arm_full.tar.gz) | [fancyss_arm_lite](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_arm_lite.tar.gz) | [fancyss_arm](https://github.com/hq450/fancyss_history_package/tree/master/fancyss_arm) |
-| mtk    | [fancyss_mtk_full](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_mtk_full.tar.gz) | [fancyss_mtk_lite](https://raw.githubusercontent.com/hq450/fancyss/3.0/packages/fancyss_mtk_lite.tar.gz) | [fancyss_mtk](https://github.com/hq450/fancyss_history_package/tree/master/fancyss_mtk) |
+| hnd    | [fancyss_hnd_full](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_hnd_full.tar.gz) | [fancyss_hnd_lite](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_hnd_lite.tar.gz) | [fancyss_hnd](https://github.com/fastbash/fancyss_bak_history_package/tree/master/fancyss_hnd) |
+| hnd_v8 | [fancyss_hnd_v8_full](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_hnd_v8_full.tar.gz)  | [fancyss_hnd_v8_lite](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_hnd_v8_lite.tar.gz)  | [fancyss_hnd_v8](https://github.com/fastbash/fancyss_bak_history_package/tree/master/fancyss_hnd_v8)                                                         |
+| qca    | [fancyss_qca_full](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_qca_full.tar.gz) | [fancyss_qca_lite](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_qca_lite.tar.gz) | [fancyss_qca](https://github.com/fastbash/fancyss_bak_history_package/tree/master/fancyss_qca) |
+| arm    | [fancyss_arm_full](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_arm_full.tar.gz) | [fancyss_arm_lite](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_arm_lite.tar.gz) | [fancyss_arm](https://github.com/fastbash/fancyss_bak_history_package/tree/master/fancyss_arm) |
+| mtk    | [fancyss_mtk_full](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_mtk_full.tar.gz) | [fancyss_mtk_lite](https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/packages/fancyss_mtk_lite.tar.gz) | [fancyss_mtk](https://github.com/fastbash/fancyss_bak_history_package/tree/master/fancyss_mtk) |
 
 ## 插件安装
 
@@ -171,7 +168,7 @@ tx：华硕天选青色皮肤
 1. 克隆本项目：使用linux系统，比如Ubuntu 20.04
 
    ```bash
-   git clone https://github.com/hq450/fancyss.git
+   git clone https://github.com/fastbash/fancyss_bak.git
    ```
 
 2. 切换到3.0分支
@@ -208,14 +205,14 @@ tx：华硕天选青色皮肤
 
 ## 相关链接
 
-* **fancyss 3.0**更新日志：https://github.com/hq450/fancyss/blob/3.0/Changelog.txt
+* **fancyss 3.0**更新日志：https://github.com/fastbash/fancyss_bak/blob/3.0/Changelog.txt
 
 * 官改/梅改固件下载【网方网站】（最新固件）：[https://www.koolcenter.com](https://www.koolcenter.com/)
 * 官改/梅改固件下载【固件镜像】（次新固件）：[https://fw.koolcenter.com](https://fw.koolcenter.com)
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=hq450/fancyss&type=Date)](https://star-history.com/#hq450/fancyss&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=fastbash/fancyss_bak&type=Date)](https://star-history.com/#fastbash/fancyss_bak&Date)
 
 [^1]: RT-AC86U从384_81918_koolshare固件版本开始，使用的是asuswrt风格ui，而不是rog风格。
 [^2]: RT-AX89X采用的SoC为ipq8074/ipq8074A，支持64位系统，但是其固件是32位系统。

@@ -22,6 +22,10 @@ KEY_WORDS_1=$(dbus get ss_basic_exclude | sed 's/,$//g' | sed 's/,/|/g')
 KEY_WORDS_2=$(dbus get ss_basic_include | sed 's/,$//g' | sed 's/,/|/g')
 alias urldecode='sed "s@+@ @g;s@%@\\\\x@g" | xargs -0 printf "%b"'
 
+model=$(nvram get model | tr -d '\r')
+fancyss=$(dbus get ss_basic_version_local | tr -d '\r')
+softcenter=$(dbus get softcenter_version | tr -d '\r')
+
 # 20230701, some vairiable should be unset
 unset usb2jffs_time_hour
 unset usb2jffs_week
@@ -1585,6 +1589,11 @@ go_proxy(){
 }
 
 download_by_curl(){
+	CURL_BIN="curl-fancyss"
+	BIN_VER="$CURL_BIN/$($CURL_BIN --version | head -n1 | awk '{print $2}')"
+	UA_STRING="User-Agent: ${BIN_VER} (${model}) fancyss_bak/${fancyss} softcenter/${softcenter}"
+    _curl_arg="-4sSkL"
+
 	if [ "$(dbus get ss_basic_online_links_goss)" == "1" ]; then
 		SOCKS5_OPEN=$(netstat -nlp 2>/dev/null|grep -w "23456"|grep -Eo "ss-local|sslocal|v2ray|xray|naive|tuic")
 		if [ -n "${SOCKS5_OPEN}" ];then
@@ -1602,19 +1611,19 @@ download_by_curl(){
 	local url_encode=$(echo "$1" | sed 's/[[:space:]]/%20/g')
 	
 	echo_date "1️⃣使用curl下载订阅，第一次尝试下载..."
-	run curl-fancyss -4sSk ${EXT_ARG} --connect-timeout 6 "${url_encode}" 2>/dev/null >${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
+	run $CURL_BIN ${_curl_arg} -H "$UA_STRING" ${EXT_ARG} --connect-timeout 6 "${url_encode}" 2>/dev/null >${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
 	if [ "$?" == "0" ]; then
 		return 0
 	fi
 	
 	echo_date "2️⃣使用curl下载订阅失败，第二次尝试下载..."
-	run curl-fancyss -4sSk ${EXT_ARG} --connect-timeout 10 "${url_encode}" 2>/dev/null >${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
+	run $CURL_BIN ${_curl_arg} -H "$UA_STRING" ${EXT_ARG} --connect-timeout 10 "${url_encode}" 2>/dev/null >${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
 	if [ "$?" == "0" ]; then
 		return 0
 	fi
 
 	echo_date "3️⃣使用curl下载订阅失败，第三次尝试下载..."
-	run curl-fancyss -4sSk ${EXT_ARG} --connect-timeout 12 "${url_encode}" 2>/dev/null >${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
+	run $CURL_BIN ${_curl_arg} -H "$UA_STRING" ${EXT_ARG} --connect-timeout 12 "${url_encode}" 2>/dev/null >${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
 	if [ "$?" == "0" ]; then
 		return 0
 	fi	
@@ -1625,8 +1634,12 @@ download_by_curl(){
 download_by_wget(){
 	# if go proxy or not
 	go_proxy
+
+	WGET_BIN="wget"
+	BIN_VER="$WGET_BIN/$($WGET_BIN --version | head -n1 | awk '{print $3}')"
+	UA_STRING="${BIN_VER} (${model}) fancyss_bak/${fancyss} softcenter/${softcenter}"
 	
-	if [ -n $(echo $1 | grep -E "^https") ]; then
+	if echo $1 | grep -qE "^https"; then
 		local EXT_OPT="--no-check-certificate"
 	else
 		local EXT_OPT=""
@@ -1635,19 +1648,19 @@ download_by_wget(){
 	local url_encode=$(echo "$1" | sed 's/[[:space:]]/%20/g')
 	
 	echo_date "1️⃣使用wget下载订阅，第一次尝试下载..."
-	wget -4 -t 1 -T 10 --dns-timeout=5 -q ${EXT_OPT} "${url_encode}" -O ${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
+	wget -4 -t 1 -T 10 --dns-timeout=5 -q ${EXT_OPT} -U "$UA_STRING" "${url_encode}" -O ${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
 	if [ "$?" == "0" ]; then
 		return 0
 	fi
 
 	echo_date "2️⃣使用wget下载订阅，第二次尝试下载..."
-	wget -4 -t 1 -T 15 --dns-timeout=10 -q ${EXT_OPT} "${url_encode}" -O ${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
+	wget -4 -t 1 -T 15 --dns-timeout=10 -q ${EXT_OPT} -U "$UA_STRING" "${url_encode}" -O ${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
 	if [ "$?" == "0" ]; then
 		return 0
 	fi	
 	
 	echo_date "3️⃣使用wget下载订阅，第三次尝试下载..."
-	wget -4 -t 1 -T 20 --dns-timeout=15 -q ${EXT_OPT} "${url_encode}" -O ${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
+	wget -4 -t 1 -T 20 --dns-timeout=15 -q ${EXT_OPT} -U "$UA_STRING" "${url_encode}" -O ${DIR}/sub_file_encode_${SUB_LINK_HASH:0:4}.txt
 	if [ "$?" == "0" ]; then
 		return 0
 	fi
@@ -2128,13 +2141,23 @@ case $SH_ARG in
 	echo_date "当前节点列表内已经订阅了 $local_groups 组..." | tee -a $LOG_FILE
 	sed -i '/ssnodeupdate/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
 	if [ "$(dbus get ss_basic_node_update)" = "1" ]; then
-		if [ "$(dbus get ss_basic_node_update_day)" = "7" ]; then
-			cru a ssnodeupdate "0 $(dbus get ss_basic_node_update_hr) * * * /koolshare/scripts/ss_online_update.sh fancyss 3"
-			echo_date "设置自动更新订阅服务在每天 $(dbus get ss_basic_node_update_hr) 点。" | tee -a $LOG_FILE
+		_msg="设置自动更新订阅服务在"
+		ss_basic_node_update_day="$(dbus get ss_basic_node_update_day)"
+		if [ "$ss_basic_node_update_day" = "0" ]; then
+			ss_basic_node_update_day='*'
+			_msg="${_msg} 每天"
 		else
-			cru a ssnodeupdate "0 $(dbus get ss_basic_node_update_hr) * * $(dbus get ss_basic_node_update_day) /koolshare/scripts/ss_online_update.sh fancyss 3"
-			echo_date "设置自动更新订阅服务在星期 $(dbus get ss_basic_node_update_day) 的 $(dbus get ss_basic_node_update_hr) 点。" | tee -a $LOG_FILE
+			_msg="${_msg} 周${ss_basic_node_update_day} 的"
 		fi
+		ss_basic_node_update_hr="$(dbus get ss_basic_node_update_hr)"
+		if [ "$ss_basic_node_update_hr" = "25" ];then
+			ss_basic_node_update_hr='*'
+			_msg="${_msg} 每小时。"
+		else
+			_msg="${_msg} $ss_basic_node_update_hr 点。"
+		fi
+		cru a ssnodeupdate "0 $ss_basic_node_update_hr * * $ss_basic_node_update_day /koolshare/scripts/ss_online_update.sh fancyss 3"
+		echo_date "$_msg" | tee -a $LOG_FILE
 	else
 		echo_date "关闭自动更新订阅服务！" | tee -a $LOG_FILE
 		sed -i '/ssnodeupdate/d' /var/spool/cron/crontabs/* >/dev/null 2>&1

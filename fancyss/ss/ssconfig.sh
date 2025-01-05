@@ -1179,7 +1179,7 @@ ss_arg() {
 			echo_date ""
 			echo_date "检测到你的ss节点使用了v2ray-plugin混淆插件！但是本插件默认没有提供相关的二进制文件！"
 			echo_date "请前往下面的链接下载v2ray-plugin，并将其放置在路由器的/koolshare/bin目录后重启插件！"
-			echo_date "下载地址：https://github.com/hq450/fancyss/tree/3.0/binaries/v2ray-plugin"
+			echo_date "下载地址：https://github.com/fastbash/fancyss_bak/tree/3.0/binaries/v2ray-plugin"
 			echo_date ""
 			echo_date "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			echo_date ""
@@ -2336,11 +2336,11 @@ create_dnsmasq_conf() {
 	#    走代理的除了gfw列表里其其它域名，加入有个国外用户想直连访问国内的新浪微博，那么应该用国外DNS去解析，得到和不开插件一样的解析效果
 	local ALL_NODE_DOMAINS=$(dbus list ssconf|grep _server_|awk -F"=" '{print $NF}'|sort -u|grep -Ev "([0-9]{1,3}[\.]){3}[0-9]{1,3}")
 	local wanwhitedomains=$(echo ${ss_wan_white_domain} | base64_decode | sed '/^#/d' | grep "." | sort -u)
-	local ALL_WHITE_DOMAINS=$(echo ${wanwhitedomains} ${ALL_NODE_DOMAINS})
-	if [ -n "${ALL_WHITE_DOMAINS} " ]; then
+	local ALL_WHITE_DOMAINS=$(echo ${wanwhitedomains} ${ALL_NODE_DOMAINS} | sed 's# #\n#g' | sort -u)
+	if [ -n "${ALL_WHITE_DOMAINS}" ]; then
 		echo_date "生成域名白名单！"
 		echo "# -------- for white_domain --------" >>/tmp/wblist.conf
-		for wan_white_domain in ${ALL_WHITE_DOMAINS} ${ALL_NODE_DOMAINS}; do
+		for wan_white_domain in ${ALL_WHITE_DOMAINS}; do
 			detect_domain "${wan_white_domain}"
 			if [ "$?" == "0" ]; then
 				if [ "${ss_basic_advdns}" == "1" ];then
@@ -2356,7 +2356,7 @@ create_dnsmasq_conf() {
 						# 应该从gfwlist中删除对应域名
 						echo "${wan_white_domain}" >> /tmp/cdn.txt
 						local DOMAIN_EXIST_2=$(cat /tmp/gfwlist.txt | /bin/grep -Ew "^${wan_white_domain}")
-						if [ -n ${DOMAIN_EXIST_2} ];then
+						if [ -n "${DOMAIN_EXIST_2}" ];then
 							cat /tmp/gfwlist.txt | /bin/grep -Evw "^${wan_white_domain}" | run sponge /tmp/gfwlist.txt
 						fi	
 					fi
@@ -2491,7 +2491,7 @@ start_kcp() {
 			echo_date ""
 			echo_date "检测到你需要使用kcptun！但是本插件默认没有提供相关的二进制文件！"
 			echo_date "请前往下面的链接下载kcptun二进制，并将其放置在路由器的/koolshare/bin目录后重启插件！"
-			echo_date "下载地址：https://github.com/hq450/fancyss/tree/3.0/binaries/kcptun"
+			echo_date "下载地址：https://github.com/fastbash/fancyss_bak/tree/3.0/binaries/kcptun"
 			echo_date ""
 			echo_date "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 			echo_date ""
@@ -2561,7 +2561,7 @@ start_speeder() {
 					echo_date ""
 					echo_date "检测到你需要使用speederv1！但是本插件默认没有提供相关的二进制文件！"
 					echo_date "请前往下面的链接下载speederv1二进制，并将其放置在路由器的/koolshare/bin目录后重启插件！"
-					echo_date "https://raw.githubusercontent.com/hq450/fancyss/3.0/fancyss/bin-${pkg_arch}/speederv1"
+					echo_date "https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/fancyss/bin-${pkg_arch}/speederv1"
 					echo_date ""
 					echo_date "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 					echo_date ""
@@ -2606,7 +2606,7 @@ start_speeder() {
 					echo_date ""
 					echo_date "检测到你需要使用speederv2！但是本插件默认没有提供相关的二进制文件！"
 					echo_date "请前往下面的链接下载speederv2二进制，并将其放置在路由器的/koolshare/bin目录后重启插件！"
-					echo_date "https://raw.githubusercontent.com/hq450/fancyss/3.0/fancyss/bin-${pkg_arch}/speederv2"
+					echo_date "https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/fancyss/bin-${pkg_arch}/speederv2"
 					echo_date ""
 					echo_date "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 					echo_date ""
@@ -2658,7 +2658,7 @@ start_speeder() {
 				echo_date ""
 				echo_date "检测到你需要使用udp2raw！但是本插件默认没有提供相关的二进制文件！"
 				echo_date "请前往下面的链接下载udp2raw二进制，并将其放置在路由器的/koolshare/bin目录后重启插件！"
-				echo_date "https://raw.githubusercontent.com/hq450/fancyss/3.0/fancyss/bin-${pkg_arch}/udp2raw"
+				echo_date "https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/fancyss/bin-${pkg_arch}/udp2raw"
 				echo_date ""
 				echo_date "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 				echo_date ""
@@ -4493,7 +4493,7 @@ start_tuic(){
 		echo_date ""
 		echo_date "检测到你需要使用tuic-client！但是本插件默认没有提供相关的二进制文件！"
 		echo_date "请前往下面的链接下载tuic-client二进制，并将其放置在路由器的/koolshare/bin目录后重启插件！"
-		echo_date "https://raw.githubusercontent.com/hq450/fancyss/3.0/fancyss/bin-${pkg_arch}/tuic-client"
+		echo_date "https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/fancyss/bin-${pkg_arch}/tuic-client"
 		echo_date ""
 		echo_date "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 		echo_date ""

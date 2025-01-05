@@ -6,7 +6,7 @@ source /koolshare/scripts/base.sh
 eval $(dbus export ss_basic_)
 alias echo_date='echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】:'
 RULE_FILE=/koolshare/ss/rules/rules.json.js
-URL_MAIN="https://raw.githubusercontent.com/hq450/fancyss/3.0/rules"
+URL_MAIN="https://raw.githubusercontent.com/fastbash/fancyss/3.0/rules"
 
 run(){
 	env -i PATH=${PATH} "$@"
@@ -24,7 +24,7 @@ start_update(){
 	version_gfw_local=$(cat ${RULE_FILE} | run jq -r '.gfwlist.date' | sed 's/[[:space:]]/_/g')
 	version_chn_local=$(cat ${RULE_FILE} | run jq -r '.chnroute.date' | sed 's/[[:space:]]/_/g')
 	version_cdn_local=$(cat ${RULE_FILE} | run jq -r '.cdn_china.date' | sed 's/[[:space:]]/_/g')
-	if [ -z ${version_gfw_local} -o -z ${version_chn_local} -o -z ${version_cdn_local} -o ];then
+	if [ -z "${version_gfw_local}" ] || [ -z "${version_chn_local}" ] || [ -z "${version_cdn_local}" ];then
 		echo_date "没有找到规则版本号！退出！"
 		echo XU6J03M6 >> /tmp/upload/ss_log.txt
 		exit

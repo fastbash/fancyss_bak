@@ -197,16 +197,17 @@ function pop_help() {
 			、<a target="_blank" href="https://github.com/trojan-gfw/trojan"><u>Trojan</u></a>\
 			、<a target="_blank" href="https://github.com/klzgrad/naiveproxy"><u>NaïveProxy</u></a>\
 			、<a target="_blank" href="https://github.com/EAimTY/tuic"><u>tuic</u></a>\
-			七种客户端的科学上网、游戏加速工具。<br \><br \>\
+			、<a href="https://github.com/apernet/hysteria" target="_blank"><u>Hysteria2</u></a>\
+			八种客户端的科学上网、游戏加速工具。<br \><br \>\
 			本插件支持以Asuswrt、Asuswrt-Merlin为基础的，带软件中心的固件，目前固件均由<a style="color:#e7bd16" target="_blank" href="https://www.koolcenter.com/">https:\/\/www.koolcenter.com/</a>提供。<br \><br \>\
-			使用本插件有任何问题，可以前往<a style="color:#e7bd16" target="_blank" href="https://github.com/hq450/fancyss/issues"><u>github的issue页面</u></a>反馈~<br \><br \>\
-			● 插件交流：<a style="color:#e7bd16" target="_blank" href="https://t.me/+PzdfDBssIIFmMThl"><u>加入telegram群组</u></a><br \><br \>\
+			使用本插件有任何问题，可以前往<a style="color:#e7bd16" target="_blank" href="https://github.com/fastbash/fancyss_bak/issues"><u>github的issue页面</u></a>反馈~<br \><br \>\
+			<br \><br \>\
 			我们的征途是星辰大海 ^_^</div>'
 	});
 }
 function pop_node_add() {
 	note = "<li>检测到你尚未添加任何代理节点！你至少需要一个节点，才能让插件正常工作！</li><br /> ";
-	note += "<li>如果你已经有节点，请从【手动添加】【节点订阅】【恢复配置】中选择一种添加。</li><br />";
+	note += "<li>如果你已经有节点，请从【节点订阅】【手动添加】【恢复配置】中选择一种添加。</li><br />";
 	layer.open({
 		type: 0,
 		skin: 'layui-layer-lan',
@@ -217,16 +218,16 @@ function pop_node_add() {
 		btnAlign: 'c',
 		maxmin: true,
 		content: note,
-		btn: ['手动添加', '订阅节点', '恢复配置'],
+		btn: ['订阅节点', '手动添加', '恢复配置'],
 		btn1: function() {
-			$("#add_ss_node").trigger("click");
+			$("#show_btn7").trigger("click");
 			layer.closeAll();
 		},
 		btn2: function() {
-			$("#show_btn7").trigger("click");
+			$("#add_ss_node").trigger("click"); layer.closeAll();
 		},
 		btn3: function() {
-			$("#show_btn9").trigger("click");
+			$("#show_btn9").trigger("click"); layer.closeAll();
 		},
 		success: function(layero, index){
 			console.log(index);
@@ -499,7 +500,7 @@ function LoadingSSProgress(seconds) {
 	document.getElementById("LoadingBar").style.visibility = "visible";
 	if (action == 0) {
 		document.getElementById("loading_block3").innerHTML = "科学上网功能关闭中 ..."
-		$("#loading_block2").html("<li><font color='#ffcc00'><a href='https://github.com/hq450/fancyss' target='_blank'></font>插件工作有问题？请到<em>GITHUB</em>提交issue...</font></li>");
+		$("#loading_block2").html("<li><font color='#ffcc00'><a href='https://github.com/fastbash/fancyss_bak' target='_blank'></font>插件工作有问题？请到<em>GITHUB</em>提交issue...</font></li>");
 	} else if (action == 1) {
 		document.getElementById("loading_block3").innerHTML = "gfwlist模式启用中 ..."
 		$("#loading_block2").html("<li><font color='#ffcc00'>此期间请勿访问屏蔽网址，以免污染DNS进入缓存</font></li><li><font color='#ffcc00'>尝试不同的DNS解析方案，可以达到最佳的效果哦...</font></li><li><font color='#ffcc00'>请等待日志显示完毕，并出现自动关闭按钮！</font></li><li><font color='#ffcc00'>在此期间请不要刷新本页面，不然可能导致问题！</font></li>");
@@ -849,7 +850,7 @@ function openssHint(itemNum) {
 		statusmenu += "<br /><br />需要清空电脑DNS缓存，才能立即看到效果。"
 		_caption = "IP/CIDR黑名单";
 	} else if (itemNum == 44) {
-		statusmenu = "shadowsocks规则更新包括了gfwlist模式中用到的<a href='https://github.com/hq450/fancyss/blob/master/rules/gfwlist.conf' target='_blank'><font color='#00F'><u>gfwlist</u></font></a>，在大陆白名单模式和游戏模式中用到的<a href='https://github.com/hq450/fancyss/blob/master/rules/chnroute.txt' target='_blank'><u><font color='#00F'>chnroute</font></u></a>和<a href='https://github.com/hq450/fancyss/blob/master/rules/cdn.txt' target='_blank'><u><font color='#00F'>国内cdn名单</font></u></a>"
+		statusmenu = "shadowsocks规则更新包括了gfwlist模式中用到的<a href='https://github.com/fastbash/fancyss/blob/master/rules/gfwlist.conf' target='_blank'><font color='#00F'><u>gfwlist</u></font></a>，在大陆白名单模式和游戏模式中用到的<a href='https://github.com/fastbash/fancyss/blob/master/rules/chnroute.txt' target='_blank'><u><font color='#00F'>chnroute</font></u></a>和<a href='https://github.com/fastbash/fancyss/blob/master/rules/cdn.txt' target='_blank'><u><font color='#00F'>国内cdn名单</font></u></a>"
 		statusmenu += "<br />建议更新时间在凌晨闲时进行，以避免更新时重启ss服务器造成网络访问问题。"
 		_caption = "shadowsocks规则自动更新";
 	} else if (itemNum == 45) {

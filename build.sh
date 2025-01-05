@@ -5,7 +5,7 @@ VERSION=$(cat ./fancyss/ss/version|sed -n 1p)
 TITLE="科学上网"
 DESCRIPTION="科学上网"
 HOME_URL=Module_shadowsocks.asp
-CURR_PATH="$( cd "$( dirname "$BASH_SOURCE[0]" )" && pwd )"
+CURR_PATH="$( cd "$( dirname "$0" )" && pwd )"
 
 cp_rules(){
 	cp -rf ${CURR_PATH}/rules/gfwlist.conf ${CURR_PATH}/fancyss/ss/rules/
@@ -354,13 +354,13 @@ build_pkg() {
 }
 
 do_backup(){
-	if [ "${CURR_PATH}/../fancyss_history_package" ];then
+	if [ -d "${CURR_PATH}/../fancyss_bak_history_package" ];then
 		local platform=$1
 		local pkgtype=$2
 		local release_type=$3
 		if [ ${release_type} == "release" ];then
 			cd ${CURR_PATH}
-			HISTORY_DIR="${CURR_PATH}/../fancyss_history_package/fancyss_${platform}"
+			HISTORY_DIR="${CURR_PATH}/../fancyss_bak_history_package/fancyss_${platform}"
 			mkdir -p ${HISTORY_DIR}
 			# backup latested package after pack
 			local backup_version=${VERSION}

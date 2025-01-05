@@ -1,6 +1,6 @@
 #!/bin/bash
 CurrentDate=$(TZ=CST-8 date +%Y-%m-%d\ %H:%M)
-CURR_PATH="$( cd "$( dirname "$BASH_SOURCE[0]" )" && pwd )"
+CURR_PATH="$( cd "$( dirname "$0" )" && pwd )"
 RULE_PATH=${CURR_PATH%\/*}
 RULE_FILE=${RULE_PATH}/rules.json.js
 OBJECT_1='{}'
@@ -341,7 +341,7 @@ gen_chnroute_fancyss(){
 
 	# 3. write json
 	local SOURCE="fancyss"
-	local URL="https://github.com/hq450/fancyss/tree/3.0/rules"
+	local URL="https://github.com/fastbash/fancyss/tree/3.0/rules"
 	local CURR_DATE=$(TZ=CST-8 date +%Y-%m-%d\ %H:%M)
 	local MD5_VALUE=${md5sum1}
 	local LINE_COUN=$(cat ${CURR_PATH}/chnroute_tmp.txt | wc -l)

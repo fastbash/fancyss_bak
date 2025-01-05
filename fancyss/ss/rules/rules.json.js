@@ -66,7 +66,7 @@
     "count": "8421",
     "count_ip": "359416579",
     "source": "fancyss",
-    "url": "https://github.com/hq450/fancyss/tree/3.0/rules"
+    "url": "https://github.com/fastbash/fancyss/tree/3.0/rules"
   },
   "cdn_china": {
     "name": "cdn.txt",

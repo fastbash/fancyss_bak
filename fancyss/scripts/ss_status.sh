@@ -45,7 +45,7 @@ get_china_status(){
 	# tell test result to web status check
 	if [ "${ret_code}" == "200" -o "${ret_code}" == "204" -o "${ret_code}" == "301" ];then
 		local ret_time_ext=$(echo $ret0 | awk -F "|" '{printf "%.0f ms\n", $1 * 1000}')
-		log2='国内链接 【'${LOGTIME}'】 ✓&nbsp;&nbsp;'${ret_time_ext}''
+		log2='国内链接 【'${LOGTIME}'】 ✓'
 	else
 		log2='国内链接 【'${LOGTIME}'】 <font color='#FF0000'>X</font>'
 	fi
@@ -82,7 +82,7 @@ get_foreign_status(){
 	# tell test result to web status check
 	if [ "${ret_code}" == "200" -o "${ret_code}" == "204" -o "${ret_code}" == "301" ];then
 		local ret_time_ext=$(echo $ret0 | awk -F "|" '{printf "%.0f ms\n", $1 * 1000}')
-		log1='国外链接 【'${LOGTIME}'】 ✓&nbsp;&nbsp;'${ret_time_ext}''
+		log1='国外链接 【'${LOGTIME}'】 ✓'
 	else
 		log1='国外链接 【'${LOGTIME}'】 <font color='#FF0000'>X</font>'
 	fi

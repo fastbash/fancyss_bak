@@ -229,7 +229,7 @@ fancyss Changelog
    - fix	修复页面的一些小问题，如账号设置页面显示为空的问题
    - fix	修复fancyss lite版本，DNS设定页面报错的问题！
    - fix	修复节点服务器域名被解析成127.0.0.1从而导致节点工作异常的问题！
-   - add	插件顶部新增通知栏和广告栏，推送信息来自：https://gist.github.com/hq450/001dd0617a64e11a9492dcf9205a0e03
+   - add	插件顶部新增通知栏和广告栏，推送信息来自：https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/rules/fancyss_msg.json
        		推送信息为插件自己通过前端获取以上地址得到，不存在远程控制和推送恶意代码的可能。
        		通知栏：未来有重要信息会通过通知栏进行通知，没有通知的时候不会有任何信息干扰用户
        		广告栏：广告栏会尽量放一些不干扰人的广告，也希望能给我带来一些微薄的收益回报，望理解！
@@ -447,9 +447,9 @@ fancyss Changelog
        		1. 在线更新：通过在线更新fancyss_arm_1.0.6/fancyss_hnd_2.0.3/fancyss_qca_2.2.2过度版本后，即可再次通过在线更新升级到3.x.x
        		2. 离线安装：下载并安装3.x.x，比如3.0.0的离线安装包，通过软件中心离线安装功能安装即可
    - note3	3.x.x包含1.x.x - 2.x.x所有的功能和更新，为方便查询，提供日志回溯链接：
-       		fancyss_hnd 1.0.0 - 2.0.3 更新日志: https://github.com/hq450/fancyss/blob/master/fancyss_hnd/Changelog.txt
-       		fancyss_qca 2.0.0 - 2.2.2 更新日志: https://github.com/hq450/fancyss/blob/master/fancyss_hnd/Changelog.txt
-       		fancyss_arm 1.0.0 - 1.0.6 更新日志: https://github.com/hq450/fancyss/blob/master/fancyss_hnd/Changelog.txt
+       		fancyss_hnd 1.0.0 - 2.0.3 更新日志: https://github.com/fastbash/fancyss_bak/blob/master/fancyss_hnd/Changelog.txt
+       		fancyss_qca 2.0.0 - 2.2.2 更新日志: https://github.com/fastbash/fancyss_bak/blob/master/fancyss_hnd/Changelog.txt
+       		fancyss_arm 1.0.0 - 1.0.6 更新日志: https://github.com/fastbash/fancyss_bak/blob/master/fancyss_hnd/Changelog.txt
        		----------------------------------------------------------------------------------------------------------
    - add	增加dnsmasq重启按钮，方便在不重启整个插件的时候，通过重启dnsmasq来重建DNS缓存
    - update	规则（rules）更新和二进制（binary）更新地址均切换到3.0分支

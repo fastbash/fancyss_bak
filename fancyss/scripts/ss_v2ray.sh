@@ -6,7 +6,7 @@ source /koolshare/scripts/base.sh
 eval $(dbus export ss_basic_)
 alias echo_date='echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】:'
 V2RAY_CONFIG_FILE="/koolshare/ss/v2ray.json"
-url_main="https://raw.githubusercontent.com/hq450/fancyss/3.0/binaries/v2ray"
+url_main="https://raw.githubusercontent.com/fastbash/fancyss_bak/3.0/binaries/v2ray"
 
 # arm hnd hnd_v8 qca mtk
 pkg_arch=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_ARCH=.+" | awk -F"=" '{print $2}' |sed 's/"//g')
