@@ -49,8 +49,6 @@ get_old_plan() {
 	4)
 		if [ -n "${ss_basic_rss_obfs}" ]; then
 			echo "ssr-tunnel"
-		else
-			echo "ss-tunnel"
 		fi
 		;;
 	7)
@@ -100,10 +98,10 @@ GET_FW_VER(){
 GET_PROXY_TOOL(){
 	case "${ss_basic_type}" in
 	0)
-		if [ "${ss_basic_rust}" == "1" ];then
+		if [ "${ss_basic_score}" != "1" ];then
 			echo "shadowsocks-rust"
 		else
-			echo "shadowsocks-libev"
+			echo "xray"
 		fi
 		;;
 	1)
@@ -244,7 +242,7 @@ GET_PROG_STAT(){
 	# proxy core program
 	if [ "${ss_basic_type}" == "0" ]; then
 		# ss
-		if [ "${ss_basic_rust}" == "1" ]; then
+		if [ "${ss_basic_score}" != "1" ]; then
 			local SS_RUST=$(ps | grep "sslocal" | grep "3333" | awk '{print $1}')
 			if [ -n "${SS_RUST}" ]; then
 				echo "sslocal		运行中🟢		透明代理		${SS_RUST}"
@@ -252,11 +250,16 @@ GET_PROG_STAT(){
 				echo "sslocal	未运行🔴		透明代理"
 			fi
 		else
-			local SS_REDIR=$(pidof ss-redir)
-			if [ -n "${SS_REDIR}" ]; then
-				echo "ss-redir	运行中🟢		透明代理		${SS_REDIR}"
+			local XRAY=$(pidof xray)
+			if [ -n "${XRAY}" ];then
+				local xray_time=$(perpls|grep xray|grep -Eo "uptime.+-s\ " | awk -F" |:|/" '{print $3}')
+				if [ -n "${xray_time}" ];then
+					echo "Xray		运行中🟢		透明代理		${XRAY}	工作时长: ${xray_time}"
+				else
+					echo "Xray		运行中🟢		透明代理		${XRAY}"
+				fi
 			else
-				echo "ss-redir	未运行🔴		透明代理"
+				echo "Xray	未运行🔴"
 			fi
 		fi
 
@@ -373,7 +376,7 @@ GET_PROG_STAT(){
 			fi
 			
 			if [ "${ss_basic_type}" == "0" ]; then
-				if [ "${ss_basic_rust}" == "1" ]; then
+				if [ "${ss_basic_score}" != "1" ]; then
 					local SS_RUST_LOCAL=$(ps | grep "sslocal" | grep "23456" | awk '{print $1}')
 					if [ -n "${SS_RUST_LOCAL}" ];then
 						echo "sslocal		运行中🟢		socks5		${SS_RUST_LOCAL}"
@@ -381,11 +384,11 @@ GET_PROG_STAT(){
 						echo "sslocal		未运行🔴		socks5"
 					fi
 				else
-					local SS_LOCAL=$(ps | grep "ss-local" | grep "23456" | awk '{print $1}')
-					if [ -n "${SS_LOCAL}" ];then
-						echo "ss-local	运行中🟢		socks5		${SS_LOCAL}"
+					local XRAY_SOCKS=$(netstat -nlp | grep "23456" | grep "LISTEN" | grep "xray" | awk '{print $NF}' | awk -F "/" '{print $1}')
+					if [ -n "${XRAY_SOCKS}" ];then
+						echo "xray		运行中🟢		socks5		${XRAY_SOCKS}"
 					else
-						echo "ss-local	未运行🔴		socks5"
+						echo "xray		未运行🔴		socks5"
 					fi
 				fi
 			elif [ "${ss_basic_type}" == "1" ]; then
@@ -407,8 +410,7 @@ GET_PROG_STAT(){
 			fi
 		elif [ "${ss_foreign_dns}" == "4" ]; then
 			if [ "${ss_basic_type}" == "0" ]; then
-				# ss-tunnel
-				if [ "${ss_basic_rust}" == "1" ]; then
+				if [ "${ss_basic_score}" != "1" ]; then
 					local SS_RUST_TUNNEL=$(ps | grep "sslocal" | grep "7913" | awk '{print $1}')
 					if [ -n "${SS_RUST_TUNNEL}" ];then
 						echo "sslocal		运行中🟢		DNS解析		${SS_RUST_TUNNEL}"
@@ -416,11 +418,11 @@ GET_PROG_STAT(){
 						echo "sslocal		未运行🔴		DNS解析"
 					fi
 				else
-					local SS_TUNNEL=$(ps | grep "ss-tunnel" | grep "7913" | awk '{print $1}')
-					if [ -n "${SS_TUNNEL}" ];then
-						echo "ss-tunnel	运行中🟢		DNS解析		${SS_TUNNEL}"
+					local XRAY_DNS=$(netstat -nlp | grep "7913" | grep "LISTEN" | grep "xray" | awk '{print $NF}' | awk -F "/" '{print $1}')
+					if [ -n "${XRAY_DNS}" ];then
+						echo "xray		运行中🟢			DNS解析	${XRAY_DNS}"
 					else
-						echo "ss-tunnel	未运行🔴		DNS解析"
+						echo "xray		未运行🔴			DNS解析"
 					fi
 				fi
 			elif [ "${ss_basic_type}" == "1" ]; then
@@ -500,7 +502,7 @@ GET_PROG_STAT(){
 				# udp
 				if [ "${ss_basic_type}" == "0" ];then
 					# ss
-					if [ "${ss_basic_rust}" == "1" ];then
+					if [ "${ss_basic_score}" != "1" ];then
 						local SS_RUST_TUNNEL=$(ps | grep "sslocal" | grep "055" | awk '{print $1}')
 						if [ -n "${SS_RUST_TUNNEL}" ];then
 							echo "sslocal		运行中🟢		可信1:UDP查询	${SS_RUST_TUNNEL}"
@@ -508,11 +510,11 @@ GET_PROG_STAT(){
 							echo "sslocal		未运行🔴		可信1:UDP查询"
 						fi
 					else
-						local SS_TUNNEL=$(ps | grep "ss-tunnel" | grep "055" | awk '{print $1}')
-						if [ -n "${SS_TUNNEL}" ];then
-							echo "ss-tunnel	运行中🟢		可信1:UDP查询	${SS_TUNNEL}"
+						local XRAY_SOCKS=$(netstat -nlp | grep "23456" | grep "LISTEN" | grep "xray" | awk '{print $NF}' | awk -F "/" '{print $1}')
+						if [ -n "${XRAY_SOCKS}" ];then
+							echo "xray		运行中🟢		可信1:socks5	${XRAY_SOCKS}"
 						else
-							echo "ss-tunnel	未运行🔴		可信1:UDP查询"
+							echo "xray		未运行🔴		可信1:socks5"
 						fi
 					fi
 				elif [ "${ss_basic_type}" == "1" ];then
@@ -543,7 +545,7 @@ GET_PROG_STAT(){
 					echo "dns2socks	未运行🔴		可信1:TCP查询"
 				fi
 				if [ "${ss_basic_type}" == "0" ];then
-					if [ "${ss_basic_rust}" == "1" ]; then
+					if [ "${ss_basic_score}" != "1" ]; then
 						local SS_RUST_LOCAL=$(ps | grep "sslocal" | grep "23456" | awk '{print $1}')
 						if [ -n "${SS_RUST_LOCAL}" ];then
 							echo "sslocal		运行中🟢		可信1:socks5	${SS_RUST_LOCAL}"
@@ -551,11 +553,11 @@ GET_PROG_STAT(){
 							echo "sslocal		未运行🔴		可信1:socks5"
 						fi
 					else
-						local SS_LOCAL=$(ps | grep "ss-local" | grep "23456" | awk '{print $1}')
-						if [ -n "${SS_LOCAL}" ];then
-							echo "ss-local	运行中🟢		可信1:socks5	${SS_LOCAL}"
+						local XRAY_SOCKS=$(netstat -nlp | grep "23456" | grep "LISTEN" | grep "xray" | awk '{print $NF}' | awk -F "/" '{print $1}')
+						if [ -n "${XRAY_SOCKS}" ];then
+							echo "xray		运行中🟢		可信1:socks5	${XRAY_SOCKS}"
 						else
-							echo "ss-local	未运行🔴		可信1:socks5"
+							echo "xray		未运行🔴		可信1:socks5"
 						fi
 					fi
 				elif [ "${ss_basic_type}" == "1" ];then
@@ -674,17 +676,9 @@ ECHO_VERSION(){
 			echo "sslocal			${SSRUST_VER}			https://github.com/shadowsocks/shadowsocks-rust"
 		fi
 	fi
-	echo "ss-redir		$(run ss-redir -h|sed '/^$/d'|head -n1|awk '{print $NF}')			https://github.com/shadowsocks/shadowsocks-libev"
-	if [ -x "/koolshare/bin/ss-tunnel" ];then
-		echo "ss-tunnel		$(run ss-tunnel -h|sed '/^$/d'|head -n1|awk '{print $NF}')			https://github.com/shadowsocks/shadowsocks-libev"
-	fi
-	echo "ss-local		$(run ss-local -h|sed '/^$/d'|head -n1|awk '{print $NF}')			https://github.com/shadowsocks/shadowsocks-libev"
 	echo "obfs-local		$(run obfs-local -h|sed '/^$/d'|head -n1|awk '{print $NF}')			https://github.com/shadowsocks/simple-obfs"
 	echo "ssr-redir		$(run rss-redir -h|sed '/^$/d'|head -n1|awk '{print $2}')			https://github.com/shadowsocksrr/shadowsocksr-libev"
 	echo "ssr-local		$(run rss-local -h|sed '/^$/d'|head -n1|awk '{print $2}')			https://github.com/shadowsocksrr/shadowsocksr-libev"
-	if [ -x "/koolshare/bin/haproxy" ];then
-		echo "haproxy			2.1.2			http://www.haproxy.org/"
-	fi
 	echo "dns2socks		$(run dns2socks /?|sed '/^$/d'|head -n1|awk '{print $2}')			https://sourceforge.net/projects/dns2socks/"
 	echo "chinadns-ng		$(run chinadns-ng -V | awk '{print $2}')		https://github.com/zfl9/chinadns-ng"
 	if [ -x "/koolshare/bin/v2ray" ];then
@@ -692,10 +686,7 @@ ECHO_VERSION(){
 		echo "v2ray			$(echo ${v2_info_all}|awk '{print $2}')			https://github.com/v2fly/v2ray-core"
 	fi
 	if [ -x "/koolshare/bin/xray" ];then
-		echo "xray			$(run xray -version|head -n1|awk '{print $2}')			https://github.com/XTLS/Xray-core"
-	fi
-	if [ -x "/koolshare/bin/v2ray-plugin" ];then
-		echo "v2ray-plugin		$(run v2ray-plugin -version|head -n1|awk '{print $2}')			https://github.com/teddysun/v2ray-plugin"
+		echo "xray			$(run xray -version|head -n1|awk '{print $2}')		https://github.com/XTLS/Xray-core"
 	fi
 	if [ -x "/koolshare/bin/kcptun" ];then
 		echo "kcptun			$(run kcptun -v | awk '{print $NF}')		https://github.com/xtaci/kcptun"
@@ -707,7 +698,7 @@ ECHO_VERSION(){
 		echo "tuic-client		$(run tuic-client -v|awk '{print $NF}')			https://github.com/EAimTY/tuic"
 	fi
 	if [ -x "/koolshare/bin/hysteria2" ];then
-		echo "hysteria2		$(run hysteria2 version|grep Version|awk '{print $2}')			https://github.com/apernet/hysteria"
+		echo "hysteria2		$(run hysteria2 version|grep Version|head -n1|awk '{print $2}')			https://github.com/apernet/hysteria"
 	fi
 	echo --------------------------------------------------------------------------------------------------------
 }

@@ -512,9 +512,6 @@ install_now(){
 	rm -rf /koolshare/ss/*
 	rm -rf /koolshare/scripts/ss_*
 	rm -rf /koolshare/webs/Module_shadowsocks*
-	rm -rf /koolshare/bin/ss-redir
-	rm -rf /koolshare/bin/ss-tunnel
-	rm -rf /koolshare/bin/ss-local
 	rm -rf /koolshare/bin/rss-redir
 	rm -rf /koolshare/bin/rss-tunnel
 	rm -rf /koolshare/bin/rss-local
@@ -563,11 +560,12 @@ install_now(){
 		rm -rf /data/hysteria2 >/dev/null 2>&1
 		rm -rf /data/naive >/dev/null 2>&1
 		rm -rf /data/sslocal >/dev/null 2>&1
+		rm -rf /data/rss-local >/dev/null 2>&1
+		rm -rf /data/rss-redir >/dev/null 2>&1
+		# legacy since 3.3.6
 		rm -rf /data/ss-local >/dev/null 2>&1
 		rm -rf /data/ss-redir >/dev/null 2>&1
 		rm -rf /data/ss-tunnel >/dev/null 2>&1
-		rm -rf /data/rss-local >/dev/null 2>&1
-		rm -rf /data/rss-redir >/dev/null 2>&1
 	fi
 	
 	# legacy files should be removed
@@ -588,6 +586,9 @@ install_now(){
 	rm -rf /koolshare/bin/koolgame
 	rm -rf /koolshare/bin/dnscrypt-proxy
 	rm -rf /koolshare/bin/resolveip
+	rm -rf /koolshare/bin/ss-redir
+	rm -rf /koolshare/bin/ss-tunnel
+	rm -rf /koolshare/bin/ss-local
 	rm -rf /koolshare/res/all.png
 	rm -rf /koolshare/res/gfw.png
 	rm -rf /koolshare/res/chn.png
@@ -649,7 +650,7 @@ install_now(){
 		echo_date "检测/data分区剩余空间..."
 		local SPACE_DATA_AVAL1=$(df | grep -w "/data" | awk '{print $4}')
 		echo_date "/data分区剩余空间为：${SPACE_DATA_AVAL1}KB"
-		local _BINS="xray v2ray hysteria2 naive sslocal ss-local ss-redir ss-tunnel rss-local rss-tunnel rss-redir"
+		local _BINS="xray v2ray hysteria2 naive sslocal rss-local rss-tunnel rss-redir"
 		for _BIN in ${_BINS}
 		do
 			if [ -f "/tmp/shadowsocks/bin/${_BIN}" ];then
@@ -821,7 +822,13 @@ install_now(){
 	[ -z "$(dbus get ss_basic_interval)" ] && dbus set ss_basic_interval=2
 	[ -z "$(dbus get ss_basic_wt_furl)" ] && dbus set ss_basic_wt_furl="http://www.google.com.tw"
 	[ -z "$(dbus get ss_basic_wt_curl)" ] && dbus set ss_basic_wt_curl="http://www.baidu.com"
-	[ -z "${ss_basic_latency_opt}" ] && dbus set ss_basic_latency_opt="2"
+
+	# fancyss_arm 默认关闭延迟测试
+	if [ "${PKG_ARCH}" == "arm" ];then
+		[ -z "${ss_basic_latency_opt}" ] && dbus set ss_basic_latency_opt="0"
+	else
+		[ -z "${ss_basic_latency_opt}" ] && dbus set ss_basic_latency_opt="2"
+	fi
 
 	# 因版本变化导致一些值没有了，更改一下
 	if [ "${ss_basic_chng_china_2_tcp}" == "5" ];then

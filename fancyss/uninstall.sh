@@ -17,10 +17,6 @@ rm -rf /koolshare/bin/websocketd >/dev/null 2>&1
 # remove files
 rm -rf /koolshare/scripts/ss_*
 rm -rf /koolshare/webs/Module_shadowsocks*
-rm -rf /koolshare/bin/ss-redir
-rm -rf /koolshare/bin/ss-tunnel
-rm -rf /koolshare/bin/ss-local
-rm -rf /koolshare/bin/rss-redir
 rm -rf /koolshare/bin/rss-tunnel
 rm -rf /koolshare/bin/rss-local
 rm -rf /koolshare/bin/obfs-local
@@ -49,8 +45,8 @@ rm -rf /koolshare/bin/dns2tcp
 rm -rf /koolshare/bin/dns-ecs-forcer
 rm -rf /koolshare/bin/uredir
 # 如果系统里有jq，删掉/koolshare/bin/jq
-if [ -n /usr/bin/jq ];then
-	rm -rf /koolshare/bin/jq >/dev/null 2>&1
+if [ -f /usr/bin/jq ];then
+	rm -r /koolshare/bin/jq >/dev/null 2>&1
 fi
 
 rm -rf /koolshare/res/icon-shadowsocks.png
@@ -66,11 +62,11 @@ rm -rf /data/v2ray >/dev/null 2>&1
 rm -rf /data/hysteria2 >/dev/null 2>&1
 rm -rf /data/naive >/dev/null 2>&1
 rm -rf /data/sslocal >/dev/null 2>&1
+rm -rf /data/rss-local >/dev/null 2>&1
+rm -rf /data/rss-redir >/dev/null 2>&1
 rm -rf /data/ss-local >/dev/null 2>&1
 rm -rf /data/ss-redir >/dev/null 2>&1
 rm -rf /data/ss-tunnel >/dev/null 2>&1
-rm -rf /data/rss-local >/dev/null 2>&1
-rm -rf /data/rss-redir >/dev/null 2>&1
 
 # folder renmove
 rm -rf /koolshare/ss
@@ -98,6 +94,10 @@ rm -rf /koolshare/bin/koolgame
 rm -rf /koolshare/bin/dnscrypt-proxy
 rm -rf /koolshare/bin/resolveip
 rm -rf /koolshare/bin/httping
+rm -rf /koolshare/bin/ss-redir
+rm -rf /koolshare/bin/ss-tunnel
+rm -rf /koolshare/bin/ss-local
+rm -rf /koolshare/bin/rss-redir
 rm -rf /koolshare/res/all.png
 rm -rf /koolshare/res/gfw.png
 rm -rf /koolshare/res/chn.png
@@ -106,7 +106,6 @@ rm -rf /koolshare/res/game.png
 # maybe used by other plugin, do not remove
 # rm -rf /koolshare/bin/sponge >/dev/null 2>&1
 # rm -rf /koolshare/bin/isutf8 >/dev/null 2>&1
-
 dbus remove softcenter_module_shadowsocks_home_url
 dbus remove softcenter_module_shadowsocks_install
 dbus remove softcenter_module_shadowsocks_md5

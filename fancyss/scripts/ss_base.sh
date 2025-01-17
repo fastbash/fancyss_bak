@@ -212,6 +212,20 @@ number_test(){
 	esac
 }
 
+cmd() {
+	# echo_date "$*" 2>&1
+	# env -i PATH=${PATH} "$@" 2>/dev/null
+	env -i PATH=${PATH} "$@" >/dev/null 2>&1 &
+}
+
+run(){
+	env -i PATH=${PATH} "$@"
+}
+
+run_bg(){
+	env -i PATH=${PATH} "$@" >/dev/null 2>&1 &
+}
+
 __valid_ip() {
 	# 验证是否为ipv4或者ipv6地址，是则正确返回，不是返回空值
 	local format_4=$(echo "$1" | grep -Eo "([0-9]{1,3}[\.]){3}[0-9]{1,3}$")
@@ -333,7 +347,7 @@ get_rand_port(){
 	# gen 10 random port
 	local ports=$(shuf -i 2000-65000 -n 10)
 	# get all used port
-	local LISTENS=$(netstat -nlp  2>/dev/null | grep -w "LISTEN" | awk '{print $4}'|awk -F ":" '{print $NF}'|sort -un)
+	local LISTENS=$(netstat -nlp 2>/dev/null | grep -E "^tcp|^udp|^raw" | awk '{print $4}'|awk -F ":" '{print $NF}'|sort -un)
 	# get one avaliable port
 	echo ${ports} ${LISTENS} ${LISTENS} | sed 's/\s/\n/g' | sort -n | uniq -u | head -n1
 }

@@ -93,12 +93,12 @@ var hostname = document.domain;
 var mouse_status;
 var ads_url_1
 var ws_enable = 0;
-if(PKG_ARCH == "hnd_v8"){
+if(PKG_ARCH == "hnd"){
 	if(PKG_TYPE == "full"){
 		var ws_enable = 1;
 	}
 }
-if(PKG_ARCH == "mtk" || PKG_ARCH == "qca"){
+if(PKG_ARCH == "mtk" || PKG_ARCH == "qca" || PKG_ARCH == "hnd_v8"){
 	var ws_enable = 1;
 }
 String.prototype.myReplace = function(f, e){
@@ -3106,9 +3106,9 @@ function refresh_html() {
 				}else{														//fancyss-full
 					// ss-rust run ss
 					if(c["ss_obfs"] == "http" || c["ss_obfs"] == "tls"){	//fancyss-full
-						html +='ss-rust-obfs';								//fancyss-full
+						html +='ss-obfs';									//fancyss-full
 					}else{													//fancyss-full
-						html +='ss-rust';									//fancyss-full
+						html +='ss';										//fancyss-full
 					}														//fancyss-full
 				}															//fancyss-full
 				break;
@@ -6548,8 +6548,7 @@ function save_failover() {
 															_i = String(i)
 															_tmp[0] = _i;
 															_tmp[1] = _i + "点";
-															option_nodeh.push(_tmp);
-														}
+															option_nodeh.push(_tmp);}
 														option_nodeh.push([25, "每小时"]);
 														var ph1 = "此处填入你的机场订阅链接，通常是http://或https://开头的链接，多个链接可以分行填写！&#10;也可以增加非http开头的行作为注释，或使用空行或者符号线作为分割，订阅脚本仅会提取http://或https://开头的链接用以订阅，示例：&#10;-------------------------------------------------&#10;🚀xx机场 ssr&#10;https://abcd.airport.com/xxx&#10;&#10;🛩️yy机场 ss&#10;https://xyza.com/xxx&#10;-------------------------------------------------&#10;填写完成后点击下面的【保存并订阅】按钮开始订阅！";
 														var ph2 = "多个关键词用英文逗号分隔，如：测试,过期,剩余,曼谷,M247,D01,硅谷";
@@ -6701,15 +6700,15 @@ function save_failover() {
 																{ id:'ss_basic_udpgpt', name:'ss_basic_udp_proxy', func:'u', type:'radio', suffix: '<a class="hintstyle" href="javascript:void(0);" onclick="openssHint(153)"><font color="#ffcc00">仅chatgpt</font></a>', value: 2},
 															]},
 															{ td: '<tr><td class="smth" style="font-weight: bold;" colspan="2">性能优化</td></tr>'},
-															{ title: 'ssr开启多核心支持', id:'ss_basic_mcore', hint:'108', type:'checkbox', value:true},								//fancyss-hnd
+															{ title: 'ssr开启多核心支持', id:'ss_basic_mcore', hint:'108', type:'checkbox', value:true},										//fancyss-hnd
 															{ title: 'ss/v2ray/xray开启tcp fast open', id:'ss_basic_tfo', type:'checkbox', value:false},										//fancyss-hnd
 															{ title: 'ss协议开启TCP_NODELAY', id:'ss_basic_tnd', type:'checkbox', value:false},
 															{ title: '用Xray核心运行ss协议', id:'ss_basic_score', hint:'113', type:'checkbox', value:false},									//fancyss-full
 															{ title: '用Xray核心运行V2ray节点', id:'ss_basic_vcore', hint:'114', type:'checkbox', value:false},									//fancyss-full
-															{ title: 'Xray启用进程守护', id:'ss_basic_xguard', hint:'115', type:'checkbox', value:false},																																						//fancyss-full
+															{ title: 'Xray启用进程守护', id:'ss_basic_xguard', hint:'115', type:'checkbox', value:false},
 															{ td: '<tr><td class="smth" style="font-weight: bold;" colspan="2">其它</td></tr>'},
-															{ title: '开启kcp加速功能', id:'ss_basic_kcp_on', type:'checkbox', value:false, func:'v'},			//fancyss-full
-															{ title: '开启udp加速功能', id:'ss_basic_udp_on', type:'checkbox', value:false, func:'v'},			//fancyss-full
+															{ title: '开启kcp加速功能', id:'ss_basic_kcp_on', type:'checkbox', value:false, func:'v'},											//fancyss-full
+															{ title: '开启udp加速功能', id:'ss_basic_udp_on', type:'checkbox', value:false, func:'v'},											//fancyss-full
 															{ title: '所有trojan节点强制允许不安全', id:'ss_basic_tjai', hint:'120', type:'checkbox', value:false},
 															{ title: '插件开启时 - 跳过网络可用性检测', id:'ss_basic_nonetcheck', hint:'138', type:'checkbox', value:false},
 															{ title: '插件开启时 - 跳过时间一致性检测', id:'ss_basic_notimecheck', hint:'139', type:'checkbox', value:false},

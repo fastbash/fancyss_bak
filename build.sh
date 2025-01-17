@@ -114,10 +114,11 @@ gen_folder(){
 		rm -rf ./shadowsocks/bin-qca
 		rm -rf ./shadowsocks/bin-mtk
 		mv ./shadowsocks/bin-arm ./shadowsocks/bin
+		rm -rf ./shadowsocks/ss/websocket_arm
 		rm -rf ./shadowsocks/ss/websocket_qca
 		rm -rf ./shadowsocks/ss/websocket_mtk
 		rm -rf ./shadowsocks/ss/websocket_hnd
-		mv ./shadowsocks/ss/websocket_arm ./shadowsocks/ss/websocket
+		# mv ./shadowsocks/ss/websocket_arm ./shadowsocks/ss/websocket
 		echo arm > ./shadowsocks/.valid
 		sed -i '/fancyss-hnd/d' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/\,\s\"ss_basic_mcore\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
@@ -196,10 +197,6 @@ gen_folder(){
 		sed -i '/naiveproxy/d' ./shadowsocks/res/ss-menu.js
 		sed -i '/naiveproxy/d' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i '/tuic/d' ./shadowsocks/res/ss-menu.js
-		# remove options from shadowsocks-rust: shadowsocks2022 encryption method
-		sed -i 's/\,\s\"2022-blake3-aes-128-gcm\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
-		sed -i 's/\,\s\"2022-blake3-aes-256-gcm\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
-		sed -i 's/\,\s\"2022-blake3-chacha20-poly1305\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
 		# remove lines bewteen matchs
 		sed -i '/fancyss_full_1/,/fancyss_full_2/d' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i '/fancyss_naive_1/,/fancyss_naive_2/d' ./shadowsocks/webs/Module_shadowsocks.asp
@@ -216,6 +213,7 @@ gen_folder(){
 		sed -i 's/\,\s\"tuic_json\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/\,\s\"ss_basic_vcore\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/\,\s\"ss_basic_tcore\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
+		sed -i 's/\,\s\"ss_basic_score\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/\,\s\"ss_basic_rust\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/\,\s\"ss_basic_kcp_on\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/\,\s\"ss_basic_udp_on\"//g' ./shadowsocks/webs/Module_shadowsocks.asp

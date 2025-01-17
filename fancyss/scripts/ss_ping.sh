@@ -272,24 +272,21 @@ start_webtest(){
 	# 2. 分类
 	sort_nodes
 
-	# 3. 生成可用端口
-	# gen_ports
-
-	# 4. 测试
+	# 3. 测试
 	test_nodes
 
-	# 5. remove lock
+	# 4. remove lock
 	rm -rf /tmp/webtest.lock
 }
 
 sort_nodes(){
 	# 1.给所有节点分类
-	# 00_01 ss
+	# 00_01 ss 
 	# 00_02 ss + obfs
-	# 00_03 ss + v2ray
+	# 00_03 ss + v2ray					# deprecated since 3.3.6
 	# 00_04 ss2022
 	# 00_05 ss2022 + obfs
-	# 00_06 ss2022 + v2ray
+	# 00_06 ss2022 + v2ray				# deprecated since 3.3.6
 	# 01 ssr
 	# 02 koolgame (deleted in 3.0.4)
 	# 03 v2ray
@@ -312,7 +309,7 @@ sort_nodes(){
 	done
 
 	# then sort shadowsocks
-	local wt_flies=$(find /tmp/fancyss_webtest/wt_*.txt|sort -t "/" -nk5)
+	local wt_flies=$(find ${TMP2}/wt_*.txt|sort -t "/" -nk5)
 	for file in ${wt_flies}
 	do
 		local file_name=${file##*/}
@@ -328,7 +325,6 @@ sort_nodes(){
 			do
 				# echo $ss_nu
 				local _obfs=$(dbus get ssconf_basic_ss_obfs_${ss_nu})
-				local _v2ray=$(dbus get ssconf_basic_ss_v2ray_${ss_nu})
 				local _method=$(dbus get ssconf_basic_method_${ss_nu})
 				local ss_2022=$(echo ${_method} | grep "2022-blake")
 				if [ -z "${_obfs}" -o "${_obfs}" == "0" ];then
@@ -336,54 +332,23 @@ sort_nodes(){
 				else
 					local _obfs_enable="1"
 				fi
-				if [ -z "${_v2ray}" -o "${_v2ray}" == "0" ];then
-					local _v2ray_enable="0"
-				else
-					local _v2ray_enable="1"
-				fi
 				if [ -z "${ss_2022}" ];then
-					if [ "${_obfs_enable}" == "0" -a "${_v2ray_enable}" == "0" ];then
+					if [ "${_obfs_enable}" == "0" ];then
 						echo ${ss_nu} >>${TMP2}/${pref_name}_00_01.txt
-					elif [ "${_obfs_enable}" == "1" -a "${_v2ray_enable}" == "0" ];then
+					elif [ "${_obfs_enable}" == "1" ];then
 						echo ${ss_nu} >>${TMP2}/${pref_name}_00_02.txt
-					elif [ "${_obfs_enable}" == "0" -a "${_v2ray_enable}" == "1" ];then
-						echo ${ss_nu} >>${TMP2}/${pref_name}_00_03.txt
 					fi
 				else
-					if [ "${_obfs_enable}" == "0" -a "${_v2ray_enable}" == "0" ];then
+					if [ "${_obfs_enable}" == "0" ];then
 						echo ${ss_nu} >>${TMP2}/${pref_name}_00_04.txt
-					elif [ "${_obfs_enable}" == "1" -a "${_v2ray_enable}" == "0" ];then
+					elif [ "${_obfs_enable}" == "1" ];then
 						echo ${ss_nu} >>${TMP2}/${pref_name}_00_05.txt
-					elif [ "${_obfs_enable}" == "0" -a "${_v2ray_enable}" == "1" ];then
-						echo ${ss_nu} >>${TMP2}/${pref_name}_00_06.txt
 					fi
 				fi
 			done
 			rm -rf $file
 		fi
 	done
-}
-
-gen_ports(){
-	# lsof -i -n -P|awk '{print $1}'|sort -un
-	local ports_used=$(netstat -tulpn|awk '{print $4}'|awk -F ":" '{print $NF}'|sort -un)
-	local nodes_nu=$(dbus list ssconf_basic_name_ | sed -n 's/^.*_\([0-9]\+\)=.*/\1/p'|wc -l)
-	local min_port=59000
-	local max_port=$(($min_port + $nodes_nu + 200))
-
-	while [ $min_port -le $max_port ]; do
-		local _match=$(echo "$ports_used" | grep -Ewo "$min_port")
-		if [ -z "${_match}" ];then
-			echo $min_port >>${TMP2}/ports_aval.txt
-		fi
-		let min_port++
-	done
-}
-
-get_port(){
-	local port=$(sed -n "1p" ${TMP2}/ports_aval.txt)
-	sed -i '1d' ${TMP2}/ports_aval.txt
-	echo $port
 }
 
 test_nodes(){
@@ -400,7 +365,7 @@ test_nodes(){
 		BEGN_NODE=$((${CURR_NODE} - 10))
 	fi
 
-	local CURR_FILE=$(find /tmp/fancyss_webtest/ -name "wt_*.txt" | xargs grep -Ew "^${CURR_NODE}" | awk -F ":" '{print $1}')
+	local CURR_FILE=$(find ${TMP2}/ -name "wt_*.txt" | xargs grep -Ew "^${CURR_NODE}" | awk -F ":" '{print $1}')
 	if [ -f "${CURR_FILE}" ];then
 		local FIRST_BGN=$(cat ${CURR_FILE}|head -n1)
 		if [ -f "${CURR_FILE}" -a "${BEGN_NODE}" -gt "${FIRST_BGN}" ];then
@@ -432,7 +397,8 @@ test_nodes(){
 	#echo CURR_LINE $CURR_LINE
 	#echo CURR_FILE $CURR_FILE
 	#echo BEGN_NODE $BEGN_NODE
-
+	base_port=$(gen_base_port ${count})
+	
 	cat ${TMP2}/nodes_file_name.txt | while read test_file
 	do
 		local file_name=${test_file##*/}
@@ -446,52 +412,54 @@ test_nodes(){
 		#echo node_type $node_type
 		#echo pref_name $pref_name
 		#echo -----------------
-		# 00 ss
+		# 00_01 ss
+		# 00_02 ss + obfs
+		# 00_03 ss + v2ray					# deprecated since 3.3.6
+		# 00_04 ss2022
+		# 00_05 ss2022 + obfs
+		# 00_06 ss2022 + v2ray				# deprecated since 3.3.6
 		# 01 ssr
 		# 02 koolgame (deleted in 3.0.4)
 		# 03 v2ray
 		# 04 xray
 		# 05 trojan
 		# 06 naive
+		# 07 tuic
+		# 08 hysteria2
+
 		case $node_type in
 		00_01)
-			test_01_ss $file_name
+			test_01_ss_fake_multi $file_name $node_type
 			;;
 		00_02)
-			test_02_ss $file_name
-			;;
-		00_03)
-			test_03_ss $file_name
+			test_01_ss_fake_multi $file_name $node_type
 			;;
 		00_04)
-			test_04_ss $file_name
+			test_01_ss_fake_multi $file_name $node_type
 			;;
 		00_05)
-			test_05_ss $file_name
-			;;
-		00_06)
-			test_06_ss $file_name
+			test_01_ss_fake_multi $file_name $node_type
 			;;
 		01)
-			test_07_sr $file_name
+			test_07_sr $file_name $node_type
 			;;
 		03)
-			test_08_vr $file_name
+			test_08_vr $file_name $node_type
 			;;
 		04)
-			test_09_xr $file_name
+			test_09_xr $file_name $node_type
 			;;
 		05)
-			test_10_tj $file_name
+			test_10_tj $file_name $node_type
 			;;
 		06)
-			test_11_nv $file_name
+			test_11_nv $file_name $node_type
 			;;
 		07)
-			test_12_tc $file_name
+			test_12_tc $file_name $node_type
 			;;
 		08)
-			test_13_h2 $file_name
+			test_13_h2 $file_name $node_type
 			;;
 		esac
 	done
@@ -506,9 +474,13 @@ test_nodes(){
 
 	# copy webtest.txt for other useage
 	cp -rf /tmp/upload/webtest.txt /tmp/upload/webtest_bakcup.txt
+
+	# we shold remove test tmp file
+	
 }
 
 test_01_ss_new(){
+	# test ss nodes by ss-libev
 	local file=$1
 
 	# multi thread
@@ -536,13 +508,11 @@ test_01_ss_new(){
 	fi
 
 	# start to test
-	local base_port=50600
 	cat ${TMP2}/${file} | while read nu; do
 		read -u3
 		{
 			# 0. write testing info
 			echo -en "${nu}>testing...\n" >>${TMP2}/results/${nu}.txt
-			# find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 			cat ${TMP2}/results/*.txt > /tmp/upload/webtest.txt
 			
 			# 1. resolve server
@@ -553,25 +523,19 @@ test_01_ss_new(){
 			fi
 			
 			# 2. start ss-local
-			local new_port=$(($base_port + $nu))
-			# run ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${new_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) $ARG_1 $ARG_2 -f ${TMP2}/pids/${nu}.pid >/dev/null 2>&1
-			# wait_program wt-ss-local
-			run ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${new_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) $ARG_1 $ARG_2 >/dev/null 2>&1 &
-			detect_running_status2 wt-ss-local ${new_port}
+			local socks5_port=$(get_rand_port)
+			run_bg ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${socks5_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) ${ARG_1} ${ARG_2}
 			sleep 1
-
+			wait_program wt-ss-local
+			
 			# 3. start curl test
-			curl_test ${nu} ${new_port}
+			curl_test ${nu} ${socks5_port}
 
 			# 4. write tested info
-			# find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 			cat ${TMP2}/results/*.txt > /tmp/upload/webtest.txt
 			
 			# 5. stop ss-local
-			if [ -f "${TMP2}/pids/${nu}.pid" ];then
-				kill -9 $(cat ${TMP2}/pids/${nu}.pid) >/dev/null 2>&1
-			fi
-			local _pid=$(ps -w | grep wt-ss-local | grep ${new_port} | awk '{print $1}')
+			local _pid=$(ps -w | grep "wt-ss-local" | grep -w "${_server_ip}" | grep -w "$(dbus get ssconf_basic_port_${nu})" | grep -w "${socks5_port}" | awk '{print $1}' | head -n1)
 			if [ -n "${_pid}" ];then
 				kill -9 ${_pid} >/dev/null 2>&1
 			fi
@@ -588,8 +552,10 @@ test_01_ss_new(){
 	rm -rf ${TMP2}/wt-ss-local
 }
 
-test_01_ss(){
+test_01_ss_old(){
+	# test ss nodes by ss-libev
 	local file=$1
+	local mark=$2
 
 	# alisa binary
 	ln -sf /koolshare/bin/ss-local ${TMP2}/wt-ss-local
@@ -606,7 +572,6 @@ test_01_ss(){
 	fi
 
 	# start to test
-	local base_port=50600
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
 		for nu in $nus; do
 			{
@@ -621,107 +586,227 @@ test_01_ss(){
 				fi
 				
 				# 2. start ss-local
-				local new_port=$(($base_port + $nu))
-				run ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${new_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) $ARG_1 $ARG_2 -f ${TMP2}/pids/${nu}.pid >/dev/null 2>&1
+				local socks5_port=$(get_rand_port)
+				run_bg ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${socks5_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) ${ARG_1} ${ARG_2}
 
 				sleep 1
 				wait_program wt-ss-local
 
 				# 3. start curl test
-				curl_test ${nu} ${new_port}
-				# sed -i "/testing/d" /tmp/upload/webtest.txt
+				curl_test ${nu} ${socks5_port}
 				
 				# 4. stop ss-local
-				if [ -f "${TMP2}/pids/${nu}.pid" ];then
-					kill -9 $(cat ${TMP2}/pids/${nu}.pid) >/dev/null 2>&1
+				local _pid=$(ps -w | grep "wt-ss-local" | grep -w "${_server_ip}" | grep -w "$(dbus get ssconf_basic_port_${nu})" | grep -w "${socks5_port}" | awk '{print $1}' | head -n1)
+				if [ -n "${_pid}" ];then
+					kill -9 ${_pid} >/dev/null 2>&1
 				fi
 			} &
 		done
 		wait
 		
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 	
 	rm -rf ${TMP2}/pids/*
 	rm -rf ${TMP2}/wt-ss-local
 }
 
-test_02_ss(){
+test_01_ss_fake_multi(){
+	# test ss nodes by xray fake multi thread
 	local file=$1
-	# alisa binary
-	ln -sf /koolshare/bin/ss-local ${TMP2}/wt-ss-local
-	ln -sf /koolshare/bin/obfs-local ${TMP2}/wt-obfs-local
-	killall wt-ss-local >/dev/null 2>&1
-	killall wt-obfs-local >/dev/null 2>&1
+	local mark=$2
+	local count=$(cat ${TMP2}/$file | wc -l)
+	
+	# show info to web as soon as possible
+	cat ${TMP2}/${file} | xargs -n 8 | head -n1 | while read nus; do
+		for nu in $nus; do
+			echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
+		done
+	done
+	
+	# prepare
+	killall wt-ss >/dev/null 2>&1
+	killall wt-obfs >/dev/null 2>&1
+	ln -sf /koolshare/bin/xray ${TMP2}/wt-ss
+	ln -sf /koolshare/bin/obfs-local ${TMP2}/wt-obfs
+	mkdir -p ${TMP2}/conf_${mark}
+	mkdir -p ${TMP2}/json_${mark}
+	mkdir -p ${TMP2}/bash_${mark}
+	mkdir -p ${TMP2}/logs_${mark}
+	rm -rf ${TMP2}/conf_${mark}/*
+	rm -rf ${TMP2}/json_${mark}/*
+	rm -rf ${TMP2}/bash_${mark}/*
+	rm -rf ${TMP2}/logs_${mark}/*
 
-	# get extra option for shadowsocks-libev
-	local ARG_1 ARG_2
-	if [ "$(dbus get ss_basic_tfo)" == "1" -a "${LINUX_VER}" != "26" ]; then
-		local ARG_1="--fast-open"
-		echo 3 >/proc/sys/net/ipv4/tcp_fastopen
-	fi
-	if [ "$(dbus get ss_basic_tnd)" == "1" ]; then
-		local ARG_2="--no-delay"
+	# gen all xray conf at once
+	cat ${TMP2}/${file} | xargs -n 16 | while read nus; do
+		for nu in $nus; do
+			{
+				creat_xray_ss_json ${nu} ${mark}
+			} &
+		done
+		wait
+	done
+
+	# merge all xray json
+	find ${TMP2}/conf_${mark} -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >${TMP2}/json_${mark}/00_inbounds.json
+	find ${TMP2}/conf_${mark} -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >${TMP2}/json_${mark}/01_outbounds.json
+	find ${TMP2}/conf_${mark} -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >${TMP2}/json_${mark}/02_routing.json
+
+	# now we can start xray to host multiple outbounds
+	run ${TMP2}/wt-ss run -confdir ${TMP2}/json_${mark}/ >${TMP2}/logs_${mark}/log.txt 2>&1 &
+
+	# make sure xray is runing, otherwise output error
+	# sleep 3
+	wait_program2 wt-ss ${TMP2}/logs_${mark}/log.txt started
+
+	if [ -f "${TMP2}/socsk5_ports.txt" ];then
+		eval $(cat ${TMP2}/socsk5_ports.txt)
 	fi
 
-	# start to test
-	local base_port=50600
+	# test in multiple process
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
 		for nu in $nus; do
 			{
 				# 0. testing info
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 
-				# 1. resolve server
-				local _server_ip=$(_get_server_ip $(dbus get ssconf_basic_server_${nu}))
-				if [ -z "${_server_ip}" ];then
-					echo -en "${nu}:\t解析失败！\n"
-					continue
-				fi
-
-				# 2. obfs prama
-				local ARG_OBFS
-				if [ "$(dbus get ssconf_basic_ss_obfs_${nu})" == "http" ]; then
-					if [ -n "$(dbus get ssconf_basic_ss_obfs_host_${nu})" ]; then
-						ARG_OBFS="--plugin ${TMP2}/wt-obfs-local --plugin-opts obfs=http;obfs-host=$(dbus get ssconf_basic_ss_obfs_host_${nu})"
-					else
-						ARG_OBFS="--plugin ${TMP2}/wt-obfs-local --plugin-opts obfs=http"
-					fi
-				elif [ "$(dbus get ssconf_basic_ss_obfs_${nu})" == "tls" ]; then
-					if [ -n "$(dbus get ssconf_basic_ss_obfs_host_${nu})" ]; then
-						ARG_OBFS="--plugin ${TMP2}/wt-obfs-local --plugin-opts obfs=tls;obfs-host=$(dbus get ssconf_basic_ss_obfs_host_${nu})"
-					else
-						ARG_OBFS="--plugin ${TMP2}/wt-obfs-local --plugin-opts obfs=tls"
-					fi
+				# 1. start obfs-local
+				if [ -x "${TMP2}/bash_${mark}/start_${nu}.sh" ];then
+					sh ${TMP2}/bash_${mark}/start_${nu}.sh
 				fi
 				
-				# 3. start ss-local
-				local new_port=$(($base_port + $nu))
-				run ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${new_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) $ARG_OBFS $ARG_1 $ARG_2 -f ${TMP2}/pids/${nu}.pid >/dev/null 2>&1
-				sleep 1
-
-				# 4. start curl test
-				curl_test ${nu} ${new_port}
+				# 2. start curl test
+				local socks5_port=$(eval echo \$socks5_port_${nu})
+				curl_test ${nu} ${socks5_port}
 				
-				# 5. stop ss-local
-				if [ -f "${TMP2}/pids/${nu}.pid" ];then
-					kill -9 $(cat ${TMP2}/pids/${nu}.pid) >/dev/null 2>&1
+				# 3. stop obfs-local
+				if [ -x "${TMP2}/bash_${mark}/stop_${nu}.sh" ];then
+					sh ${TMP2}/bash_${mark}/stop_${nu}.sh
 				fi
 			} &
 		done
 		wait
-		
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+	done
+
+	# finished kill xray
+	killall wt-ss >/dev/null 2>&1
+
+	# finished
+	rm -rf ${TMP2}/wt-ss
+	rm -rf ${TMP2}/wt-obfs
+}
+
+
+test_01_ss_real_multi(){
+	# test ss nodes by xray real multi thread
+	local file=$1
+	local mark=$2
+	local count=$(cat ${TMP2}/$file | wc -l)
+	
+	# show info to web as soon as possible
+	cat ${TMP2}/${file} | xargs -n 8 | head -n1 | while read nus; do
+		for nu in $nus; do
+			echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
+		done
 	done
 	
-	rm -rf ${TMP2}/pids/*
-	rm -rf ${TMP2}/wt-ss-local
-	rm -rf ${TMP2}/wt-obfs-local
+	# prepare
+	killall wt-ss >/dev/null 2>&1
+	killall wt-obfs >/dev/null 2>&1
+	ln -sf /koolshare/bin/xray ${TMP2}/wt-ss
+	ln -sf /koolshare/bin/obfs-local ${TMP2}/wt-obfs
+	mkdir -p ${TMP2}/conf_${mark}
+	mkdir -p ${TMP2}/json_${mark}
+	mkdir -p ${TMP2}/bash_${mark}
+	mkdir -p ${TMP2}/logs_${mark}
+	rm -rf ${TMP2}/conf_${mark}/*
+	rm -rf ${TMP2}/json_${mark}/*
+	rm -rf ${TMP2}/bash_${mark}/*
+	rm -rf ${TMP2}/logs_${mark}/*
+
+	# gen all xray conf at once
+	cat ${TMP2}/${file} | xargs -n 16 | while read nus; do
+		for nu in $nus; do
+			{
+				creat_xray_ss_json ${nu} ${mark}
+			} &
+		done
+		wait
+	done
+
+	# merge all xray json
+	find ${TMP2}/conf_${mark} -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >${TMP2}/json_${mark}/00_inbounds.json
+	find ${TMP2}/conf_${mark} -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >${TMP2}/json_${mark}/01_outbounds.json
+	find ${TMP2}/conf_${mark} -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >${TMP2}/json_${mark}/02_routing.json
+
+	# now we can start xray to host multiple outbounds
+	run ${TMP2}/wt-ss run -confdir ${TMP2}/json_${mark}/ >${TMP2}/logs_${mark}/log.txt 2>&1 &
+
+	# make sure xray is runing, otherwise output error
+	# sleep 3
+	wait_program2 wt-ss ${TMP2}/logs_${mark}/log.txt started
+
+	if [ -f "${TMP2}/socsk5_ports.txt" ];then
+		eval $(cat ${TMP2}/socsk5_ports.txt)
+	fi
+
+	# multi thread
+	[ -e /tmp/fd1 ] || mknod /tmp/fd1 p
+	exec 3<>/tmp/fd1
+	rm -rf /tmp/fd1
+
+	awk 'BEGIN { for (i=1; i<=8; i++) printf("%d\n", i) }' | while read seq
+	do
+		echo
+	done >&3
+
+	# test in multiple process
+	cat ${TMP2}/${file} | while read nu; do
+		read -u3
+		{
+			# 0. testing info
+			echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
+			cat ${TMP2}/results/*.txt > /tmp/upload/webtest.txt
+			
+			# 1. start obfs-local
+			if [ -x "${TMP2}/bash_${mark}/start_${nu}.sh" ];then
+				sh ${TMP2}/bash_${mark}/start_${nu}.sh
+			fi
+			
+			# 2. start curl test
+			local socks5_port=$(eval echo \$socks5_port_${nu})
+			curl_test ${nu} ${socks5_port}
+
+			# 4. write tested info
+			cat ${TMP2}/results/*.txt > /tmp/upload/webtest.txt
+			
+			# 5. stop obfs-local
+			if [ -x "${TMP2}/bash_${mark}/stop_${nu}.sh" ];then
+				sh ${TMP2}/bash_${mark}/stop_${nu}.sh
+			fi
+			
+			echo >&3
+		} &
+	done
+
+	exec 3<&-
+	exec 3>&-
+
+	# finished kill xray
+	killall wt-ss >/dev/null 2>&1
+	killall wt-obfs >/dev/null 2>&1
+
+	# finished
+	rm -rf ${TMP2}/wt-ss
+	rm -rf ${TMP2}/wt-obfs
 }
 
 test_03_ss(){
+	# not used since 3.3.6
 	local file=$1
 
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
@@ -734,65 +819,20 @@ test_03_ss(){
 		wait
 
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
-	done
-}
-
-test_04_ss(){
-	local file=$1
-	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
-		for nu in $nus; do
-			{
-				echo -en "${nu}>testing\n" >>/tmp/upload/webtest.txt
-				echo -en "${nu}>ns\n" >>${TMP2}/results/${nu}.txt
-			} &
-		done
-		wait
-
-		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
-	done
-}
-
-test_05_ss(){
-	local file=$1
-	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
-		for nu in $nus; do
-			{
-				echo -en "${nu}>testing\n" >>/tmp/upload/webtest.txt
-				echo -en "${nu}>ns\n" >>${TMP2}/results/${nu}.txt
-			} &
-		done
-		wait
-
-		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
-	done
-}
-
-test_06_ss(){
-	local file=$1
-	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
-		for nu in $nus; do
-			{
-				echo -en "${nu}>testing\n" >>/tmp/upload/webtest.txt
-				echo -en "${nu}>ns\n" >>${TMP2}/results/${nu}.txt
-			} &
-		done
-		wait
-
-		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 }
 
 test_07_sr(){
 	local file=$1
+	local mark=$2
+	
 	# alisa binary
-	ln -sf /koolshare/bin/rss-local ${TMP2}/wt-rss-local
 	killall wt-rss-local >/dev/null 2>&1
+	ln -sf /koolshare/bin/rss-local ${TMP2}/wt-rss-local
+	mkdir -p ${TMP2}/conf_${mark}
+	rm -rf ${TMP2}/conf_${mark}/*
 
-	local base_port=50600
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
 		for nu in $nus; do
 			{
@@ -804,18 +844,16 @@ test_07_sr(){
 				if [ -z "${_server_ip}" ];then
 					# use domain
 					_server_ip=$(dbus get ssconf_basic_server_${nu})
-					#echo -en "${nu}:\t解析失败！\n"
-					#continue
 				fi
 
 				# 2. gen json conf
-				local new_port=$(($base_port + $nu))
-				cat >${TMP2}/conf/${nu}.json <<-EOF
+				local socks5_port=$(get_rand_port)
+				cat >${TMP2}/conf_${mark}/${nu}.json <<-EOF
 					{
 					    "server":"${_server_ip}",
 					    "server_port":$(dbus get ssconf_basic_port_${nu}),
 					    "local_address":"0.0.0.0",
-					    "local_port":${new_port},
+					    "local_port":${socks5_port},
 					    "password":"$(dbus get ssconf_basic_password_${nu} | base64_decode)",
 					    "timeout":600,
 					    "protocol":"$(dbus get ssconf_basic_rss_protocol_${nu})",
@@ -827,11 +865,11 @@ test_07_sr(){
 				EOF
 
 				# 3. start rss-local
-				run ${TMP2}/wt-rss-local -c ${TMP2}/conf/${nu}.json -f ${TMP2}/pids/${nu}.pid >/dev/null 2>&1
+				run ${TMP2}/wt-rss-local -c ${TMP2}/conf_${mark}/${nu}.json -f ${TMP2}/pids/${nu}.pid >/dev/null 2>&1
 				sleep 1
 
 				# 4. start curl test
-				curl_test ${nu} ${new_port}
+				curl_test ${nu} ${socks5_port}
 
 				# 5. stop rss-local
 				if [ -f "${TMP2}/pids/${nu}.pid" ];then
@@ -842,11 +880,10 @@ test_07_sr(){
 		wait
 
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 
 	rm -rf ${TMP2}/wt-ss-local
-	rm -rf ${TMP2}/conf/*
 }
 
 test_08_vr(){
@@ -871,36 +908,40 @@ test_08_vr(){
 	done
 
 	# merge json
-	mkdir -p $TMP2/json
-	rm -rf $TMP2/json/*
-	find /tmp/fancyss_webtest/conf -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >$TMP2/json/00_inbounds.json
-	find /tmp/fancyss_webtest/conf -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >$TMP2/json/01_outbounds.json
-	find /tmp/fancyss_webtest/conf -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >$TMP2/json/02_routing.json
-	rm -rf $TMP2/conf/*
+	mkdir -p ${TMP2}/json
+	rm -rf ${TMP2}/json/*
+	find ${TMP2}/conf -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >${TMP2}/json/00_inbounds.json
+	find ${TMP2}/conf -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >${TMP2}/json/01_outbounds.json
+	find ${TMP2}/conf -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >${TMP2}/json/02_routing.json
+	rm -rf ${TMP2}/conf/*
 
 	# now we can start v2ray or v2ray/xray to host multiple outbounds
-	run ${TMP2}/wt-v2ray run -confdir /tmp/fancyss_webtest/json/ >/dev/null 2>&1 &
+	run ${TMP2}/wt-v2ray run -confdir ${TMP2}/json/ >/dev/null 2>&1 &
 	
 	# make sure xray/v2ray is runing, otherwise output error
 	sleep 3
 	wait_program wt-v2ray
+
+	if [ -f "${TMP2}/socsk5_ports.txt" ];then
+		eval $(cat ${TMP2}/socsk5_ports.txt)
+	fi
 	
 	# test in multiple process
-	local base_port=50600
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
 		for nu in $nus; do
 			{
 				# 0. testing info
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
-				
-				local new_port=$(($base_port + $nu))
-				curl_test ${nu} ${new_port}
+
+				# 2. start curl test
+				local socks5_port=$(eval echo \$socks5_port_${nu})
+				curl_test ${nu} ${socks5_port}
 			} &
 		done
 		wait
 
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 	
 	# finished kill v2ray
@@ -908,7 +949,7 @@ test_08_vr(){
 
 	# finished
 	rm -rf ${TMP2}/conf/*
-	rm -rf $TMP2/json/*
+	rm -rf ${TMP2}/json/*
 	rm -rf ${TMP2}/wt-v2ray
 }
 
@@ -918,6 +959,8 @@ test_09_xr(){
 	# alisa binary
 	killall wt-xray >/dev/null 2>&1
 	ln -sf /koolshare/bin/xray ${TMP2}/wt-xray
+	mkdir -p ${TMP2}/conf/
+	rm -rf ${TMP2}/conf/*
 
 	# gen all xray conf
 	cat ${TMP2}/${file} | xargs -n 16 | while read nus; do
@@ -930,36 +973,40 @@ test_09_xr(){
 	done
 
 	# merge all xray json
-	mkdir -p $TMP2/json
-	rm -rf $TMP2/json/*
-	find /tmp/fancyss_webtest/conf -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >$TMP2/json/00_inbounds.json
-	find /tmp/fancyss_webtest/conf -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >$TMP2/json/01_outbounds.json
-	find /tmp/fancyss_webtest/conf -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >$TMP2/json/02_routing.json
-	rm -rf $TMP2/conf/*
+	mkdir -p ${TMP2}/json
+	rm -rf ${TMP2}/json/*
+	find ${TMP2}/conf -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >${TMP2}/json/00_inbounds.json
+	find ${TMP2}/conf -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >${TMP2}/json/01_outbounds.json
+	find ${TMP2}/conf -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >${TMP2}/json/02_routing.json
+	rm -rf ${TMP2}/conf/*
 
 	# now we can start xray or xray to host multiple outbounds
-	run ${TMP2}/wt-xray run -confdir /tmp/fancyss_webtest/json/ >/dev/null 2>&1 &
+	run ${TMP2}/wt-xray run -confdir ${TMP2}/json/ >/dev/null 2>&1 &
 
 	# make sure xray is runing, otherwise output error
 	sleep 3
 	wait_program wt-xray
 
+	if [ -f "${TMP2}/socsk5_ports.txt" ];then
+		eval $(cat ${TMP2}/socsk5_ports.txt)
+	fi
+
 	# test in multiple process
-	local base_port=50600
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
 		for nu in $nus; do
 			{
 				# 0. testing info
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 				
-				local new_port=$(($base_port + $nu))
-				curl_test ${nu} ${new_port}
+				# 2. start curl test
+				local socks5_port=$(eval echo \$socks5_port_${nu})
+				curl_test ${nu} ${socks5_port}
 			} &
 		done
 		wait
 
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 
 	# finished kill xray
@@ -989,36 +1036,40 @@ test_10_tj(){
 	done
 
 	# merge all trojan json
-	mkdir -p $TMP2/json
-	rm -rf $TMP2/json/*
-	find /tmp/fancyss_webtest/conf -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >$TMP2/json/00_inbounds.json
-	find /tmp/fancyss_webtest/conf -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >$TMP2/json/01_outbounds.json
-	find /tmp/fancyss_webtest/conf -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >$TMP2/json/02_routing.json
-	rm -rf $TMP2/conf/*
+	mkdir -p ${TMP2}/json
+	rm -rf ${TMP2}/json/*
+	find ${TMP2}/conf -name "*_inbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ inbounds: [ inputs.inbounds[0] ] }' >${TMP2}/json/00_inbounds.json
+	find ${TMP2}/conf -name "*_outbounds.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{ outbounds: [ inputs.outbounds[0] ] }' >${TMP2}/json/01_outbounds.json
+	find ${TMP2}/conf -name "*_routing.json" | sort -t "/" -nk5 | xargs cat | run jq -n '{routing: { rules: [ inputs.routing.rules[0] ] }}' >${TMP2}/json/02_routing.json
+	rm -rf ${TMP2}/conf/*
 
 	# now we can start wt-trojan to host multiple outbounds
-	run ${TMP2}/wt-trojan run -confdir /tmp/fancyss_webtest/json >/dev/null 2>&1 &
+	run ${TMP2}/wt-trojan run -confdir ${TMP2}/json/ >/dev/null 2>&1 &
 
 	# make sure wt-trojan is runing, otherwise output error
 	sleep 3
 	wait_program wt-trojan
 
+	if [ -f "${TMP2}/socsk5_ports.txt" ];then
+		eval $(cat ${TMP2}/socsk5_ports.txt)
+	fi
+
 	# test in multiple process
-	local base_port=50600
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
 		for nu in $nus; do
 			{
 				# 0. testing info
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 
-				local new_port=$(($base_port + $nu))
-				curl_test ${nu} ${new_port}
+				# 2. start curl test
+				local socks5_port=$(eval echo \$socks5_port_${nu})
+				curl_test ${nu} ${socks5_port}
 			} &
 		done
 		wait
 
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 
 	# finished kill wt-trojan
@@ -1037,7 +1088,6 @@ test_11_nv(){
 	ln -sf /koolshare/bin/naive ${TMP2}/wt-naive
 	killall wt-naive >/dev/null 2>&1
 
-	local base_port=50600
 	cat ${TMP2}/${file} | xargs -n 2 | while read nus; do
 		for nu in $nus; do
 			{
@@ -1045,20 +1095,20 @@ test_11_nv(){
 				local _server_ip=$(_get_server_ip $(dbus get ssconf_basic_naive_server_${nu}))
 
 				# 2. start naiveproxy
-				local new_port=$(($base_port + $nu))
+				local socks5_port=$(get_rand_port)
 				if [ -z "${_server_ip}" ];then
-					run ${TMP2}/wt-naive --listen=socks://127.0.0.1:${new_port} --proxy=$(dbus get ssconf_basic_naive_prot_${nu})://$(dbus get ssconf_basic_naive_user_${nu}):$(dbus get ssconf_basic_naive_pass_${nu} | base64_decode)@$(dbus get ssconf_basic_naive_server_${nu}):$(dbus get ssconf_basic_naive_port_${nu}) >/dev/null 2>&1 &
+					run ${TMP2}/wt-naive --listen=socks://127.0.0.1:${socks5_port} --proxy=$(dbus get ssconf_basic_naive_prot_${nu})://$(dbus get ssconf_basic_naive_user_${nu}):$(dbus get ssconf_basic_naive_pass_${nu} | base64_decode)@$(dbus get ssconf_basic_naive_server_${nu}):$(dbus get ssconf_basic_naive_port_${nu}) >/dev/null 2>&1 &
 				else
-					run ${TMP2}/wt-naive --listen=socks://127.0.0.1:${new_port} --proxy=$(dbus get ssconf_basic_naive_prot_${nu})://$(dbus get ssconf_basic_naive_user_${nu}):$(dbus get ssconf_basic_naive_pass_${nu} | base64_decode)@$(dbus get ssconf_basic_naive_server_${nu}):$(dbus get ssconf_basic_naive_port_${nu}) --host-resolver-rules="MAP $(dbus get ssconf_basic_naive_server_${nu}) ${_server_ip}" >/dev/null 2>&1 &
+					run ${TMP2}/wt-naive --listen=socks://127.0.0.1:${socks5_port} --proxy=$(dbus get ssconf_basic_naive_prot_${nu})://$(dbus get ssconf_basic_naive_user_${nu}):$(dbus get ssconf_basic_naive_pass_${nu} | base64_decode)@$(dbus get ssconf_basic_naive_server_${nu}):$(dbus get ssconf_basic_naive_port_${nu}) --host-resolver-rules="MAP $(dbus get ssconf_basic_naive_server_${nu}) ${_server_ip}" >/dev/null 2>&1 &
 				fi
 
 				sleep 2
 
 				# 4. start curl test
-				curl_test ${nu} ${new_port}
+				curl_test ${nu} ${socks5_port}
 
 				# 5. stop naive
-				local _pid=$(ps | grep wt-naive | grep ${new_port} | awk '{print $1}')
+				local _pid=$(ps | grep wt-naive | grep ${socks5_port} | awk '{print $1}')
 				if [ -n "${_pid}" ];then
 					kill -9 ${_pid} >/dev/null 2>&1
 				fi
@@ -1067,7 +1117,7 @@ test_11_nv(){
 		wait
 
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 	
 	killall wt-naive >/dev/null 2>&1
@@ -1081,25 +1131,24 @@ test_12_tc(){
 	ln -sf /koolshare/bin/tuic-client ${TMP2}/wt-tuic
 	killall wt-tuic >/dev/null 2>&1
 
-	local base_port=50600
 	cat ${TMP2}/${file} | xargs -n 2 | while read nus; do
 		for nu in $nus; do
 			{
 				# 1. gen json
-				local new_port=$(($base_port + $nu))
-				local new_addr="127.0.0.1:${new_port}"
-				dbus get ssconf_basic_tuic_json_${nu} | base64_decode | run jq --arg addr "$new_addr" '.local.server = $addr' >${TMP2}/conf/tuic-${new_port}.json
+				local socks5_port=$(get_rand_port)
+				local new_addr="127.0.0.1:${socks5_port}"
+				dbus get ssconf_basic_tuic_json_${nu} | base64_decode | run jq --arg addr "$new_addr" '.local.server = $addr' >${TMP2}/conf/tuic-${socks5_port}.json
 
 				# 2. start tuic
-				run ${TMP2}/wt-tuic -c ${TMP2}/conf/tuic-${new_port}.json >/dev/null 2>&1 &
+				run ${TMP2}/wt-tuic -c ${TMP2}/conf/tuic-${socks5_port}.json >/dev/null 2>&1 &
 
 				sleep 2
 
 				# 4. start curl test
-				curl_test ${nu} ${new_port}
+				curl_test ${nu} ${socks5_port}
 
 				# 5. stop tuic
-				local _pid=$(ps | grep "wt-tuic" | grep -v grep | grep ${new_port} | awk '{print $1}')
+				local _pid=$(ps | grep "wt-tuic" | grep -v grep | grep ${socks5_port} | awk '{print $1}')
 				if [ -n "${_pid}" ];then
 					kill -9 ${_pid} >/dev/null 2>&1
 				fi
@@ -1108,7 +1157,7 @@ test_12_tc(){
 		wait
 
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 	
 	killall wt-tuic >/dev/null 2>&1
@@ -1117,23 +1166,28 @@ test_12_tc(){
 
 test_13_h2(){
 	local file=$1
-	local base_port=50600
+	local mark=$2
 	
 	# alisa binary
-	rm -rf ${TMP2}/wt-hy2
-	rm -rf ${TMP2}/conf/*
-	ln -sf /koolshare/bin/hysteria2 ${TMP2}/wt-hy2
 	killall wt-hy2 >/dev/null 2>&1
+	mkdir -p ${TMP2}/conf_${mark}
+	rm -rf ${TMP2}/wt-hy2
+	rm -rf ${TMP2}/conf_${mark}/*
+	ln -sf /koolshare/bin/hysteria2 ${TMP2}/wt-hy2
 
 	# gen hy2 yaml
 	cat ${TMP2}/${file} | xargs -n 16 | while read nus; do
 		for nu in $nus; do
 			{
-				creat_hy2_yaml ${nu}
+				creat_hy2_yaml ${nu} ${mark}
 			} &
 		done
 		wait
 	done
+
+	if [ -f "${TMP2}/socsk5_ports.txt" ];then
+		eval $(cat ${TMP2}/socsk5_ports.txt)
+	fi
 
 	cat ${TMP2}/${file} | xargs -n 1 | while read nus; do
 		for nu in $nus; do
@@ -1143,15 +1197,15 @@ test_13_h2(){
 
 				# 1. start hy2       
 				if [ "${LINUX_VER}" == "419" -o "${LINUX_VER}" == "54" ];then
-					run ${TMP2}/wt-hy2 -c  ${TMP2}/conf/${nu}.yaml >/dev/null 2>&1 &
+					run ${TMP2}/wt-hy2 -c ${TMP2}/conf_${mark}/${nu}.yaml >/dev/null 2>&1 &
 				else
-					env -i PATH=${PATH} QUIC_GO_DISABLE_ECN=true ${TMP2}/wt-hy2 -c ${TMP2}/conf/${nu}.yaml >/dev/null 2>&1 &
+					env -i PATH=${PATH} QUIC_GO_DISABLE_ECN=true ${TMP2}/wt-hy2 -c ${TMP2}/conf_${mark}/${nu}.yaml >/dev/null 2>&1 &
 				fi
 				sleep 2
 
 				# 2. start curl test
-				local new_port=$(($base_port + $nu))
-				curl_test ${nu} ${new_port}
+				local socks5_port=$(eval echo \$socks5_port_${nu})
+				curl_test ${nu} ${socks5_port}
 
 				# 3. stop hy2
 				killall wt-hy2
@@ -1160,7 +1214,7 @@ test_13_h2(){
 		wait
 		
 		# merge all curl test result
-		find /tmp/fancyss_webtest/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
+		find ${TMP2}/results/ -name "*.txt" | sort -t "/" -nk5 | xargs cat > /tmp/upload/webtest.txt
 	done
 
 	rm -rf ${TMP2}/wt-hy2
@@ -1218,7 +1272,7 @@ creat_v2ray_json() {
 			fi
 
 			# sni is host
-			if [ -z "${v2ray_network_security_sni}" -a -n "{v2ray_network_host}" ];then
+			if [ -z "${v2ray_network_security_sni}" -a -n "${v2ray_network_host}" ];then
 				local v2ray_network_security_sni=$(echo "${v2ray_network_host}" | sed 's/", "/\n/g' | head -n1)
 			fi
 
@@ -1326,7 +1380,7 @@ creat_v2ray_json() {
 		[ -z "${v2ray_security}" ] && v2ray_security="auto"
 	
 		# outbounds area
-		cat >>$TMP2/conf/${nu}_outbounds.json <<-EOF
+		cat >>${TMP2}/conf/${nu}_outbounds.json <<-EOF
 			{
 			"outbounds": [
 				{
@@ -1365,32 +1419,33 @@ creat_v2ray_json() {
 		EOF
 
 		# delete all null value
-		# jq 'del(..|nulls)' $TMP2/conf/${nu}_outbounds.json | run sponge $TMP2/conf/${nu}_outbounds.json
-		sed -i '/null/d' $TMP2/conf/${nu}_outbounds.json 2>/dev/null
+		# jq 'del(..|nulls)' ${TMP2}/conf/${nu}_outbounds.json | run sponge ${TMP2}/conf/${nu}_outbounds.json
+		sed -i '/null/d' ${TMP2}/conf/${nu}_outbounds.json 2>/dev/null
 	else
-		dbus get ssconf_basic_v2ray_json_${nu} | base64_decode >$TMP2/v2ray_user.json
-		local OB=$(cat $TMP2/v2ray_user.json | run jq .outbound)
-		local OBS=$(cat $TMP2/v2ray_user.json | run jq .outbounds)
+		dbus get ssconf_basic_v2ray_json_${nu} | base64_decode >${TMP2}/v2ray_user.json
+		local OB=$(cat ${TMP2}/v2ray_user.json | run jq .outbound)
+		local OBS=$(cat ${TMP2}/v2ray_user.json | run jq .outbounds)
 
 		# 兼容旧格式：outbound
 		if [ "$OB" != "null" ]; then
-			OUTBOUNDS=$(cat $TMP2/v2ray_user.json | run jq .outbound)
+			OUTBOUNDS=$(cat ${TMP2}/v2ray_user.json | run jq .outbound)
 		fi
 		
 		# 新格式：outbound[]
 		if [ "$OBS" != "null" ]; then
-			OUTBOUNDS=$(cat $TMP2/v2ray_user.json | run jq .outbounds[0])
+			OUTBOUNDS=$(cat ${TMP2}/v2ray_user.json | run jq .outbounds[0])
 		fi
-		echo "{}" | run jq --argjson args "$OUTBOUNDS" '. + {outbounds: [$args]}' >$TMP2/conf/${nu}_outbounds.json
+		echo "{}" | run jq --argjson args "$OUTBOUNDS" '. + {outbounds: [$args]}' >${TMP2}/conf/${nu}_outbounds.json
 	fi
 
-	local base_port=50600
 	# inbounds
-	cat >>$TMP2/conf/${nu}_inbounds.json <<-EOF
+	local socks5_port=$(get_rand_port)
+	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
+	cat >>${TMP2}/conf/${nu}_inbounds.json <<-EOF
 		{
 		  "inbounds": [
 		    {
-		      "port": $(($base_port + $nu)),
+		      "port": ${socks5_port},
 		      "protocol": "socks",
 		      "settings": {
 		        "auth": "noauth",
@@ -1403,7 +1458,125 @@ creat_v2ray_json() {
 	EOF
 
 	# routing
-	cat >>$TMP2/conf/${nu}_routing.json <<-EOF
+	cat >>${TMP2}/conf/${nu}_routing.json <<-EOF
+		{
+		  "routing": {
+		    "rules": [
+		      {
+		        "type": "field",
+		        "inboundTag": ["socks${nu}"],
+		        "outboundTag": "proxy${nu}"
+		      }
+		    ]
+		  }
+		}
+	EOF
+}
+
+creat_xray_ss_json() {
+	local nu=$1
+	local mark=$2
+
+	# gen xray outbound
+	local ss_server=$(dbus get ssconf_basic_server_${nu})
+	local _server_ip=$(_get_server_ip ${ss_server})
+	if [ -z "${_server_ip}" ];then
+		_server_ip=${ss_server}
+	fi
+	local ss_port=$(dbus get ssconf_basic_port_${nu})
+	local ss_pass=$(dbus get ssconf_basic_password_${nu} | base64_decode)
+	local ss_meth=$(dbus get ssconf_basic_method_${nu})
+	
+	if [ "${ss_basic_tfo}" == "1" -a "${LINUX_VER}" != "26" ]; then
+		local OBFS_ARG="--fast-open"
+		echo 3 >/proc/sys/net/ipv4/tcp_fastopen
+	else
+		local OBFS_ARG=""
+	fi
+
+	# obfs
+	if [ "$(dbus get ssconf_basic_ss_obfs_${nu})" == "http" -o "$(dbus get ssconf_basic_ss_obfs_${nu})" == "tls" ]; then
+		local obfs_port=$(get_rand_port)
+		local _server_ip_tmp="127.0.0.1"
+		local _server_port_tmp="${obfs_port}"
+		if [ -n "$(dbus get ssconf_basic_ss_obfs_host_${nu})" ]; then
+			cat >>"${TMP2}/bash_${mark}/start_${nu}.sh" <<-EOF
+				#!/bin/sh
+				${TMP2}/wt-obfs -s ${_server_ip} -p ${ss_port} -l ${_server_port_tmp} --obfs $(dbus get ssconf_basic_ss_obfs_${nu}) --obfs-host $(dbus get ssconf_basic_ss_obfs_host_${nu}) ${OBFS_ARG} >/dev/null 2>&1 &
+			EOF
+		else
+			cat >>"${TMP2}/bash_${mark}/start_${nu}.sh" <<-EOF
+				#!/bin/sh
+				${TMP2}/wt-obfs -s ${_server_ip} -p ${ss_port} -l ${_server_port_tmp} --obfs $(dbus get ssconf_basic_ss_obfs_${nu}) ${OBFS_ARG} >/dev/null 2>&1 &
+			EOF
+		fi
+		cat >${TMP2}/bash_${mark}/stop_${nu}.sh <<-EOF
+			#!/bin/sh
+			_pid=\$(ps -w | grep "wt-obfs" | grep -w "${_server_ip}" | grep -w "${ss_port}" | grep -w "${_server_port_tmp}" | awk '{print \$1}' | head -n1)
+			if [ -n "\${_pid}" ];then
+			    kill -9 \${_pid}
+			fi
+		EOF
+		
+		chmod +x ${TMP2}/bash_${mark}/start_${nu}.sh
+		chmod +x ${TMP2}/bash_${mark}/stop_${nu}.sh
+	else
+		local _server_ip_tmp="${_server_ip}"
+		local _server_port_tmp="${ss_port}"
+	fi
+	
+	cat >>${TMP2}/conf_${mark}/${nu}_outbounds.json <<-EOF
+		{
+		"outbounds": [
+			{
+				"tag": "proxy${nu}",
+				"protocol": "shadowsocks",
+				"settings": {
+					"servers": [
+						{
+							"address": "${_server_ip_tmp}",
+							"port": ${_server_port_tmp},
+							"password": "${ss_pass}",
+							"method": "${ss_meth}",
+							"uot": false
+						}
+					]
+				},
+				"sockopt": {
+					"tcpFastOpen": $(get_function_switch ${ss_basic_tfo}),
+					"tcpcongestion": "bbr"
+				}
+			}
+		]
+		}
+	EOF
+	
+	sed -i '/null/d' ${TMP2}/conf_${mark}/${nu}_outbounds.json 2>/dev/null
+	if [ "${LINUX_VER}" == "26" ]; then
+		sed -i '/tcpFastOpen/d' ${TMP2}/conf_${mark}/${nu}_outbounds.json 2>/dev/null
+	fi
+
+	# inbounds
+	local socks5_port=$(get_rand_port)
+	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
+	cat >>${TMP2}/conf_${mark}/${nu}_inbounds.json <<-EOF
+		{
+		  "inbounds": [
+		    {
+		      "port": ${socks5_port},
+		      "protocol": "socks",
+		      "settings": {
+		        "auth": "noauth",
+		        "udp": true
+		      },
+		      "tag": "socks${nu}"
+		    }
+		  ]
+		}
+	EOF
+
+	# routing
+	cat >>${TMP2}/conf_${mark}/${nu}_routing.json <<-EOF
 		{
 		  "routing": {
 		    "rules": [
@@ -1452,7 +1625,7 @@ creat_xray_json() {
 			fi
 		fi
 		# sni is host
-		if [ -z "${xray_network_security_sni}" -a -n "{xray_network_host}" ];then
+		if [ -z "${xray_network_security_sni}" -a -n "${xray_network_host}" ];then
 			local xray_network_security_sni=$(echo "${xray_network_host}" | sed 's/", "/\n/g' | head -n1)
 		fi
 		local xray_flow=$(dbus get ssconf_basic_xray_flow_${nu})
@@ -1610,7 +1783,7 @@ creat_xray_json() {
 		[ -z "${xray_alterid}" ] && xray_alterid="0"
 
 		# outbounds area
-		cat >>$TMP2/conf/${nu}_outbounds.json <<-EOF
+		cat >>${TMP2}/conf/${nu}_outbounds.json <<-EOF
 			{
 			"outbounds": [
 				{
@@ -1654,38 +1827,39 @@ creat_xray_json() {
 		EOF
 
 		# delete all null value
-		# jq 'del(..|nulls)' $TMP2/conf/${nu}_outbounds.json | run sponge $TMP2/conf/${nu}_outbounds.json
-		sed -i '/null/d' $TMP2/conf/${nu}_outbounds.json 2>/dev/null
+		# jq 'del(..|nulls)' ${TMP2}/conf/${nu}_outbounds.json | run sponge ${TMP2}/conf/${nu}_outbounds.json
+		sed -i '/null/d' ${TMP2}/conf/${nu}_outbounds.json 2>/dev/null
 		if [ "${xray_prot}" == "vless" ];then
-			sed -i '/alterId/d' $TMP2/conf/${nu}_outbounds.json 2>/dev/null
+			sed -i '/alterId/d' ${TMP2}/conf/${nu}_outbounds.json 2>/dev/null
 		fi
 		if [ "${LINUX_VER}" == "26" ]; then
-			sed -i '/tcpFastOpen/d' $TMP2/conf/${nu}_outbounds.json 2>/dev/null
+			sed -i '/tcpFastOpen/d' ${TMP2}/conf/${nu}_outbounds.json 2>/dev/null
 		fi
 	else
-		dbus get ssconf_basic_xray_json_${nu} | base64_decode >$TMP2/xray_user.json
-		local OB=$(cat $TMP2/xray_user.json | run jq .outbound)
-		local OBS=$(cat $TMP2/xray_user.json | run jq .outbounds)
+		dbus get ssconf_basic_xray_json_${nu} | base64_decode >${TMP2}/xray_user.json
+		local OB=$(cat ${TMP2}/xray_user.json | run jq .outbound)
+		local OBS=$(cat ${TMP2}/xray_user.json | run jq .outbounds)
 
 		# 兼容旧格式：outbound
 		if [ "$OB" != "null" ]; then
-			OUTBOUNDS=$(cat $TMP2/xray_user.json | run jq .outbound)
+			OUTBOUNDS=$(cat ${TMP2}/xray_user.json | run jq .outbound)
 		fi
 		
 		# 新格式：outbound[]
 		if [ "$OBS" != "null" ]; then
-			OUTBOUNDS=$(cat $TMP2/xray_user.json | run jq .outbounds[0])
+			OUTBOUNDS=$(cat ${TMP2}/xray_user.json | run jq .outbounds[0])
 		fi
-		echo "{}" | run jq --argjson args "$OUTBOUNDS" '. + {outbounds: [$args]}' >$TMP2/conf/${nu}_outbounds.json
+		echo "{}" | run jq --argjson args "$OUTBOUNDS" '. + {outbounds: [$args]}' >${TMP2}/conf/${nu}_outbounds.json
 	fi
 
-	local base_port=50600
 	# inbounds
-	cat >>$TMP2/conf/${nu}_inbounds.json <<-EOF
+	local socks5_port=$(get_rand_port)
+	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
+	cat >>${TMP2}/conf/${nu}_inbounds.json <<-EOF
 		{
 		  "inbounds": [
 		    {
-		      "port": $(($base_port + $nu)),
+		      "port": ${socks5_port},
 		      "protocol": "socks",
 		      "settings": {
 		        "auth": "noauth",
@@ -1698,7 +1872,7 @@ creat_xray_json() {
 	EOF
 
 	# routing
-	cat >>$TMP2/conf/${nu}_routing.json <<-EOF
+	cat >>${TMP2}/conf/${nu}_routing.json <<-EOF
 		{
 		  "routing": {
 		    "rules": [
@@ -1732,7 +1906,7 @@ creat_trojan_json(){
 
 	
 	# outbounds area
-	cat >>$TMP2/conf/${nu}_outbounds.json <<-EOF
+	cat >>${TMP2}/conf/${nu}_outbounds.json <<-EOF
 		{
 		"outbounds": [
 			{
@@ -1759,15 +1933,16 @@ creat_trojan_json(){
   		}
 	EOF
 	if [ "${LINUX_VER}" == "26" ]; then
-		sed -i '/tcpFastOpen/d' $TMP2/conf/${nu}_outbounds.json
+		sed -i '/tcpFastOpen/d' ${TMP2}/conf/${nu}_outbounds.json
 	fi
 	# inbounds
-	local base_port=50600
-	cat >>$TMP2/conf/${nu}_inbounds.json <<-EOF
+	local socks5_port=$(get_rand_port)
+	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
+	cat >>${TMP2}/conf/${nu}_inbounds.json <<-EOF
 		{
 		  "inbounds": [
 		    {
-		      "port": $(($base_port + $nu)),
+		      "port": ${socks5_port},
 		      "protocol": "socks",
 		      "settings": {
 		        "auth": "noauth",
@@ -1779,7 +1954,7 @@ creat_trojan_json(){
 		}
 	EOF
 	# routing
-	cat >>$TMP2/conf/${nu}_routing.json <<-EOF
+	cat >>${TMP2}/conf/${nu}_routing.json <<-EOF
 		{
 		  "routing": {
 		    "rules": [
@@ -1796,6 +1971,7 @@ creat_trojan_json(){
 
 creat_hy2_yaml(){
 	local nu=$1
+	local mark=$2
 	if [ -z "$(dbus get ssconf_basic_hy2_sni_${nu})" ];then
 		__valid_ip_silent "$(dbus get ssconf_basic_hy2_server_${nu})"
 		if [ "$?" != "0" ];then
@@ -1816,7 +1992,7 @@ creat_hy2_yaml(){
 		#continue
 	fi
 
-	cat >> ${TMP2}/conf/${nu}.yaml <<-EOF
+	cat >> ${TMP2}/conf_${mark}/${nu}.yaml <<-EOF
 		server: ${_server_ip}:$(dbus get ssconf_basic_hy2_port_${nu})
 		
 		auth: $(dbus get ssconf_basic_hy2_pass_${nu})
@@ -1830,7 +2006,7 @@ creat_hy2_yaml(){
 	EOF
 	
 	if [ -n "$(dbus get ssconf_basic_hy2_up_${nu})" -o -n "$(dbus get ssconf_basic_hy2_dl_${nu})" ];then
-		cat >> ${TMP2}/conf/${nu}.yaml <<-EOF
+		cat >> ${TMP2}/conf_${mark}/${nu}.yaml <<-EOF
 			bandwidth: 
 			  up: $(dbus get ssconf_basic_hy2_up_${nu}) mbps
 			  down: $(dbus get ssconf_basic_hy2_dl_${nu}) mbps
@@ -1839,7 +2015,7 @@ creat_hy2_yaml(){
 	fi
 
 	if [ "$(dbus get ssconf_basic_hy2_obfs_${nu})" == "1" -a -n "$(dbus get ssconf_basic_hy2_obfs_pass_${nu})" ];then
-		cat >> ${TMP2}/conf/${nu}.yaml <<-EOF
+		cat >> ${TMP2}/conf_${mark}/${nu}.yaml <<-EOF
 			obfs:
 			  type: salamander
 			  salamander:
@@ -1848,14 +2024,15 @@ creat_hy2_yaml(){
 		EOF
 	fi
 
-	local base_port=50600
-	cat >> ${TMP2}/conf/${nu}.yaml <<-EOF
+	local socks5_port=$(get_rand_port)
+	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
+	cat >> ${TMP2}/conf_${mark}/${nu}.yaml <<-EOF
 		transport:
 		  udp:
 		    hopInterval: 30s
 		
 		socks5:
-		  listen: 127.0.0.1:$(($base_port + $nu))
+		  listen: 127.0.0.1:${socks5_port}
 	EOF
 }
 
@@ -1866,10 +2043,13 @@ curl_test(){
 	# curl-fancyss -o /dev/null -s -I -x socks5h://127.0.0.1:23456 --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" http://www.google.com.tw
 	
 	# test multiple time and get the best one
+	# echo ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} >> ${TMP2}/curl_test_log.txt
 	local ret=$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
+	usleep 250000
 	local ret=${ret}@$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
+	usleep 250000
 	local ret=${ret}@$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
-	local ret=$(echo $ret | sed 's/@/\n/g' | sort -n | head -n1)
+	local ret=$(echo ${ret} | sed 's/@/\n/g' | sort -n | head -n1)
 	local _match=$(echo "${ret}"|grep -E "\|")
 	if [ -z ${_match} ];then
 		echo -en "${nu}>failed\n" >>${TMP2}/results/${nu}.txt
@@ -1891,14 +2071,14 @@ _get_server_ip() {
 	local domain1=$(echo "$1" | grep -E "^https://|^http://|/")
 	local domain2=$(echo "$1" | grep -E "\.")
 	if [ -n "${domain1}" -o -z "${domain2}" ]; then
-		echo "$1 不是域名也不是ip" >>$TMP2/webtest_log.txt
+		echo "$1 不是域名也不是ip" >>${TMP2}/webtest_log.txt
 		echo ""
 		return 2
 	fi
 
 	SERVER_IP=$(__valid_ip $1)
 	if [ -n "${SERVER_IP}" ]; then
-		echo "$1 已经是ip，跳过解析！" >>$TMP2/webtest_log.txt
+		echo "$1 已经是ip，跳过解析！" >>${TMP2}/webtest_log.txt
 		echo $SERVER_IP
 		return 0
 	fi
@@ -1913,7 +2093,7 @@ _get_server_ip() {
 	fi
 	# 只解析一轮
 	until [ ${count} -eq 18 ]; do
-		#echo "$1 选取DNS服务器$(__get_server_resolver ${current})，用于域名解析" >>$TMP2/webtest_log.txt
+		#echo "$1 选取DNS服务器$(__get_server_resolver ${current})，用于域名解析" >>${TMP2}/webtest_log.txt
 		
 		SERVER_IP=$(run dnsclient -p 53 -t 2 -i 1 @$(__get_server_resolver ${current}) $1 2>/dev/null|grep -E "^IP"|head -n1|awk '{print $2}')
 		SERVER_IP=$(__valid_ip ${SERVER_IP})
@@ -1935,20 +2115,20 @@ _get_server_ip() {
 
 	# resolve failed
 	if [ -z "${SERVER_IP}" ]; then
-		#echo "$1 域名解析失败！" >>$TMP2/webtest_log.txt
+		#echo "$1 域名解析失败！" >>${TMP2}/webtest_log.txt
 		echo ""
 		return 1
 	fi
 
 	# resolve failed
 	if [ "${SERVER_IP}" == "127.0.0.1" ]; then
-		#echo "$1 解析结果为127.0.0.1，域名解析失败！" >>$TMP2/webtest_log.txt
+		#echo "$1 解析结果为127.0.0.1，域名解析失败！" >>${TMP2}/webtest_log.txt
 		echo ""
 		return 1
 	fi
 	
 	# success resolved
-	#echo "$1 域名解析成功，解析结果：${SERVER_IP}" >>$TMP2/webtest_log.txt
+	#echo "$1 域名解析成功，解析结果：${SERVER_IP}" >>${TMP2}/webtest_log.txt
 	echo $SERVER_IP
 	return 0
 }
@@ -2007,6 +2187,35 @@ wait_program(){
 		fi
 	done
 	usleep 500000
+}
+
+wait_program2(){
+	local BINNAME=$1
+	local LOGFILE=$2
+	local CONTENT=$3
+	local MATCH
+	local PID1
+	# wait for 4s
+	local i=16
+	# until [ -n "${PID1}" ]; do
+	# 	usleep 250000
+	# 	i=$(($i - 1))
+	# 	PID1=$(pidof ${BINNAME})
+	# 	if [ "$i" -lt 1 ]; then
+	# 		return 1
+	# 	fi
+	# done
+	
+	until [ -n "${MATCH}" ]; do
+		usleep 250000
+		i=$(($i - 1))
+		local MATCH=$(cat $LOGFILE 2>/dev/null | grep -w $CONTENT)
+		if [ "$i" -lt 1 ]; then
+			return 1
+		fi
+	done
+	usleep 500000
+	return 0
 }
 
 get_path_empty() {
@@ -2084,8 +2293,9 @@ get_value_empty(){
 clean_webtest(){
 	# 当用户手动点击web test按钮的时候，不论是否有正在进行的任务，不论是否在在时限内，强制开始ping
 	# 1. killall program
+	killall wt-ss >/dev/null 2>&1
 	killall wt-ss-local >/dev/null 2>&1
-	killall wt-obfs-local >/dev/null 2>&1
+	killall wt-obfs >/dev/null 2>&1
 	killall wt-rss-local >/dev/null 2>&1
 	killall wt-v2ray >/dev/null 2>&1
 	killall wt-xray >/dev/null 2>&1

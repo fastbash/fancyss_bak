@@ -39,8 +39,6 @@ backup_tar(){
 	cp /koolshare/scripts/ss_* ${TARGET_FOLDER}/scripts/
 	# binary
 	cp /koolshare/bin/isutf8 ${TARGET_FOLDER}/bin/
-	cp /koolshare/bin/ss-local ${TARGET_FOLDER}/bin/
-	cp /koolshare/bin/ss-redir ${TARGET_FOLDER}/bin/
 	cp /koolshare/bin/obfs-local ${TARGET_FOLDER}/bin/
 	cp /koolshare/bin/rss-local ${TARGET_FOLDER}/bin/
 	cp /koolshare/bin/rss-redir ${TARGET_FOLDER}/bin/
@@ -51,9 +49,11 @@ backup_tar(){
 	cp /koolshare/bin/xray ${TARGET_FOLDER}/bin/
 	cp /koolshare/bin/curl-fancyss ${TARGET_FOLDER}/bin/
 	cp /koolshare/bin/dnsclient ${TARGET_FOLDER}/bin/
+	if [ -x "/koolshare/bin/sslocal" ];then
+		cp /koolshare/bin/sslocal ${TARGET_FOLDER}/bin/
+	fi
 	cp /koolshare/bin/dns2tcp ${TARGET_FOLDER}/bin/
 	cp /koolshare/bin/dns-ecs-forcer ${TARGET_FOLDER}/bin/
-	cp /koolshare/bin/ss-tunnel ${TARGET_FOLDER}/bin/
 	if [ -x "/koolshare/bin/uredir" ];then
 		cp /koolshare/bin/uredir ${TARGET_FOLDER}/bin/
 	fi
@@ -192,7 +192,14 @@ remove_now(){
 	[ -z "$(dbus get ss_basic_interval)" ] && dbus set ss_basic_interval=2
 	[ -z "$(dbus get ss_basic_wt_furl)" ] && dbus set ss_basic_wt_furl="http://www.google.com.tw"
 	[ -z "$(dbus get ss_basic_wt_curl)" ] && dbus set ss_basic_wt_curl="http://www.baidu.com"
-	[ -z "${ss_basic_latency_opt}" ] && dbus set ss_basic_latency_opt="2"
+
+	# fancyss_arm 默认关闭延迟测试
+	PKG_ARCH=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_ARCH=.+" | awk -F"=" '{print $2}' | sed 's/"//g')
+	if [ "${PKG_ARCH}" == "arm" ];then
+		[ -z "${ss_basic_latency_opt}" ] && dbus set ss_basic_latency_opt="0"
+	else
+		[ -z "${ss_basic_latency_opt}" ] && dbus set ss_basic_latency_opt="2"
+	fi
 	
 	# lite
 	if [ ! -x "/koolshare/bin/v2ray" ];then
@@ -200,6 +207,7 @@ remove_now(){
 	else
 		dbus set ss_basic_vcore=0
 	fi
+	
 	if [ ! -x "/koolshare/bin/trojan" ];then
 		dbus set ss_basic_tcore=1
 	else
@@ -417,119 +425,6 @@ restart_dnsmasq(){
 	echo_date "dnsmasq重启成功，pid: ${DPID}"
 }
 
-remove_doh_cache(){
-	source /koolshare/scripts/ss_base.sh
-	if [ "${ss_basic_advdns}" == "1" -a "${ss_dns_plan}" == "3" ];then
-		if [ -f "/tmp/doh_main.conf" ];then
-			local doh_pid_main=$(ps -w | grep "dohclient" | grep -v "grep" | grep -E "7913|doh_main" | awk '{print $1}')
-			if [ -n "${doh_pid_main}" ]; then
-				echo_date "先关闭dohclient进程！"
-				kill -9 ${doh_pid_main} >/dev/null 2>&1
-				rm -rf /var/run/doh_main.pid
-				rm -rf /tmp/doh_main.log
-			fi
-				
-			if [ -f "/tmp/doh_main.db" ]; then
-				echo_date "删除dohclient缓存文件：/tmp/doh_main.db"
-				rm -rf /tmp/doh_main.db
-			fi
-			echo_date "重启dohclient进程..."
-			#dohclient --config=/tmp/doh_main.conf --pid="/var/run/doh_main.pid" --daemon >/dev/null 2>&1
-			detect_running_status2 dohclient doh_main
-			restart_dnsmasq
-		else
-			echo_date "失败！没有找到dohclient的配置文件，请检查dohclient是否正常运行！"
-		fi
-	else
-		echo_date "当前并未启动dohclient，跳过！"
-	fi
-}
-
-# 1. ----------------------------------------------------
-edit_smartdns_conf(){
-	local flag=$1
-	local temp_path=/tmp
-	local save_path=/koolshare/ss/rules
-	local show_path=/tmp/upload
-	local conf_name=$2
-	local user_conf=${conf_name}_user
-	local ISP_DNS1=$(nvram get wan0_dns | sed 's/ /\n/g' | grep -v 0.0.0.0 | grep -v 127.0.0.1 | sed -n 1p | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}|:")
-	local ISP_DNS2=$(nvram get wan0_dns | sed 's/ /\n/g' | grep -v 0.0.0.0 | grep -v 127.0.0.1 | sed -n 2p | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}|:")
-
-	if [ "${flag}" == "edit" ];then
-		if [ -f "${save_path}/${user_conf}.conf" ];then
-			cp -f ${save_path}/${user_conf}.conf ${show_path}/${conf_name}.conf
-			http_response "11111111" >/dev/null
-		else
-			cp -f ${save_path}/${conf_name}.conf ${show_path}/${conf_name}.conf
-			# these conf shold be edit
-			if [ "${conf_name}" == "smartdns_smrt_1" -o "${conf_name}" == "smartdns_smrt_2" -o "${conf_name}" == "smartdns_smrt_3" ];then
-				if [ -n "${ISP_DNS1}" ]; then
-					sed -i "s/114.114.114.114/${ISP_DNS1}/g" ${show_path}/${conf_name}.conf
-				fi
-				
-				if [ -n "${ISP_DNS2}" ]; then
-					sed -i "s/114.114.115.115/${ISP_DNS2}/g" ${show_path}/${conf_name}.conf
-				else
-					sed -i "/114.114.115.115/d" ${show_path}/${conf_name}.conf
-				fi
-			fi
-			http_response "22222222" >/dev/null
-		fi
-	fi
-
-	if [ "${flag}" == "save" ];then
-		http_response "$ID" >/dev/null
-		local conf_rule=$(dbus get ss_basic_smartdns_rule)
-		if [ -n "${conf_rule}" ];then
-			echo ${conf_rule} | base64_decode | sed 's/\\n/\n/g' > ${temp_path}/${user_conf}.conf
-			local md5sum_default=$(md5sum ${save_path}/${conf_name}.conf | awk '{print $1}')
-			local md5sum_usernew=$(md5sum ${temp_path}/${user_conf}.conf | awk '{print $1}')
-			if [ -f "${save_path}/${user_conf}.conf" ];then
-				local md5sum_userold=$(md5sum ${save_path}/${user_conf}.conf | awk '{print $1}')
-				if [ "${md5sum_userold}" == "${md5sum_usernew}" ];then
-					rm -rf ${temp_path}/${user_conf}.conf
-					echo_date "配置文件相较于之前的自定义配置无变化，不保存！"
-				else
-					echo_date "保存新配置到${save_path}/${user_conf}.conf"
-					mv -f ${temp_path}/${user_conf}.conf ${save_path}/${user_conf}.conf
-					cp -f ${save_path}/${user_conf}.conf ${show_path}/${conf_name}.conf
-					dbus remove ss_basic_smartdns_rule
-					echo_date "保存成功！请重启科学上网插件，使用新配置！"
-				fi
-			else
-				if [ "${md5sum_default}" == "${md5sum_usernew}" ];then
-					rm -rf ${temp_path}/${user_conf}.conf
-					rm -rf ${save_path}/${user_conf}.conf
-					echo_date "配置文件相较于默认配置无变化，不保存为自定义配置，继续使用默认配置！"
-				else
-					echo_date "保存新配置到${save_path}/${user_conf}.conf"
-					mv ${temp_path}/${user_conf}.conf ${save_path}/${user_conf}.conf
-					cp -f ${save_path}/${user_conf}.conf ${show_path}/${conf_name}.conf
-					dbus remove ss_basic_smartdns_rule
-					echo_date "保存成功！请重启科学上网插件，使用新配置！"
-				fi
-			fi
-		else
-			echo_date "检测到新配置为空，不保存！"
-		fi
-		echo XU6J03M6 >> ${LOG_FILE}
-	fi
-
-	if [ "${flag}" == "reset" ];then
-		http_response "$ID" >/dev/null
-		if [ -f "${save_path}/${user_conf}.conf" ];then
-			echo_date "切换到smartdns默认配置！"
-			rm -f ${save_path}/${user_conf}.conf
-			cp -f ${save_path}/${conf_name}.conf ${show_path}/${conf_name}.conf
-			echo_date "切换成功！请重启科学上网插件，以使用默认配置！"
-		else
-			echo_date "当前使用的即为默认配置，无需恢复，退出！"
-		fi
-		echo XU6J03M6 >> ${LOG_FILE}
-	fi
-}
-
 download_resv_log(){
 	rm -rf /tmp/files
 	rm -rf /koolshare/webs/files
@@ -595,12 +490,6 @@ case $2 in
 	restart_dnsmasq >> ${LOG_FILE}
 	echo XU6J03M6 >> ${LOG_FILE}
 	;;
-9)
-	true > ${LOG_FILE}
-	http_response "$1"
-	remove_doh_cache >> ${LOG_FILE}
-	echo XU6J03M6 >> ${LOG_FILE}
-	;;
 10)
 	true > ${LOG_FILE}
 	download_resv_log
@@ -610,118 +499,5 @@ case $2 in
 	true > ${LOG_FILE}
 	download_dig_log
 	http_response "$1"
-	;;
-edit_smartdns_conf_china_udp)
-	edit_smartdns_conf edit smartdns_chng_china_udp >> ${LOG_FILE}
-	;;
-save_smartdns_conf_china_udp)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_china_udp >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_china_udp)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_china_udp >> ${LOG_FILE}
-	;;
-edit_smartdns_conf_china_tcp)
-	edit_smartdns_conf edit smartdns_chng_china_tcp >> ${LOG_FILE}
-	;;
-save_smartdns_conf_china_tcp)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_china_tcp >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_china_tcp)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_china_tcp >> ${LOG_FILE}
-	;;
-edit_smartdns_conf_china_doh)
-	edit_smartdns_conf edit smartdns_chng_china_doh >> ${LOG_FILE}
-	;;
-save_smartdns_conf_china_doh)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_china_doh >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_china_doh)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_china_doh >> ${LOG_FILE}
-	;;
-edit_smartdns_conf_proxy_5)
-	edit_smartdns_conf edit smartdns_chng_proxy_5 >> ${LOG_FILE}
-	;;
-save_smartdns_conf_proxy_5)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_proxy_5 >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_proxy_5)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_proxy_5 >> ${LOG_FILE}
-	;;
-edit_smartdns_conf_proxy_6)
-	edit_smartdns_conf edit smartdns_chng_proxy_6 >> ${LOG_FILE}
-	;;
-save_smartdns_conf_proxy_6)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_proxy_6 >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_proxy_6)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_proxy_6 >> ${LOG_FILE}
-	;;
-edit_smartdns_conf_proxy_7)
-	edit_smartdns_conf edit smartdns_chng_proxy_7 >> ${LOG_FILE}
-	;;
-save_smartdns_conf_proxy_7)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_proxy_7 >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_proxy_7)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_proxy_7 >> ${LOG_FILE}
-	;;
-edit_smartdns_conf_proxy_8)
-	edit_smartdns_conf edit smartdns_chng_proxy_8 >> ${LOG_FILE}
-	;;
-save_smartdns_conf_proxy_8)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_proxy_8 >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_proxy_8)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_proxy_8 >> ${LOG_FILE}
-	;;
-edit_smartdns_conf_direct)
-	edit_smartdns_conf edit smartdns_chng_direct >> ${LOG_FILE}
-	;;
-save_smartdns_conf_direct)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_chng_direct >> ${LOG_FILE}
-	;;
-reset_smartdns_conf_direct)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_chng_direct >> ${LOG_FILE}
-	;;
-edit_smartdns_resolver_doh)
-	edit_smartdns_conf edit smartdns_resolver_doh >> ${LOG_FILE}
-	;;
-save_smartdns_resolver_doh)
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_resolver_doh >> ${LOG_FILE}
-	;;
-reset_smartdns_resolver_doh)
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_resolver_doh >> ${LOG_FILE}
-	;;
-edit_smartdns_smrt_*)
-	order=${2##*_}
-	edit_smartdns_conf edit smartdns_smrt_${order} >> ${LOG_FILE}
-	;;
-save_smartdns_smrt_*)
-	order=${2##*_}
-	true > ${LOG_FILE}
-	edit_smartdns_conf save smartdns_smrt_${order} >> ${LOG_FILE}
-	;;
-reset_smartdns_smrt_*)
-	order=${2##*_}
-	true > ${LOG_FILE}
-	edit_smartdns_conf reset smartdns_smrt_${order} >> ${LOG_FILE}
 	;;
 esac

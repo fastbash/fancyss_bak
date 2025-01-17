@@ -9,15 +9,22 @@ custom:
 
 ===========================================
 
-3.3.6 (to be released)
+3.3.6 (20250114)
+   - update	因上游不再更新，移除shadowsocks-libev二进制及相关功能，现在full版ss协议默认由shadowsocks-rust运行，lite版ss协议由xray运行
+   - update	在【附加功能】中新增开关：用xray核心运行ss协议，勾选后ss协议可强制由xray运行（full版本功能，否则用ss-rust运行）
+   - update	xray运行ss协议情况下支持simple obfs
+   - update	现在lite版本的fancyss也可以使用AEAD-2022加密方式了
    - fix	修复通过vless://链接添加节点时候，在grpc模式下，serviceName可能漏掉添加的问题
    - fix	修复xray在底层传输安全为reality时候，有时因错误提交了flow参数导致节点不可用的问题
    - fix	修复当服务器出口是ipv6地址时，代理出口ip检测失败的问题
    - fix	修复开启chinands-ng可信DNS-2 (直连)功能后，当DNS为空时出错的问题
+   - fix	修复某些情况下切换节点实际上还是用的上一个节点的问题
+   - fix	修复web落地延迟检测时，有时候因为端口冲突造成节点延迟检测失败的问题
    - fix	修复在102固件中，当网络划分了vlan时，开启fancyss后，该vlan无法访问网络的问题
    - update	现在在102固件中，新划分的vlan网络也能使用透明代理网络（未来考虑给开关）
-   - update	在【附加功能】中新增开关：用xray核心运行ss协议，勾选后ss协议可由xray运行（full版本功能）
+   - update	在【附加功能】中新增开关：用xray核心运行ss协议，勾选后ss协议可由xray运行（full版本功能），否则用ss-rust运行
    - update	现在开启插件前会检测并尝试解决端口冲突问题，以避免部分二进制无法启动的问题
+   - update	优化web落地延迟检测功能，现在ss节点默认由xray来运行检测
    - update	优化iptables清除相关代码
    - update	同步最新规则
    - remove	移除ss协议的v2ray-plugin功能

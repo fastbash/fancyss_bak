@@ -25,19 +25,6 @@ LINUX_VER=$(uname -r|awk -F"." '{print $1$2}')
 
 #-----------------------------------------------
 
-cmd() {
-	# echo_date "$*" 2>&1
-	# env -i PATH=${PATH} "$@" 2>/dev/null
-	env -i PATH=${PATH} "$@" >/dev/null 2>&1 &
-}
-
-run(){
-	env -i PATH=${PATH} "$@"
-}
-
-run_bg(){
-	env -i PATH=${PATH} "$@" >/dev/null 2>&1 &
-}
 
 set_lock() {
 	exec 1000>"$LOCK_FILE"
@@ -1238,16 +1225,19 @@ creat_ss_json() {
 		return 0
 	fi
 	
-	if [ -n "${WAN_ACTION}" ]; then
-		echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
-	fi
-	if [ -n "${NAT_ACTION}" ]; then
-		echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
+	if [ -z "${WEB_ACTION}" ]; then
+		if [ -n "${WAN_ACTION}" ]; then
+			echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
+		if [ -n "${NAT_ACTION}" ]; then
+			echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
+	else
+		echo_date "创建$(__get_type_abbr_name)配置文件到${CONFIG_FILE}"
 	fi
 	
-	echo_date "创建$(__get_type_abbr_name)配置文件到${CONFIG_FILE}"
 	if [ "${ss_basic_type}" == "0" ]; then
 		cat >${CONFIG_FILE} <<-EOF
 			{
@@ -2984,12 +2974,15 @@ get_value_empty(){
 }
 
 creat_v2ray_json() {
-	if [ -n "$WAN_ACTION" ]; then
-		echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
-	elif [ -n "$NAT_ACTION" ]; then
-		echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
+	if [ -z "${WEB_ACTION}" ]; then
+		if [ -n "${WAN_ACTION}" ]; then
+			echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
+		if [ -n "${NAT_ACTION}" ]; then
+			echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
 	else
 		echo_date "创建$(__get_type_abbr_name)配置文件到${V2RAY_CONFIG_FILE}"
 	fi
@@ -3547,12 +3540,16 @@ start_v2ray() {
 }
 
 creat_xray_ss_json() {
-	if [ -n "${WAN_ACTION}" ]; then
-		echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
-	elif [ -n "${NAT_ACTION}" ]; then
-		echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
+	if [ -z "${WEB_ACTION}" ]; then
+		# 非web提交
+		if [ -n "${WAN_ACTION}" ]; then
+			echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
+		if [ -n "${NAT_ACTION}" ]; then
+			echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
 	else
 		echo_date "创建$(__get_type_abbr_name)节点配置文件到${XRAY_CONFIG_FILE}"
 	fi
@@ -3672,7 +3669,7 @@ creat_xray_ss_json() {
 					"sockopt": {
 						"tcpFastOpen": $(get_function_switch ${ss_basic_tfo}),
 						"tcpMptcp": false,
-						"tcpNoDelay": $(get_function_switch ${ss_basic_tnd})
+						"tcpcongestion": "bbr"
 					}
 				}
 			]
@@ -3702,7 +3699,7 @@ creat_xray_ss_json() {
 					"sockopt": {
 						"tcpFastOpen": $(get_function_switch ${ss_basic_tfo}),
 						"tcpMptcp": false,
-						"tcpNoDelay": $(get_function_switch ${ss_basic_tnd})
+						"tcpcongestion": "bbr"
 					}			
 				}
 			]
@@ -3728,12 +3725,15 @@ creat_xray_ss_json() {
 }
 
 creat_xray_json() {
-	if [ -n "${WAN_ACTION}" ]; then
-		echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
-	elif [ -n "${NAT_ACTION}" ]; then
-		echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
+	if [ -z "${WEB_ACTION}" ]; then
+		if [ -n "${WAN_ACTION}" ]; then
+			echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
+		if [ -n "${NAT_ACTION}" ]; then
+			echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
 	else
 		echo_date "创建$(__get_type_abbr_name)节点配置文件到${XRAY_CONFIG_FILE}"
 	fi
@@ -3742,7 +3742,7 @@ creat_xray_json() {
 	rm -rf "${XRAY_CONFIG_TEMP}"
 	rm -rf "${XRAY_CONFIG_FILE}"
 	if [ "${ss_basic_xray_use_json}" != "1" ]; then
-		echo_date 生成Xray配置文件...
+		echo_date "生成Xray配置文件..."
 		local tcp="null"
 		local kcp="null"
 		local ws="null"
@@ -4299,12 +4299,15 @@ start_xray() {
 
 creat_trojan_json(){
 	# do not create json file on start
-	if [ -n "${WAN_ACTION}" ]; then
-		echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
-	elif [ -n "${NAT_ACTION}" ]; then
-		echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
-		return 0
+	if [ -z "${WEB_ACTION}" ]; then
+		if [ -n "${WAN_ACTION}" ]; then
+			echo_date "检测到网络拨号/开机触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
+		if [ -n "${NAT_ACTION}" ]; then
+			echo_date "检测到防火墙重启触发启动，不创建$(__get_type_abbr_name)配置文件，使用上次的配置文件！"
+			return 0
+		fi
 	else
 		echo_date "创建xray的trojan配置文件到${TROJAN_CONFIG_FILE}"
 	fi
@@ -4637,7 +4640,7 @@ write_cron_job() {
 	fi
 	sed -i '/ssnodeupdate/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
 	if [ "$ss_basic_node_update" = "1" ]; then
-		if [ "$ss_basic_node_update_day" = "7" ]; then
+		if [ "$ss_basic_node_update_day" = "0" ]; then
 			cru a ssnodeupdate "0 $ss_basic_node_update_hr * * * /koolshare/scripts/ss_online_update.sh fancyss 3"
 			echo_date "设置订阅服务器自动更新订阅服务器在每天 $ss_basic_node_update_hr 点。"
 		else
@@ -4662,7 +4665,7 @@ load_tproxy() {
 	MODULES="xt_TPROXY xt_socket xt_comment"
 	OS=$(uname -r)
 	# load Kernel Modules
-	echo_date 加载TPROXY模块，用于udp转发...
+	echo_date "加载TPROXY模块，用于udp转发..."
 	checkmoduleisloaded() {
 		if lsmod | grep $MODULE &>/dev/null; then return 0; else return 1; fi
 	}
@@ -4786,7 +4789,7 @@ flush_iptables_old() {
 
 # creat ipset rules
 creat_ipset() {
-	echo_date 创建ipset名单
+	echo_date "创建ipset名单"
 	ipset -! create white_list nethash && ipset flush white_list
 	ipset -! create black_list nethash && ipset flush black_list
 	ipset -! create chatgpt nethash && ipset flush chatgpt
@@ -5322,7 +5325,7 @@ detect_ip(){
 	elif [ "${METHOD}" == "1" ];then
 		# 检测代理ip
 		#echo_date "检测国外ip地址，检测地址：${SUBJECT}"
-		local SOCKS5_OPEN=$(netstat -nlp 2>/dev/null|grep -w "23456"|grep -Eo "ss-local|sslocal|v2ray|xray|naive|tuic|hysteria2")
+		local SOCKS5_OPEN=$(netstat -nlp 2>/dev/null|grep -w "23456"|grep -Eo "sslocal|v2ray|xray|naive|tuic|hysteria2")
 		if [ -n "${SOCKS5_OPEN}" ];then
 			local IP=$(run curl-fancyss -4s -x socks5h://127.0.0.1:23456 --connect-timeout ${TIMEOUT} ${SUBJECT} 2>&1 | grep -v "Terminated")
 		else
@@ -5729,9 +5732,9 @@ get_status() {
 	WAN_ACTION=$(ps | grep /jffs/scripts/wan-start | grep -v grep)
 	NAT_ACTION=$(ps | grep /jffs/scripts/nat-start | grep -v grep)
 	WEB_ACTION=$(ps | grep "ss_config.sh" | grep -v grep)
-	[ -n "$WAN_ACTION" ] && echo_date 路由器开机触发koolss重启！
-	[ -n "$NAT_ACTION" ] && echo_date 路由器防火墙触发koolss重启！
-	[ -n "$WEB_ACTION" ] && echo_date WEB提交操作触发koolss重启！
+	[ -n "$WAN_ACTION" ] && echo_date "路由器开机触发koolss重启！"
+	[ -n "$NAT_ACTION" ] && echo_date "路由器防火墙触发koolss重启！"
+	[ -n "$WEB_ACTION" ] && echo_date "WEB提交操作触发koolss重启！"
 
 	iptables -nvL PREROUTING -t nat
 	iptables -nvL OUTPUT -t nat
