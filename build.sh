@@ -27,6 +27,8 @@ sync_binary(){
 		rm -rf ${CURR_PATH}/fancyss/bin-hnd/${BIN_REMOVE}
 		rm -rf ${CURR_PATH}/fancyss/bin-qca/${BIN_REMOVE}
 		rm -rf ${CURR_PATH}/fancyss/bin-arm/${BIN_REMOVE}
+		rm -rf ${CURR_PATH}/fancyss/bin-ipq32/${BIN_REMOVE}
+		rm -rf ${CURR_PATH}/fancyss/bin-ipq64/${BIN_REMOVE}
 	done
 	
 	BINS_COPY="v2ray xray naive ss_rust hysteria2"
@@ -51,6 +53,7 @@ sync_binary(){
 		echo ">>> start to copy latest ${BIN}, version: ${version}"
 		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_arm64 ${CURR_PATH}/fancyss/bin-mtk/${REAL_BIN}
 		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_arm64 ${CURR_PATH}/fancyss/bin-hnd_v8/${REAL_BIN}
+		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7 ${CURR_PATH}/fancyss/bin-ipq32/${REAL_BIN}
 		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7 ${CURR_PATH}/fancyss/bin-hnd/${REAL_BIN}
 		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7 ${CURR_PATH}/fancyss/bin-qca/${REAL_BIN}
 		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv5 ${CURR_PATH}/fancyss/bin-arm/${REAL_BIN}
@@ -71,12 +74,10 @@ gen_folder(){
 		rm -rf ./shadowsocks/bin-hnd_v8
 		rm -rf ./shadowsocks/bin-qca
 		rm -rf ./shadowsocks/bin-mtk
+		rm -rf ./shadowsocks/bin-ipq32
+		rm -rf ./shadowsocks/bin-ipq64
 		mv ./shadowsocks/bin-hnd ./shadowsocks/bin
 		rm -rf ./shadowsocks/bin/uredir
-		rm -rf ./shadowsocks/ss/websocket_arm
-		rm -rf ./shadowsocks/ss/websocket_mtk
-		rm -rf ./shadowsocks/ss/websocket_qca
-		mv ./shadowsocks/ss/websocket_hnd ./shadowsocks/ss/websocket
 		echo hnd > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"hnd\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
@@ -85,12 +86,10 @@ gen_folder(){
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-qca
 		rm -rf ./shadowsocks/bin-mtk
+		rm -rf ./shadowsocks/bin-ipq32
+		rm -rf ./shadowsocks/bin-ipq64
 		mv ./shadowsocks/bin-hnd_v8 ./shadowsocks/bin
 		rm -rf ./shadowsocks/bin/uredir
-		rm -rf ./shadowsocks/ss/websocket_arm
-		rm -rf ./shadowsocks/ss/websocket_mtk
-		rm -rf ./shadowsocks/ss/websocket_qca
-		mv ./shadowsocks/ss/websocket_hnd ./shadowsocks/ss/websocket
 		echo hnd_v8 > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"hnd_v8\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
@@ -99,12 +98,10 @@ gen_folder(){
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-hnd_v8
 		rm -rf ./shadowsocks/bin-mtk
+		rm -rf ./shadowsocks/bin-ipq32
+		rm -rf ./shadowsocks/bin-ipq64
 		mv ./shadowsocks/bin-qca ./shadowsocks/bin
 		rm -rf ./shadowsocks/bin/uredir
-		rm -rf ./shadowsocks/ss/websocket_arm
-		rm -rf ./shadowsocks/ss/websocket_mtk
-		rm -rf ./shadowsocks/ss/websocket_hnd
-		mv ./shadowsocks/ss/websocket_qca ./shadowsocks/ss/websocket
 		echo qca > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"qca\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
@@ -113,12 +110,9 @@ gen_folder(){
 		rm -rf ./shadowsocks/bin-hnd_v8
 		rm -rf ./shadowsocks/bin-qca
 		rm -rf ./shadowsocks/bin-mtk
+		rm -rf ./shadowsocks/bin-ipq32
+		rm -rf ./shadowsocks/bin-ipq64
 		mv ./shadowsocks/bin-arm ./shadowsocks/bin
-		rm -rf ./shadowsocks/ss/websocket_arm
-		rm -rf ./shadowsocks/ss/websocket_qca
-		rm -rf ./shadowsocks/ss/websocket_mtk
-		rm -rf ./shadowsocks/ss/websocket_hnd
-		# mv ./shadowsocks/ss/websocket_arm ./shadowsocks/ss/websocket
 		echo arm > ./shadowsocks/.valid
 		sed -i '/fancyss-hnd/d' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/\,\s\"ss_basic_mcore\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
@@ -130,17 +124,48 @@ gen_folder(){
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-hnd_v8
 		rm -rf ./shadowsocks/bin-qca
+		rm -rf ./shadowsocks/bin-ipq32
+		rm -rf ./shadowsocks/bin-ipq64
 		mv ./shadowsocks/bin-mtk ./shadowsocks/bin
 		rm -rf ./shadowsocks/bin/uredir
-		rm -rf ./shadowsocks/ss/websocket_arm
-		rm -rf ./shadowsocks/ss/websocket_qca
-		rm -rf ./shadowsocks/ss/websocket_hnd
-		mv ./shadowsocks/ss/websocket_mtk ./shadowsocks/ss/websocket
 		rm -rf ./shadowsocks/bin/README.md
 		echo mtk > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"mtk\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-
+	if [ "${platform}" == "ipq32" ];then
+		rm -rf ./shadowsocks/bin-arm
+		rm -rf ./shadowsocks/bin-hnd
+		rm -rf ./shadowsocks/bin-hnd_v8
+		rm -rf ./shadowsocks/bin-qca
+		rm -rf ./shadowsocks/bin-mtk
+		rm -rf ./shadowsocks/bin-ipq64
+		mv ./shadowsocks/bin-ipq32 ./shadowsocks/bin
+		rm -rf ./shadowsocks/bin/uredir
+		rm -rf ./shadowsocks/bin/README.md
+		# bd4 already include jq and curl with proxy support
+		rm -rf ./shadowsocks/bin/jq
+		rm -rf ./shadowsocks/bin/curl-fancyss
+		# bd4 jffs2 space to small, use xray run ss
+		rm -rf ./shadowsocks/bin/sslocal
+		echo ipq32 > ./shadowsocks/.valid
+		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"ipq32\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
+	fi
+	if [ "${platform}" == "ipq64" ];then
+		rm -rf ./shadowsocks/bin-arm
+		rm -rf ./shadowsocks/bin-hnd
+		rm -rf ./shadowsocks/bin-hnd_v8
+		rm -rf ./shadowsocks/bin-qca
+		rm -rf ./shadowsocks/bin-ipq32
+		rm -rf ./shadowsocks/bin-ipq64
+		mv ./shadowsocks/bin-mtk ./shadowsocks/bin
+		rm -rf ./shadowsocks/bin/uredir
+		rm -rf ./shadowsocks/bin/README.md
+		# tuf-be6500 already include jq and curl with proxy support
+		rm -rf ./shadowsocks/bin/jq
+		rm -rf ./shadowsocks/bin/curl-fancyss
+		echo mtk > ./shadowsocks/.valid
+		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"ipq64\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
+	fi
 	# remove some binary because it's not default provide by install packages
 	find ./shadowsocks/bin -name "speederv1" | xargs rm -rf
 	find ./shadowsocks/bin -name "speederv2" | xargs rm -rf
@@ -416,12 +441,18 @@ make(){
 	pack arm lite release
 	pack mtk full release
 	pack mtk lite release
+	pack ipq32 full release
+	pack ipq32 lite release
+	pack ipq64 full release
+	pack ipq64 lite release
 	# --- for debug ---
 	pack hnd full debug
 	pack hnd_v8 full debug
 	pack qca full debug
 	pack arm full debug
 	pack mtk full debug
+	pack ipq32 full debug
+	pack ipq64 full debug
 	finish
 }
 

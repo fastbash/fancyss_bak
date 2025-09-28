@@ -19,12 +19,12 @@ lan_ipaddr=$(nvram get lan_ipaddr)
 ip_prefix_hex=$(nvram get lan_ipaddr | awk -F "." '{printf ("0x%02x", $1)} {printf ("%02x", $2)} {printf ("%02x", $3)} {printf ("00/0xffffff00\n")}')
 WAN_ACTION=$(ps | grep /jffs/scripts/wan-start | grep -v grep)
 NAT_ACTION=$(ps | grep /jffs/scripts/nat-start | grep -v grep)
+WEB_ACTION=$(ps | grep "ss_config.sh" | grep -v grep)
 ARG_OBFS=""
 OUTBOUNDS="[]"
 LINUX_VER=$(uname -r|awk -F"." '{print $1$2}')
 
 #-----------------------------------------------
-
 
 set_lock() {
 	exec 1000>"$LOCK_FILE"
@@ -125,8 +125,8 @@ get_time(){
 		"Dec")
 			monthValue="12"
 			;;
-		*)
-		    continue
+		# *)
+		#     continue
 	esac
 	local UTCTIME="$yearValue.$monthValue.$dateValue-$timeValue"
 	local SERVER_TIMESTAMP=$(date +%s --utc ${UTCTIME})
@@ -535,7 +535,7 @@ prepare_system() {
 		dbus set ssconf_basic_mode_${ssconf_basic_node}="2"
 	fi
 
-	if [ "${ss_basic_type}" == "6" -a "${ss_basic_advdns}" = "1" -a "${ss_basic_chng_trust_1_enable}" == "1" -a "${ss_basic_chng_trust_1_opt}" == "1" ]; then
+	if [ "${ss_basic_type}" == "6" -a "${ss_basic_advdns}" == "1" -a "${ss_basic_chng_trust_1_enable}" == "1" -a "${ss_basic_chng_trust_1_opt}" == "1" ]; then
 		echo_date "[可信DNS-1]: NaïveProxy不支持udp代理，将可信DNS-1自动切换为tcp协议！"
 		ss_basic_chng_trust_1_opt=2
 		dbus set ss_basic_chng_trust_1_opt=2
@@ -1306,7 +1306,11 @@ start_ss_local() {
 	if [ -n "$(ps|grep rss-local|grep 23456)" ];then
 		return
 	fi
-	
+
+	if [ -n "$(ps|grep sslocal|grep 23456)" ];then
+		return
+	fi
+
 	if [ "${ss_basic_type}" == "1" ]; then
 		echo_date "开启ssr-local，提供socks5代理端口：23456"
 		run_bg rss-local -b 127.0.0.1 -l 23456 -c ${CONFIG_FILE} -u -f /var/run/sslocal1.pid
@@ -1388,6 +1392,8 @@ start_dns_new(){
 		ss_dns_plan="1"
 		dbus set ss_dns_plan="1"
 	fi
+
+	start_ss_local
 
 	echo_date "----------------------- start dns -----------------------"
 	
@@ -1613,8 +1619,8 @@ start_dns_new(){
 			dbus set ss_basic_chng_trust_1_opt="2"
 		fi
 		
-		# 7.1 udp
 		if [ "${ss_basic_chng_trust_1_opt}" == "1" ];then
+			# 7.1 udp
 	 		if [ "${ss_basic_type}" == "0" -o "${ss_basic_type}" == "1" ]; then
 	 			# ss/ssr 使用ss-tunnel或者ssr-tunnel
 				if [ "${ss_basic_chng_trust_1_ecs}" == "1" ];then
@@ -1694,11 +1700,16 @@ start_dns_new(){
 					echo_date "使用${TCORE_NAME}_dns作为chinadns-ng的上游DNS..."
 					local FDNS1="127.0.0.1#1055"
 				fi
+			elif [ "${ss_basic_type}" == "6" -o "${ss_basic_type}" == "7" -o "${ss_basic_type}" == "8" ]; then
+				# naive, tuic, hysteria do not support udp dns
+				echo_date "⚠️$(__get_type_full_name ${ss_basic_type})下不支持代理udp查询dns，改用dns2socks！"
+				dbus set ss_basic_chng_trust_1_opt=2
+				ss_basic_chng_trust_1_opt=2
 			fi
 		fi
 
-		# 7.2 tcp
 		if [ "${ss_basic_chng_trust_1_opt}" == "2" ];then
+			# 7.2 tcp
 			if [ -z "${ss_basic_chng_trust_1_opt_tcp_val}" ];then
 				ss_basic_chng_trust_1_opt_tcp_val="1"
 				ss_basic_chng_trust_1_ecs="1"
@@ -1706,7 +1717,6 @@ start_dns_new(){
 				dbus set ss_basic_chng_trust_1_ecs="1"
 			fi
 		
-			start_ss_local
 			echo_date "开启dns2socks，作为chinadns-ng的可信上游DNS-1"
 			if [ "${ss_basic_chng_trust_1_ecs}" == "1" ];then
 				local DNS2SOCKS_PORT="2055"
@@ -4631,33 +4641,52 @@ start_hysteria2(){
 }
 
 write_cron_job() {
+	# 定时规则更新
 	sed -i '/ssupdate/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
-	if [ "1" == "$ss_basic_rule_update" ]; then
-		echo_date "添加fancyss规则定时更新任务，每天$ss_basic_rule_update_time自动检测更新规则."
-		cru a ssupdate "0 $ss_basic_rule_update_time * * * /bin/sh /koolshare/scripts/ss_rule_update.sh"
+	if [ "1" == "${ss_basic_rule_update}" ]; then
+		echo_date "⏰️fancyss规则定时更新任务启用，每天${ss_basic_rule_update_time}点自动检测更新规则."
+		cru a ssupdate "0 ${ss_basic_rule_update_time} * * * /bin/sh /koolshare/scripts/ss_rule_update.sh"
 	else
-		echo_date "fancyss规则定时更新任务未启用！"
+		echo_date "❎️fancyss规则定时更新任务未启用！"
 	fi
+	
+	# 定时订阅
 	sed -i '/ssnodeupdate/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
-	if [ "$ss_basic_node_update" = "1" ]; then
-		if [ "$ss_basic_node_update_day" = "0" ]; then
-			cru a ssnodeupdate "0 $ss_basic_node_update_hr * * * /koolshare/scripts/ss_online_update.sh fancyss 3"
-			echo_date "设置订阅服务器自动更新订阅服务器在每天 $ss_basic_node_update_hr 点。"
+	if [ "${ss_basic_node_update}" == "1" ]; then
+		if [ "${ss_basic_node_update_day}" == "0" ]; then
+			cru a ssnodeupdate "0 ${ss_basic_node_update_hr} * * * /koolshare/scripts/ss_online_update.sh fancyss 3"
+			echo_date "⏰️fancyss规则定时更新任务启用，每天${ss_basic_node_update_hr}点自动更新订阅。"
 		else
-			cru a ssnodeupdate "0 $ss_basic_node_update_hr * * $ss_basic_node_update_day /koolshare/scripts/ss_online_update.sh fancyss 3"
-			echo_date "设置订阅服务器自动更新订阅服务器在星期 $ss_basic_node_update_day 的 $ss_basic_node_update_hr 点。"
+			cru a ssnodeupdate "0 ${ss_basic_node_update_hr} * * ${ss_basic_node_update_day} /koolshare/scripts/ss_online_update.sh fancyss 3"
+			echo_date "⏰️fancyss规则定时更新任务启用，每周${ss_basic_node_update_day}的${ss_basic_node_update_hr}点自动更新订阅。"
 		fi
+	else
+		echo_date "❎️fancyss定时更新订阅节点任务未启用！"
+	fi
+	
+	# 定时webtest
+	sed -i '/sslatencyjob/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
+	if [ "${ss_basic_lt_cru_opts}" == "1" ]; then
+		echo_date "⏰️fancyss 节点web落地延迟检测任务启用，设置每隔${ss_basic_lt_cru_time}分钟检测一次..."
+		sed -i '/sslatencyjob/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
+		cru a sslatencyjob "*/${ss_basic_lt_cru_time} * * * * /koolshare/scripts/ss_webtest.sh 2"
+	else
+		echo_date "❎️fancyss节点web落地延迟检测任务未启用！"
 	fi
 }
 
 kill_cron_job() {
 	if [ -n "$(cru l | grep ssupdate)" ]; then
-		echo_date 删除fancyss规则定时更新任务...
+		echo_date "删除fancyss规则定时更新任务..."
 		sed -i '/ssupdate/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
 	fi
 	if [ -n "$(cru l | grep ssnodeupdate)" ]; then
-		echo_date 删除SSR定时订阅任务...
+		echo_date "删除定时订阅任务..."
 		sed -i '/ssnodeupdate/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
+	fi
+	if [ -n "$(cru l | grep sslatencyjob)" ]; then
+		echo_date "删除SSR定时订阅任务..."
+		sed -i '/sslatencyjob/d' /var/spool/cron/crontabs/* >/dev/null 2>&1
 	fi
 }
 #--------------------------------------nat part begin------------------------------------------------
@@ -4691,7 +4720,7 @@ load_tproxy() {
 	fi
 }
 flush_iptables() {
-	# NAT
+	# flush NAT
 	local NAT_RULES=$(iptables -t nat -S | grep -E "SHADOWSOCKS|3333" | sort)
 	if [ -z "${NAT_RULES}" ];then
 		return 1
@@ -4712,7 +4741,7 @@ flush_iptables() {
 		fi
 	done
 
-	#MANGLE
+	# flush MANGLE
 	local MANGLE_RULES=$(iptables -t mangle -S | grep -E "SHADOWSOCKS|3333" | sort)
 	if [ -z "${MANGLE_RULES}" ];then
 		return 1
@@ -4733,39 +4762,11 @@ flush_iptables() {
 		fi
 	done
 
-	flush_iptables_old
+	flush_ipset
 }
-flush_iptables_old() {
-	#  # flush rules and set if any
-	#  nat_indexs=$(iptables -nvL PREROUTING -t nat | sed 1,2d | sed -n '/SHADOWSOCKS/=' | sort -r)
-	#  for nat_index in $nat_indexs; do
-	#  	iptables -t nat -D PREROUTING $nat_index >/dev/null 2>&1
-	#  done
-	#  iptables -t nat -F SHADOWSOCKS >/dev/null 2>&1 && iptables -t nat -X SHADOWSOCKS >/dev/null 2>&1
-	#  iptables -t nat -F SHADOWSOCKS_EXT >/dev/null 2>&1
-	#  iptables -t nat -F SHADOWSOCKS_DNS >/dev/null 2>&1 && iptables -t nat -X SHADOWSOCKS_DNS >/dev/null 2>&1
-	#  iptables -t nat -F SHADOWSOCKS_GFW >/dev/null 2>&1 && iptables -t nat -X SHADOWSOCKS_GFW >/dev/null 2>&1
-	#  iptables -t nat -F SHADOWSOCKS_CHN >/dev/null 2>&1 && iptables -t nat -X SHADOWSOCKS_CHN >/dev/null 2>&1
-	#  iptables -t nat -F SHADOWSOCKS_GAM >/dev/null 2>&1 && iptables -t nat -X SHADOWSOCKS_GAM >/dev/null 2>&1
-	#  iptables -t nat -F SHADOWSOCKS_GLO >/dev/null 2>&1 && iptables -t nat -X SHADOWSOCKS_GLO >/dev/null 2>&1
-	#  iptables -t nat -F SHADOWSOCKS_HOM >/dev/null 2>&1 && iptables -t nat -X SHADOWSOCKS_HOM >/dev/null 2>&1
-	#  mangle_indexs=$(iptables -nvL PREROUTING -t mangle | sed 1,2d | sed -n '/SHADOWSOCKS/=' | sort -r)
-	#  for mangle_index in $mangle_indexs; do
-	#  	iptables -t mangle -D PREROUTING $mangle_index >/dev/null 2>&1
-	#  done
-	#  iptables -t mangle -F SHADOWSOCKS >/dev/null 2>&1 && iptables -t mangle -X SHADOWSOCKS >/dev/null 2>&1
-	#  iptables -t mangle -F SHADOWSOCKS_GPT >/dev/null 2>&1 && iptables -t mangle -X SHADOWSOCKS_GPT >/dev/null 2>&1
-	#  iptables -t mangle -F SHADOWSOCKS_GFW >/dev/null 2>&1 && iptables -t mangle -X SHADOWSOCKS_GFW >/dev/null 2>&1
-	#  iptables -t mangle -F SHADOWSOCKS_CHN >/dev/null 2>&1 && iptables -t mangle -X SHADOWSOCKS_CHN >/dev/null 2>&1
-	#  iptables -t mangle -F SHADOWSOCKS_GAM >/dev/null 2>&1 && iptables -t mangle -X SHADOWSOCKS_GAM >/dev/null 2>&1
-	#  iptables -t mangle -F SHADOWSOCKS_GLO >/dev/null 2>&1 && iptables -t mangle -X SHADOWSOCKS_GLO >/dev/null 2>&1
-	#  iptables -t nat -D OUTPUT -p tcp -m set --match-set router dst -j REDIRECT --to-ports 3333 >/dev/null 2>&1
-	#  iptables -t nat -F OUTPUT >/dev/null 2>&1
-	#  iptables -t nat -X SHADOWSOCKS_EXT >/dev/null 2>&1
-	#  iptables -t mangle -D QOSO0 -m mark --mark "$ip_prefix_hex" -j RETURN >/dev/null 2>&1
-	
-	echo_date "清除ipset规则集..."
+flush_ipset() {
 	# flush ipset
+	echo_date "清除ipset规则集..."
 	ipset -F chnroute >/dev/null 2>&1 && ipset -X chnroute >/dev/null 2>&1
 	ipset -F white_list >/dev/null 2>&1 && ipset -X white_list >/dev/null 2>&1
 	ipset -F black_list >/dev/null 2>&1 && ipset -X black_list >/dev/null 2>&1
@@ -5732,9 +5733,9 @@ get_status() {
 	WAN_ACTION=$(ps | grep /jffs/scripts/wan-start | grep -v grep)
 	NAT_ACTION=$(ps | grep /jffs/scripts/nat-start | grep -v grep)
 	WEB_ACTION=$(ps | grep "ss_config.sh" | grep -v grep)
-	[ -n "$WAN_ACTION" ] && echo_date "路由器开机触发koolss重启！"
-	[ -n "$NAT_ACTION" ] && echo_date "路由器防火墙触发koolss重启！"
-	[ -n "$WEB_ACTION" ] && echo_date "WEB提交操作触发koolss重启！"
+	[ -n "${WAN_ACTION}" ] && echo_date "路由器开机触发fancyss重启！"
+	[ -n "${NAT_ACTION}" ] && echo_date "路由器防火墙触发fancyss重启！"
+	[ -n "${WEB_ACTION}" ] && echo_date "WEB提交操作触发fancyss重启！"
 
 	iptables -nvL PREROUTING -t nat
 	iptables -nvL OUTPUT -t nat

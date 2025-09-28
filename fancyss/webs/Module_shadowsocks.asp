@@ -98,7 +98,7 @@ if(PKG_ARCH == "hnd"){
 		var ws_enable = 1;
 	}
 }
-if(PKG_ARCH == "mtk" || PKG_ARCH == "qca" || PKG_ARCH == "hnd_v8"){
+if(PKG_ARCH == "mtk" || PKG_ARCH == "qca" || PKG_ARCH == "hnd_v8" || PKG_ARCH == "ipq32" || PKG_ARCH == "ipq64"){
 	var ws_enable = 1;
 }
 String.prototype.myReplace = function(f, e){
@@ -361,7 +361,7 @@ function save() {
 	E("ss_state2").innerHTML = "国外连接 - " + "Waiting...";
 	E("ss_state3").innerHTML = "国内连接 - " + "Waiting...";
 	// key define
-	var params_input = ["ss_failover_s1", "ss_failover_s2_1", "ss_failover_s2_2", "ss_failover_s3_1", "ss_failover_s3_2", "ss_failover_s4_1", "ss_failover_s4_2", "ss_failover_s4_3", "ss_failover_s5", "ss_basic_interval", "ss_basic_row", "ss_dns_plan", "ss_basic_chng_china_1_prot", "ss_basic_chng_china_1_udp", "ss_basic_chng_china_1_udp_user", "ss_basic_chng_china_1_tcp", "ss_basic_chng_china_1_tcp_user", "ss_basic_chng_china_2_prot", "ss_basic_chng_china_2_udp", "ss_basic_chng_china_2_udp_user", "ss_basic_chng_china_2_tcp", "ss_basic_chng_china_2_tcp_user", "ss_basic_chng_trust_1_opt", "ss_basic_chng_trust_1_opt", "ss_basic_chng_trust_1_opt_udp_val", "ss_basic_chng_trust_1_opt_udp_val_user", "ss_basic_chng_trust_1_opt_tcp_val", "ss_basic_chng_trust_1_opt_tcp_val_user", "ss_basic_chng_trust_2_opt", "ss_basic_chng_trust_2_opt_udp", "ss_basic_chng_trust_2_opt_tcp", "ss_basic_chng_repeat_times", "ss_china_dns", "ss_china_dns_user", "ss_foreign_dns", "ss_dns2socks_user", "ss_sstunnel_user", "ss_direct_user", "ss_basic_kcp_lserver", "ss_basic_kcp_lport", "ss_basic_kcp_server", "ss_basic_kcp_port", "ss_basic_kcp_parameter", "ss_basic_rule_update", "ss_basic_rule_update_time", "ssr_subscribe_mode", "ss_basic_online_links_goss", "ss_basic_node_update", "ss_basic_node_update_day", "ss_basic_node_update_hr", "ss_basic_exclude", "ss_basic_include", "ss_acl_default_port", "ss_acl_default_mode", "ss_basic_kcp_method", "ss_basic_kcp_password", "ss_basic_kcp_mode", "ss_basic_kcp_encrypt", "ss_basic_kcp_mtu", "ss_basic_kcp_sndwnd", "ss_basic_kcp_rcvwnd", "ss_basic_kcp_conn", "ss_basic_kcp_extra", "ss_basic_udp_software", "ss_basic_udp_node", "ss_basic_udpv1_lserver", "ss_basic_udpv1_lport", "ss_basic_udpv1_rserver", "ss_basic_udpv1_rport", "ss_basic_udpv1_password", "ss_basic_udpv1_mode", "ss_basic_udpv1_duplicate_nu", "ss_basic_udpv1_duplicate_time", "ss_basic_udpv1_jitter", "ss_basic_udpv1_report", "ss_basic_udpv1_drop", "ss_basic_udpv2_lserver", "ss_basic_udpv2_lport", "ss_basic_udpv2_rserver", "ss_basic_udpv2_rport", "ss_basic_udpv2_password", "ss_basic_udpv2_fec", "ss_basic_udpv2_timeout", "ss_basic_udpv2_mode", "ss_basic_udpv2_report", "ss_basic_udpv2_mtu", "ss_basic_udpv2_jitter", "ss_basic_udpv2_interval", "ss_basic_udpv2_drop", "ss_basic_udpv2_other", "ss_basic_udp2raw_lserver", "ss_basic_udp2raw_lport", "ss_basic_udp2raw_rserver", "ss_basic_udp2raw_rport", "ss_basic_udp2raw_password", "ss_basic_udp2raw_rawmode", "ss_basic_udp2raw_ciphermode", "ss_basic_udp2raw_authmode", "ss_basic_udp2raw_lowerlevel", "ss_basic_udp2raw_other", "ss_basic_udp_upstream_mtu", "ss_basic_udp_upstream_mtu_value", "ss_reboot_check", "ss_basic_week", "ss_basic_day", "ss_basic_inter_min", "ss_basic_inter_hour", "ss_basic_inter_day", "ss_basic_inter_pre", "ss_basic_time_hour", "ss_basic_time_min", "ss_basic_tri_reboot_time", "ss_basic_server_resolv", "ss_basic_server_resolv_user", "ss_basic_pingm", "ss_basic_wt_furl", "ss_basic_wt_curl", "ss_basic_lt_cru_opts", "ss_basic_lt_cru_time", "ss_basic_hy2_up_speed", "ss_basic_hy2_dl_speed", "ss_basic_hy2_tfo_switch"];
+	var params_input = ["ss_failover_s1", "ss_failover_s2_1", "ss_failover_s2_2", "ss_failover_s3_1", "ss_failover_s3_2", "ss_failover_s4_1", "ss_failover_s4_2", "ss_failover_s4_3", "ss_failover_s5", "ss_basic_interval", "ss_basic_row", "ss_dns_plan", "ss_basic_chng_china_1_prot", "ss_basic_chng_china_1_udp", "ss_basic_chng_china_1_udp_user", "ss_basic_chng_china_1_tcp", "ss_basic_chng_china_1_tcp_user", "ss_basic_chng_china_2_prot", "ss_basic_chng_china_2_udp", "ss_basic_chng_china_2_udp_user", "ss_basic_chng_china_2_tcp", "ss_basic_chng_china_2_tcp_user", "ss_basic_chng_trust_1_opt", "ss_basic_chng_trust_1_opt", "ss_basic_chng_trust_1_opt_udp_val", "ss_basic_chng_trust_1_opt_udp_val_user", "ss_basic_chng_trust_1_opt_tcp_val", "ss_basic_chng_trust_1_opt_tcp_val_user", "ss_basic_chng_trust_2_opt", "ss_basic_chng_trust_2_opt_udp", "ss_basic_chng_trust_2_opt_tcp", "ss_basic_chng_repeat_times", "ss_china_dns", "ss_china_dns_user", "ss_foreign_dns", "ss_dns2socks_user", "ss_sstunnel_user", "ss_direct_user", "ss_basic_kcp_lserver", "ss_basic_kcp_lport", "ss_basic_kcp_server", "ss_basic_kcp_port", "ss_basic_kcp_parameter", "ss_basic_rule_update", "ss_basic_rule_update_time", "ssr_subscribe_mode", "ss_basic_online_links_goss", "ss_basic_node_update", "ss_basic_node_update_day", "ss_basic_node_update_hr", "ss_basic_exclude", "ss_basic_include", "ss_acl_default_port", "ss_acl_default_mode", "ss_basic_kcp_method", "ss_basic_kcp_password", "ss_basic_kcp_mode", "ss_basic_kcp_encrypt", "ss_basic_kcp_mtu", "ss_basic_kcp_sndwnd", "ss_basic_kcp_rcvwnd", "ss_basic_kcp_conn", "ss_basic_kcp_extra", "ss_basic_udp_software", "ss_basic_udp_node", "ss_basic_udpv1_lserver", "ss_basic_udpv1_lport", "ss_basic_udpv1_rserver", "ss_basic_udpv1_rport", "ss_basic_udpv1_password", "ss_basic_udpv1_mode", "ss_basic_udpv1_duplicate_nu", "ss_basic_udpv1_duplicate_time", "ss_basic_udpv1_jitter", "ss_basic_udpv1_report", "ss_basic_udpv1_drop", "ss_basic_udpv2_lserver", "ss_basic_udpv2_lport", "ss_basic_udpv2_rserver", "ss_basic_udpv2_rport", "ss_basic_udpv2_password", "ss_basic_udpv2_fec", "ss_basic_udpv2_timeout", "ss_basic_udpv2_mode", "ss_basic_udpv2_report", "ss_basic_udpv2_mtu", "ss_basic_udpv2_jitter", "ss_basic_udpv2_interval", "ss_basic_udpv2_drop", "ss_basic_udpv2_other", "ss_basic_udp2raw_lserver", "ss_basic_udp2raw_lport", "ss_basic_udp2raw_rserver", "ss_basic_udp2raw_rport", "ss_basic_udp2raw_password", "ss_basic_udp2raw_rawmode", "ss_basic_udp2raw_ciphermode", "ss_basic_udp2raw_authmode", "ss_basic_udp2raw_lowerlevel", "ss_basic_udp2raw_other", "ss_basic_udp_upstream_mtu", "ss_basic_udp_upstream_mtu_value", "ss_reboot_check", "ss_basic_week", "ss_basic_day", "ss_basic_inter_min", "ss_basic_inter_hour", "ss_basic_inter_day", "ss_basic_inter_pre", "ss_basic_time_hour", "ss_basic_time_min", "ss_basic_tri_reboot_time", "ss_basic_server_resolv", "ss_basic_server_resolv_user", "ss_basic_wt_furl", "ss_basic_wt_curl", "ss_basic_lt_cru_opts", "ss_basic_lt_cru_time", "ss_basic_hy2_up_speed", "ss_basic_hy2_dl_speed", "ss_basic_hy2_tfo_switch"];
 	var params_check = ["ss_failover_enable", "ss_failover_c1", "ss_failover_c2", "ss_failover_c3", "ss_adv_sub", "ss_basic_tablet", "ss_basic_noserver", "ss_basic_dragable", "ss_basic_qrcode", "ss_basic_enable", "ss_basic_gfwlist_update", "ss_basic_tfo", "ss_basic_tnd", "ss_basic_score", "ss_basic_vcore", "ss_basic_xguard", "ss_basic_kcp_on", "ss_basic_udp_on", "ss_basic_tjai", "ss_basic_nonetcheck", "ss_basic_notimecheck", "ss_basic_nochnipcheck", "ss_basic_nofrnipcheck", "ss_basic_noruncheck", "ss_basic_nofdnscheck", "ss_basic_nocdnscheck", "ss_basic_olddns", "ss_basic_advdns", "ss_basic_chnroute_update", "ss_basic_cdn_update", "ss_basic_kcp_nocomp", "ss_basic_udp_boost_enable", "ss_basic_udpv1_disable_filter", "ss_basic_udpv2_disableobscure", "ss_basic_udpv2_disablechecksum", "ss_basic_udp2raw_boost_enable", "ss_basic_udp2raw_a", "ss_basic_udp2raw_keeprule", "ss_basic_dns_hijack", "ss_basic_chng_no_ipv6", "ss_basic_chng_act", "ss_basic_chng_gt", "ss_basic_chng_mc", "ss_basic_mcore", "ss_basic_chng_china_1_enable", "ss_basic_chng_china_2_enable", "ss_basic_chng_china_1_ecs", "ss_basic_chng_trust_1_enable", "ss_basic_chng_trust_2_enable", "ss_basic_chng_china_2_ecs", "ss_basic_chng_trust_1_ecs", "ss_basic_chng_trust_2_ecs", "ss_basic_proxy_newb", "ss_basic_udpoff", "ss_basic_udpall", "ss_basic_udpgpt"];
 	var params_base64 = ["ss_dnsmasq", "ss_wan_white_ip", "ss_wan_white_domain", "ss_wan_black_ip", "ss_wan_black_domain", "ss_online_links", "ss_basic_custom"];
 	var params_no_store = ["ss_base64_links"];
@@ -2362,7 +2362,7 @@ function remove_conf_table(o) {
 	//console.log("删除第", id, "个节点！！！")
 	var dbus_tmp = {};
 	var perf = "ssconf_basic_"
-	var temp = ["name", "server", "server_ip", "mode", "port", "password", "method", "rss_protocol", "rss_protocol_param", "rss_obfs", "rss_obfs_param", "use_kcp", "ss_obfs", "ss_obfs_host", "use_lb", "ping", "lbmode", "weight", "group", "v2ray_uuid", "v2ray_alterid", "v2ray_security", "v2ray_network", "v2ray_headtype_tcp", "v2ray_headtype_kcp", "v2ray_kcp_seed", "v2ray_headtype_quic", "v2ray_grpc_mode", "v2ray_network_path", "v2ray_network_host", "v2ray_network_security", "v2ray_network_security_ai", "v2ray_network_security_alpn_h2", "v2ray_network_security_alpn_http", "v2ray_network_security_sni", "v2ray_mux_concurrency", "v2ray_json", "v2ray_use_json", "v2ray_mux_enable", "xray_uuid", "xray_alterid", "xray_prot", "xray_encryption", "xray_flow", "xray_network", "xray_headtype_tcp", "xray_headtype_kcp", "xray_headtype_quic", "xray_grpc_mode", "xray_network_path", "xray_network_host", "xray_network_security", "xray_network_security_ai", "xray_network_security_alpn_h2", "xray_network_security_alpn_http", "xray_network_security_sni", "xray_fingerprint", "xray_publickey", "xray_shortid", "xray_spiderx", "xray_show", "xray_json", "tuic_json", "xray_use_json", "type", "trojan_ai", "trojan_uuid", "trojan_sni", "trojan_tfo", "naive_prot", "naive_server", "naive_port", "naive_user", "naive_pass", "hy2_server", "hy2_port", "hy2_pass", "hy2_up", "hy2_dl", "hy2_obfs", "hy2_obfs_pass", "hy2_sni", "hy2_ai", "hy2_tfo"];
+	var temp = ["name", "server", "server_ip", "mode", "port", "password", "method", "rss_protocol", "rss_protocol_param", "rss_obfs", "rss_obfs_param", "use_kcp", "ss_obfs", "ss_obfs_host", "use_lb", "latency", "lbmode", "weight", "group", "v2ray_uuid", "v2ray_alterid", "v2ray_security", "v2ray_network", "v2ray_headtype_tcp", "v2ray_headtype_kcp", "v2ray_kcp_seed", "v2ray_headtype_quic", "v2ray_grpc_mode", "v2ray_network_path", "v2ray_network_host", "v2ray_network_security", "v2ray_network_security_ai", "v2ray_network_security_alpn_h2", "v2ray_network_security_alpn_http", "v2ray_network_security_sni", "v2ray_mux_concurrency", "v2ray_json", "v2ray_use_json", "v2ray_mux_enable", "xray_uuid", "xray_alterid", "xray_prot", "xray_encryption", "xray_flow", "xray_network", "xray_headtype_tcp", "xray_headtype_kcp", "xray_headtype_quic", "xray_grpc_mode", "xray_network_path", "xray_network_host", "xray_network_security", "xray_network_security_ai", "xray_network_security_alpn_h2", "xray_network_security_alpn_http", "xray_network_security_sni", "xray_fingerprint", "xray_publickey", "xray_shortid", "xray_spiderx", "xray_show", "xray_json", "tuic_json", "xray_use_json", "type", "trojan_ai", "trojan_uuid", "trojan_sni", "trojan_tfo", "naive_prot", "naive_server", "naive_port", "naive_user", "naive_pass", "hy2_server", "hy2_port", "hy2_pass", "hy2_up", "hy2_dl", "hy2_obfs", "hy2_obfs_pass", "hy2_sni", "hy2_ai", "hy2_tfo"];
 	var new_nodes = ss_nodes.concat()
 	new_nodes.splice(new_nodes.indexOf(id), 1);
 	//first: mark all node from ss_nodes data as empty
@@ -3009,7 +3009,7 @@ function refresh_html() {
 
 	// define col width in different situation
 	var noserver = parseInt(E("ss_basic_noserver").checked ? "1":"0");
-	if(node_nu && db_ss["ss_basic_latency_opt"] != "0"){
+	if(node_nu && db_ss["ss_basic_latency_val"] != "0"){
 		//开启延迟测试
 		if(noserver == "1"){
 			//关闭server
@@ -3039,10 +3039,7 @@ function refresh_html() {
 		html += '<th style="width:' + width[3] + ';cursor:pointer" onclick="hide_server();" title="点我隐藏服务器信息!" >服务器地址</th>'
 	}
 	html += '<th style="width:' + width[4] + ';">类型</th>'
-	if(node_nu && db_ss["ss_basic_latency_opt"] == "1"){
-		html += '<th style="width:' + width[5] + ';" id="depay_th">ping/丢包</th>'
-	}
-	if(node_nu && db_ss["ss_basic_latency_opt"] == "2"){
+	if(node_nu && db_ss["ss_basic_latency_val"] == "2"){
 		html += '<th style="width:' + width[5] + ';" id="depay_th">web落地延迟</th>'
 	}
 	html += '<th style="width:' + width[6] + ';">编辑</th>'
@@ -3151,8 +3148,8 @@ function refresh_html() {
 				break;														//fancyss-full
 		}
 		html +='</td>';
-		//ping/丢包
-		if(node_nu && (db_ss["ss_basic_latency_opt"] == "1" || db_ss["ss_basic_latency_opt"] == "2")){
+		//webtest
+		if(node_nu && db_ss["ss_basic_latency_val"] == "2"){
 			html += '<td style="width:' + width[5] + ';" id="ss_node_lt_' + c["node"] + '" class="latency"></td>';
 		}
 		//节点编辑
@@ -3173,8 +3170,7 @@ function refresh_html() {
 	if(node_nu){
 		html += '<input class="button_gen" id="dropdownbtn" type="button" value="延迟测试">'
 		html += '<div class="dropdown" id="dropdown">'
-		html += '<a onclick="test_latency_now(1)" href="javascript:void(0);"></lable>开始 ping 延迟测试<lable id="ss_ping_pts_show"></lable></a>'
-		html += '<a onclick="test_latency_now(2)" href="javascript:void(0);"></lable>开始 web 延迟测试<lable id="ss_ping_wts_show"></lable></a>'
+		html += '<a onclick="test_latency_now(2)" href="javascript:void(0);"></lable>开始 web 延迟测试<lable id="ss_wts_show"></lable></a>'
 		html += '<a onclick="test_latency_now(0)" href="javascript:void(0);"></lable>关闭延迟测试功能</a>'
 		html += '<a onclick="open_latency_sett()" href="javascript:void(0);"></lable>设置</a>'
 		html += '</div>'
@@ -3194,9 +3190,9 @@ function refresh_html() {
 		save_new_order();
 		//ss_node_sel();
 	}
-	// ask or not ask for ping
-	if(db_ss["ss_basic_latency_opt"]){
-		latency_test(db_ss["ss_basic_latency_opt"]);
+	// ask or not ask for webtest
+	if(db_ss["ss_basic_latency_val"]){
+		latency_test(db_ss["ss_basic_latency_val"]);
 	}
 	// select default node
 	select_default_node(2);
@@ -3275,7 +3271,7 @@ function save_new_order(){
 	var tr = table.getElementsByTagName("tr");
 	var dbus_tmp = {};
 	var perf = "ssconf_basic_"
-	var temp = ["name", "server", "server_ip", "mode", "port", "password", "method", "rss_protocol", "rss_protocol_param", "rss_obfs", "rss_obfs_param", "use_kcp", "ss_obfs", "ss_obfs_host", "use_lb", "ping", "lbmode", "weight", "group", "v2ray_uuid", "v2ray_alterid", "v2ray_security", "v2ray_network", "v2ray_headtype_tcp", "v2ray_headtype_kcp", "v2ray_kcp_seed", "v2ray_headtype_quic", "v2ray_grpc_mode", "v2ray_network_path", "v2ray_network_host", "v2ray_network_security", "v2ray_network_security_ai", "v2ray_network_security_alpn_h2", "v2ray_network_security_alpn_http", "v2ray_network_security_sni", "v2ray_mux_concurrency", "v2ray_json", "v2ray_use_json", "v2ray_mux_enable", "xray_uuid", "xray_alterid", "xray_prot", "xray_encryption", "xray_flow", "xray_network", "xray_headtype_tcp", "xray_headtype_kcp", "xray_headtype_quic", "xray_grpc_mode", "xray_network_path", "xray_network_host", "xray_network_security", "xray_network_security_ai", "xray_network_security_alpn_h2", "xray_network_security_alpn_http", "xray_network_security_sni", "xray_fingerprint", "xray_publickey", "xray_shortid", "xray_spiderx","xray_show", "xray_json", "tuic_json", "xray_use_json", "type", "trojan_ai", "trojan_uuid", "trojan_sni", "trojan_tfo", "naive_prot", "naive_server", "naive_port", "naive_user", "naive_pass", "hy2_server", "hy2_port", "hy2_up", "hy2_dl", "hy2_obfs", "hy2_obfs_pass", "hy2_pass", "hy2_sni", "hy2_ai", "hy2_tfo"];
+	var temp = ["name", "server", "server_ip", "mode", "port", "password", "method", "rss_protocol", "rss_protocol_param", "rss_obfs", "rss_obfs_param", "use_kcp", "ss_obfs", "ss_obfs_host", "use_lb", "latency", "lbmode", "weight", "group", "v2ray_uuid", "v2ray_alterid", "v2ray_security", "v2ray_network", "v2ray_headtype_tcp", "v2ray_headtype_kcp", "v2ray_kcp_seed", "v2ray_headtype_quic", "v2ray_grpc_mode", "v2ray_network_path", "v2ray_network_host", "v2ray_network_security", "v2ray_network_security_ai", "v2ray_network_security_alpn_h2", "v2ray_network_security_alpn_http", "v2ray_network_security_sni", "v2ray_mux_concurrency", "v2ray_json", "v2ray_use_json", "v2ray_mux_enable", "xray_uuid", "xray_alterid", "xray_prot", "xray_encryption", "xray_flow", "xray_network", "xray_headtype_tcp", "xray_headtype_kcp", "xray_headtype_quic", "xray_grpc_mode", "xray_network_path", "xray_network_host", "xray_network_security", "xray_network_security_ai", "xray_network_security_alpn_h2", "xray_network_security_alpn_http", "xray_network_security_sni", "xray_fingerprint", "xray_publickey", "xray_shortid", "xray_spiderx","xray_show", "xray_json", "tuic_json", "xray_use_json", "type", "trojan_ai", "trojan_uuid", "trojan_sni", "trojan_tfo", "naive_prot", "naive_server", "naive_port", "naive_user", "naive_pass", "hy2_server", "hy2_port", "hy2_up", "hy2_dl", "hy2_obfs", "hy2_obfs_pass", "hy2_pass", "hy2_sni", "hy2_ai", "hy2_tfo"];
 	//first: mark all node from ss_nodes data as empty
 	for (var i = 0; i < tr.length; i++) {
 		var rowid = tr[i].getAttribute("id").split("_")[1];
@@ -3343,7 +3339,7 @@ function reorder_trs(){
 		//类型
 		$('#ss_node_list_table tr:nth-child(' + new_nu + ') td:nth-child(4)').attr("id", "server_" + new_nu);
 		if($('#ss_node_list_table tr:nth-child(' + new_nu + ') td:nth-child(5)').attr("id") != undefined){
-			//ping/丢包
+			//webtest
 			$('#ss_node_list_table tr:nth-child(' + new_nu + ') td:nth-child(5)').attr("id", "ss_node_lt_" + new_nu);
 			//编辑节点
 			$('#ss_node_list_table tr:nth-child(' + new_nu + ') td:nth-child(6) input:nth-child(1)').attr("id", "dd_node_" + new_nu);
@@ -3557,7 +3553,6 @@ function leav_test_sett() {
 function save_latency_sett(){
 	var dbus_post = {};
 	var post_para = 0;
-	dbus_post["ss_basic_pingm"] = E("ss_basic_pingm").value;
 	dbus_post["ss_basic_wt_furl"] = E("ss_basic_wt_furl").value;
 	dbus_post["ss_basic_wt_curl"] = E("ss_basic_wt_curl").value;
 	dbus_post["ss_basic_lt_cru_opts"] = E("ss_basic_lt_cru_opts").value;
@@ -3574,7 +3569,7 @@ function save_latency_sett(){
 		//console.log(post_dbus);
 		//now post
 		var id = parseInt(Math.random() * 100000000);
-		var postData = {"id": id, "method": "ss_ping.sh", "params":[post_para], "fields": post_dbus};
+		var postData = {"id": id, "method": "ss_webtest.sh", "params":[post_para], "fields": post_dbus};
 		$.ajax({
 			type: "POST",
 			cache:false,
@@ -3594,17 +3589,15 @@ function save_latency_sett(){
 }
 function test_latency_now(test_flag) {
 	var dbus_post = {};
-	dbus_post["ss_basic_latency_opt"] = test_flag;
+	dbus_post["ss_basic_latency_val"] = test_flag;
 	if(test_flag == 0){
 		var post_para = "close_latency_test";
-	}else if(test_flag == 1){
-		var post_para = "manual_ping";
 	}else if(test_flag == 2){
 		var post_para = "manual_webtest";
 	}
 	//now post
 	var id = parseInt(Math.random() * 100000000);
-	var postData = {"id": id, "method": "ss_ping.sh", "params":[post_para], "fields": dbus_post};
+	var postData = {"id": id, "method": "ss_webtest.sh", "params":[post_para], "fields": dbus_post};
 	$.ajax({
 		type: "POST",
 		cache:false,
@@ -3617,12 +3610,8 @@ function test_latency_now(test_flag) {
 				refresh_table();
 				if(test_flag == 0){
 					close_latency_flag=1;
-					$("#ss_ping_pts_show").html("");
-					$("#ss_ping_wts_show").html("");
+					$("#ss_wts_show").html("");
 					$("#dropdown").width(150);
-				}
-				if(test_flag == "1"){
-					$(".latency").html("waiting...");
 				}
 				if(test_flag == "2"){
 					$(".latency").html("waiting...");
@@ -3635,15 +3624,12 @@ function latency_test(action) {
 	if(action == "0") return;
 	//console.log("start latency test")
 	
-	if(action == "1"){
-		var bash_para = "web_ping";
-	}
 	if(action == "2"){
 		var bash_para = "web_webtest";
 	}
 	//now post
 	var id = parseInt(Math.random() * 100000000);
-	var postData = {"id": id, "method": "ss_ping.sh", "params":[bash_para], "fields": ""};
+	var postData = {"id": id, "method": "ss_webtest.sh", "params":[bash_para], "fields": ""};
 	$.ajax({
 		type: "POST",
 		async: true,
@@ -3653,11 +3639,7 @@ function latency_test(action) {
 		dataType: "json",
 		success: function(response) {
 			//console.log(response.result)
-			if(db_ss["ss_basic_latency_opt"] == "1"){
-				$(".latency").html("waiting...");
-			}else if(db_ss["ss_basic_latency_opt"] == "2"){
-				$(".latency").html("waiting...");
-			}
+			$(".latency").html("waiting...");
 			get_latency_data(action);
 		},
 		error: function(XmlHttpRequest, textStatus, errorThrown){
@@ -3668,128 +3650,47 @@ function latency_test(action) {
 }
 function get_latency_data(action){
 	if(close_latency_flag == 1) return false;
-	if(action == "1"){
-		var URL = '/_temp/ping.txt'
-	}else if(action == "2"){
-		var URL = '/_temp/webtest.txt'
-	}
+	var URL = '/_temp/webtest.txt'
 	$.ajax({
 		url: URL,
 		type: 'GET',
 		cache:false,
 		dataType: 'text',
 		success: function(res) {
-			if(action == "1"){
-				// getting ping results
-				const lines = res.split('\n');
-				const array = [];
-				lines.forEach(line => {
-					const parts = line.split('>').map(part => part.trim());
-					const item = [parts[0], parts[1], parts[2]];
-					array.push(item);
-				});
-				write_ping(array);
-				const hasStop = array.some(subArray => subArray.includes('stop'));
-				if(hasStop){
-					//console.log("stop getting ping result!");
-					$.ajax({
-						type: "GET",
-						url: "/_api/ss_basic_ping_ts",
-						dataType: "json",
-						async: false,
-						success: function(data) {
-							db_get = data.result[0];
-							if(db_get["ss_basic_ping_ts"]){
-								$("#ss_ping_pts_show").html("<em>【上次完成时间: " + db_get["ss_basic_ping_ts"] + "】</em>")
-								$("#dropdown").width(370);
-							}
+			// getting webtest results
+			const lines = res.split('\n');
+			const array = [];
+			lines.forEach(line => {
+				const parts = line.split('>').map(part => part.trim());
+				const item = [parts[0], parts[1]];
+				array.push(item);
+			});
+			write_webtest(array);
+			const hasStop = array.some(subArray => subArray.includes('stop'));
+			if(hasStop){
+				//console.log("stop getting webtest result!");
+				$.ajax({
+					type: "GET",
+					url: "/_api/ss_basic_webtest_ts",
+					dataType: "json",
+					async: false,
+					success: function(data) {
+						db_get = data.result[0];
+						if(db_get["ss_basic_webtest_ts"]){
+							$("#ss_wts_show").html("<em>【上次完成时间: " + db_get["ss_basic_webtest_ts"] + "】</em>")
+							$("#dropdown").width(370);
 						}
-					});
-				}else{
-					//console.log("getting ping result...");
-					setTimeout("get_latency_data(1);", 1000);
-				}
-			}else if(action == "2"){
-				// getting webtest results
-				const lines = res.split('\n');
-				const array = [];
-				lines.forEach(line => {
-					const parts = line.split('>').map(part => part.trim());
-					const item = [parts[0], parts[1]];
-					array.push(item);
+					}
 				});
-				write_webtest(array);
-				const hasStop = array.some(subArray => subArray.includes('stop'));
-				if(hasStop){
-					//console.log("stop getting webtest result!");
-					$.ajax({
-						type: "GET",
-						url: "/_api/ss_basic_webtest_ts",
-						dataType: "json",
-						async: false,
-						success: function(data) {
-							db_get = data.result[0];
-							if(db_get["ss_basic_webtest_ts"]){
-								$("#ss_ping_wts_show").html("<em>【上次完成时间: " + db_get["ss_basic_webtest_ts"] + "】</em>")
-								$("#dropdown").width(370);
-							}
-						}
-					});
-				}else{
-					//console.log("getting webtest result...");
-					setTimeout("get_latency_data(2);", 1000);
-				}
+			}else{
+				//console.log("getting webtest result...");
+				setTimeout("get_latency_data(2);", 1000);
 			}
 		},
 		error: function(XmlHttpRequest, textStatus, errorThrown){
 			setTimeout("get_latency_data(" + action + ");", 1000);
 		},
 	});
-}
-function write_ping(ps){
-	for(var i = 0; i<ps.length; i++){
-		var nu = ps[i][0];
-		var ping = parseFloat(ps[i][1]);
-		if (nu == "stop"){
-			console.log("stop flag detected!")
-			continue;
-		}
-		var loss = ps[i][2];
-		if (!ping){
-			if(E("ss_basic_pingm").value == 1){
-				test_result = '<font color="#FF0000">failed</font>';
-			}else{
-				if(loss == ""){
-					test_result = '<font color="#FF0000">failed</font>';
-				}else{
-					test_result = '<font color="#FF0000">failed/' + loss + '</font>';
-				}
-			}
-		}else{
-			if(E("ss_basic_pingm").value == 1){
-				$('#depay_th').html("ping");
-				if (ping <= 50){
-					test_result = '<font color="#1bbf35">' + ping.toPrecision(3) +'ms</font>';
-				}else if (ping > 50 && ping <= 100) {
-					test_result = '<font color="#3399FF">' + ping.toPrecision(3) +'ms</font>';
-				}else{
-					test_result = '<font color="#f36c21">' + ping.toPrecision(3) +'ms</font>';
-				}
-			}else{
-				$('#depay_th').html("ping/丢包");
-				if (ping <= 50){
-					test_result = '<font color="#1bbf35">' + ping.toPrecision(3) +'ms/' + loss + '</font>';
-				}else if (ping > 50 && ping <= 100) {
-					test_result = '<font color="#3399FF">' + ping.toPrecision(3) +'ms/' + loss + '</font>';
-				}else{
-					test_result = '<font color="#f36c21">' + ping.toPrecision(3) +'ms/' + loss + '</font>';
-				}
-			}
-		}		
-		if($('#ss_node_lt_' + nu)){
-			$('#ss_node_lt_' + nu).html(test_result);
-		}
-	}
 }
 function write_webtest(ps){
 	for(var i = 0; i<ps.length; i++){
@@ -4269,9 +4170,9 @@ function change_select_width(o, p) {
 }
 
 function get_ss_status() {
+	E("ss_state2").innerHTML = "国外连接 - " + "Waiting...";
+	E("ss_state3").innerHTML = "国内连接 - " + "Waiting...";
 	if (db_ss['ss_basic_enable'] != "1") {
-		E("ss_state2").innerHTML = "国外连接 - " + "Waiting...";
-		E("ss_state3").innerHTML = "国内连接 - " + "Waiting...";
 		return false;
 	}
 
@@ -5414,7 +5315,6 @@ function save_failover() {
 					<div id="latency_test_settings_div">
 						<table id="table_test" style="margin:-1px 0px 0px 0px;" width="100%" border="1" align="center" cellpadding="4" cellspacing="0" class="FormTable">
 							<script type="text/javascript">
-								var pingm = [["1", "1次/节点"], ["2", "5次/节点"], ["3", "10次/节点"], ["4", "20次/节点"]];
 								var furl = [
 											  "http://www.google.com/generate_204",
 											  "http://www.gstatic.com/generate_204",
@@ -5441,10 +5341,9 @@ function save_failover() {
 											["0", "关闭定时测试"],
 											["1", "定时测试web延迟"]
 										   ]
-								var lt_time = [["15", "每隔15分钟"], ["20", "每隔20分钟"], ["25", "每隔25分钟"], ["30", "每隔30分钟"]];
+								var lt_time = [["15", "每隔15分钟"], ["20", "每隔20分钟"], ["30", "每隔30分钟"], ["60", "每隔60分钟"]];
 								$('#table_test').forms([
 									{ title: '延迟测试设置', thead:'1'},
-									{ title: 'ping延迟测试次数', id:'ss_basic_pingm', type:'select', style:'width:auto', options:pingm, value:''},
 									{ title: '<a onmouseover="mOver(this, 147)" onmouseout="mOut(this)" class="hintstyle" href="javascript:void(0);">web延迟测试域名 - 国外</a>', id:'ss_basic_wt_furl', type:'select', style:'width:auto', options:furl, value:''},
 									{ title: '<a onmouseover="mOver(this, 148)" onmouseout="mOut(this)" class="hintstyle" href="javascript:void(0);">web延迟测试域名 - 国内</a>', id:'ss_basic_wt_curl', type:'select', style:'width:auto', options:curl, value:''},
 									{ title: '定时测试节点延迟', multi: [
@@ -5458,7 +5357,6 @@ function save_failover() {
 				</td>
 			</tr>
 		</table>
-		<span style="margin-left:30px">【ping延迟测试】和【web延迟测试】在节点列表里只能展示一个，关于两者的优缺点请见<a onmouseover="mOver(this, 146)" onmouseout="mOut(this)" class="hintstyle" href="javascript:void(0);"><font color="#ffcc00">[详细说明]</font></a>。<br/></span>
 		<span style="margin-left:30px">【web延迟测试】中设置的国外域名，同样会用于插件顶部[插件运行状态]中的国外链接延迟测试</span>
 		<div style="padding-top:10px;padding-bottom:10px;width:100%;text-align:center;">
 			<input id="save_latency_sett" class="button_gen" type="button" onclick="save_latency_sett();" value="保存">
@@ -6650,7 +6548,6 @@ function save_failover() {
 															option_rebm.push(_tmp);
 														}
 														var option_trit = [["0", "关闭"], ["2", "每隔2分钟"], ["5", "每隔5分钟"], ["10", "每隔10分钟"], ["15", "每隔15分钟"], ["20", "每隔20分钟"], ["25", "每隔25分钟"], ["30", "每隔30分钟"]];
-														var pingm = [["1", "1次/节点"], ["2", "5次/节点"], ["3", "10次/节点"], ["4", "20次/节点"]];
 														var weburl = ["developer.google.cn/generate_204", "connectivitycheck.gstatic.com/generate_204", "www.gstatic.com/generate_204"];
 														$('#table_addons').forms([{ td: '<tr><td class="smth" style="font-weight: bold;" colspan="2">规则测试</td></tr>'},{ title: '&nbsp;&nbsp;&nbsp;&nbsp;输入检测域名', hint:'122', multi: [{ suffix:'<input id="check_rule_value" type="text" class="input_ss_table" style="width:140px;" placeholder="example.com">'},{ suffix:'&nbsp;<input type="button" class="ss_btn" style="cursor:pointer;" onclick="check_rule();" value="检测">'}]},
 															{ td: '<tr><td class="smth" style="font-weight: bold;" colspan="2">备份/恢复</td></tr>'},

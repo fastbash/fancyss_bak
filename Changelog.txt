@@ -1,6 +1,10 @@
 fancyss Changelog
 ===========================================
 custom:
+3.3.8
+   -
+3.3.7
+   - fix 订阅任务日志显示 星期0 改为 每天
 3.3.6
    - fix	在规则更新时当所有规则文件不存在时的判断ss_rule_update.sh:27
    - fix	生成域名白名单时的重复内容
@@ -8,6 +12,18 @@ custom:
    - fix	订阅时每天的设定和星期天冲突
 
 ===========================================
+
+3.3.7 (20250226)
+   - add	新增华硕GS7(ROG魔盒)、ZenWiFi_BT8P(灵耀魔方Pro WiFi7)机型支持(mtk7988D)，使用fancyss_mtk_full/lite
+   - add	新增华硕ZenWiFi_BD4机型支持(ipq5322，内核32位)，由于jffs过小，建议安装fancyss_ipq32_lite
+   - add	新增华硕TUF-BE6500机型支持(ipq5322，内核64位)，建议安装fancyss_ipq32_full/lite
+   - fix	修复状态检测时：有时状态显示X，但实际代理可用的问题
+   - fix	修复节点实际可用，但是插件在做国外出口检测时却检测到不可用的问题
+   - fix	修复部分协议节点下，可信dns选择udp协议，插件启动后无法检测国外出口的问题
+   - update	更新shadowsocks-rust二进制: v1.22.0
+   - update	同步最新规则
+   - update	在非aarch64机型上，默认不开启webtest（落地延迟检测），因为该检测要求较多性能
+   - remove	由于icmp ping协议检测不具有实际意义，完全移除icmp ping检测
 
 3.3.6 (20250114)
    - update	因上游不再更新，移除shadowsocks-libev二进制及相关功能，现在full版ss协议默认由shadowsocks-rust运行，lite版ss协议由xray运行
