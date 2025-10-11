@@ -239,129 +239,137 @@ GET_PROG_STAT(){
 	echo "--------------------------------------------------------------------------------------------------------"
 	echo "程序		状态		作用		PID"
 
-	# proxy core program
-	if [ "${ss_basic_type}" == "0" ]; then
-		# ss
-		if [ "${ss_basic_score}" != "1" ]; then
-			local SS_RUST=$(ps | grep "sslocal" | grep "3333" | awk '{print $1}')
-			if [ -n "${SS_RUST}" ]; then
-				echo "sslocal		运行中🟢		透明代理		${SS_RUST}"
-			else
-				echo "sslocal	未运行🔴		透明代理"
-			fi
-		else
-			local XRAY=$(pidof xray)
-			if [ -n "${XRAY}" ];then
-				local xray_time=$(perpls|grep xray|grep -Eo "uptime.+-s\ " | awk -F" |:|/" '{print $3}')
-				if [ -n "${xray_time}" ];then
-					echo "Xray		运行中🟢		透明代理		${XRAY}	工作时长: ${xray_time}"
-				else
-					echo "Xray		运行中🟢		透明代理		${XRAY}"
-				fi
-			else
-				echo "Xray	未运行🔴"
-			fi
-		fi
-
-		local OBFS_SWITCH=$(dbus get ssconf_basic_ss_obfs_${ssconf_basic_node})
-		if [ -n "${OBFS_SWITCH}" -a "${OBFS_SWITCH}" != "0" ]; then
-			local SIMPLEOBFS=$(pidof obfs-local)
-			if [ -n "${SIMPLEOBFS}" ]; then
-				echo "obfs-local	运行中🟢		混淆插件		${SIMPLEOBFS}"
-			else
-				echo "obfs-local	未运行🔴		混淆插件"
-			fi
-		fi
-		
-		local V2PL_SWITCH=$(dbus get ssconf_basic_ss_v2ray_${ssconf_basic_node})
-		if [ -n "${V2PL_SWITCH}" -a "${V2PL_SWITCH}" != "0" ]; then
-			local SS_V2RAY=$(pidof v2ray-plugin)
-			if [ -n "${SS_V2RAY}" ]; then
-				echo "v2ray-plugin	运行中🟢		混淆插件		${SS_V2RAY}"
-			else
-				echo "v2ray-plugin	未运行🔴		混淆插件"
-			fi
-		fi
-	elif [ "${ss_basic_type}" == "1" ]; then
-		# ssr
-		local SSR_REDIR=$(pidof rss-redir)
-		if [ -n "${SSR_REDIR}" ];then
-			echo "ssr-redir	运行中🟢		透明代理		${SSR_REDIR}"
-		else
-			echo "ssr-redir	未运行🔴		透明代理"
-		fi
-	elif [ "${ss_basic_type}" == "3" ]; then
-		# v2ray
-		if [ "${ss_basic_vcore}" == "1" ];then
-			local XRAY=$(pidof xray)
-			if [ -n "${XRAY}" ];then
-				local xray_time=$(perpls|grep xray|grep -Eo "uptime.+-s\ " | awk -F" |:|/" '{print $3}')
-				if [ -n "${xray_time}" ];then
-					echo "Xray		运行中🟢		透明代理		${XRAY}	工作时长: ${xray_time}"
-				else
-					echo "Xray		运行中🟢		透明代理		${XRAY}"
-				fi
-			else
-				echo "Xray	未运行🔴"
-			fi
-		else
-			local V2RAY=$(pidof v2ray)
-			if [ -n "${V2RAY}" ]; then
-				echo "v2ray		运行中🟢		透明代理		${V2RAY}"
-			else
-				echo "v2ray		未运行🔴		透明代理"
-			fi
-		fi
-	elif [ "${ss_basic_type}" == "4" -o "${ss_basic_type}" == "5" ]; then
-		# xray
-		local XRAY=$(pidof xray)
-		if [ -n "${XRAY}" ];then
-			local xray_time=$(perpls|grep xray|grep -Eo "uptime.+-s\ " | awk -F" |:|/" '{print $3}')
-			if [ -n "${xray_time}" ];then
-				echo "Xray		运行中🟢		透明代理		${XRAY}	工作时长: ${xray_time}"
-			else
-				echo "Xray		运行中🟢		透明代理		${XRAY}"
-			fi
-		else
-			echo "Xray	未运行🔴		透明代理"
-		fi
-	elif [ "${ss_basic_type}" == "6" ]; then
-		# naive
-		local NAIVE=$(pidof naive)
-		if [ -n "${NAIVE}" ]; then
-			echo "naive		运行中🟢		socks5		${NAIVE}"
-		else
-			echo "naive		未运行🔴		socks5"
-		fi
-		local IPT2SOCKS=$(pidof ipt2socks)
-		if [ -n "${IPT2SOCKS}" ]; then
-			echo "ipt2socks	运行中🟢		透明代理		${IPT2SOCKS}"
-		else
-			echo "ipt2socks	未运行🔴		透明代理"
-		fi
-	elif [ "${ss_basic_type}" == "7" ]; then
-		# tuic
-		local TUIC=$(pidof tuic-client)
-		if [ -n "${TUIC}" ]; then
-			echo "tuic-client	运行中🟢		socks5		${TUIC}"
-		else
-			echo "tuic-client	未运行🔴		socks5"
-		fi
-		local IPT2SOCKS=$(pidof ipt2socks)
-		if [ -n "${IPT2SOCKS}" ]; then
-			echo "ipt2socks	运行中🟢		透明代理		${IPT2SOCKS}"
-		else
-			echo "ipt2socks	未运行🔴		透明代理"
-		fi
-	elif [ "${ss_basic_type}" == "8" ]; then
-		# tuic
-		local HY2=$(pidof hysteria2)
-		if [ -n "${HY2}" ]; then
-			echo "hysteria2	运行中🟢		透明代理		${HY2}"
-		else
-			echo "hysteria2	未运行🔴		透明代理"
-		fi
+	clash_proccess=$(ps | grep "ss" | grep clash.yaml | grep "3333" | awk '{print $1}')
+	if [ -n "${SS_RUST}" ]; then
+		echo "clash		运行中🟢		透明代理		${SS_RUST}"
+	else
+		echo "clash	未运行🔴		透明代理"
 	fi
+
+	# proxy core program
+	### prepare to delete
+	# if [ "${ss_basic_type}" == "0" ]; then
+	# 	# ss
+	# 	if [ "${ss_basic_score}" != "1" ]; then
+	# 		local SS_RUST=$(ps | grep "sslocal" | grep "3333" | awk '{print $1}')
+	# 		if [ -n "${SS_RUST}" ]; then
+	# 			echo "sslocal		运行中🟢		透明代理		${SS_RUST}"
+	# 		else
+	# 			echo "sslocal	未运行🔴		透明代理"
+	# 		fi
+	# 	else
+	# 		local XRAY=$(pidof xray)
+	# 		if [ -n "${XRAY}" ];then
+	# 			local xray_time=$(perpls|grep xray|grep -Eo "uptime.+-s\ " | awk -F" |:|/" '{print $3}')
+	# 			if [ -n "${xray_time}" ];then
+	# 				echo "Xray		运行中🟢		透明代理		${XRAY}	工作时长: ${xray_time}"
+	# 			else
+	# 				echo "Xray		运行中🟢		透明代理		${XRAY}"
+	# 			fi
+	# 		else
+	# 			echo "Xray	未运行🔴"
+	# 		fi
+	# 	fi
+
+	# 	local OBFS_SWITCH=$(dbus get ssconf_basic_ss_obfs_${ssconf_basic_node})
+	# 	if [ -n "${OBFS_SWITCH}" -a "${OBFS_SWITCH}" != "0" ]; then
+	# 		local SIMPLEOBFS=$(pidof obfs-local)
+	# 		if [ -n "${SIMPLEOBFS}" ]; then
+	# 			echo "obfs-local	运行中🟢		混淆插件		${SIMPLEOBFS}"
+	# 		else
+	# 			echo "obfs-local	未运行🔴		混淆插件"
+	# 		fi
+	# 	fi
+		
+	# 	local V2PL_SWITCH=$(dbus get ssconf_basic_ss_v2ray_${ssconf_basic_node})
+	# 	if [ -n "${V2PL_SWITCH}" -a "${V2PL_SWITCH}" != "0" ]; then
+	# 		local SS_V2RAY=$(pidof v2ray-plugin)
+	# 		if [ -n "${SS_V2RAY}" ]; then
+	# 			echo "v2ray-plugin	运行中🟢		混淆插件		${SS_V2RAY}"
+	# 		else
+	# 			echo "v2ray-plugin	未运行🔴		混淆插件"
+	# 		fi
+	# 	fi
+	# elif [ "${ss_basic_type}" == "1" ]; then
+	# 	# ssr
+	# 	local SSR_REDIR=$(pidof rss-redir)
+	# 	if [ -n "${SSR_REDIR}" ];then
+	# 		echo "ssr-redir	运行中🟢		透明代理		${SSR_REDIR}"
+	# 	else
+	# 		echo "ssr-redir	未运行🔴		透明代理"
+	# 	fi
+	# elif [ "${ss_basic_type}" == "3" ]; then
+	# 	# v2ray
+	# 	if [ "${ss_basic_vcore}" == "1" ];then
+	# 		local XRAY=$(pidof xray)
+	# 		if [ -n "${XRAY}" ];then
+	# 			local xray_time=$(perpls|grep xray|grep -Eo "uptime.+-s\ " | awk -F" |:|/" '{print $3}')
+	# 			if [ -n "${xray_time}" ];then
+	# 				echo "Xray		运行中🟢		透明代理		${XRAY}	工作时长: ${xray_time}"
+	# 			else
+	# 				echo "Xray		运行中🟢		透明代理		${XRAY}"
+	# 			fi
+	# 		else
+	# 			echo "Xray	未运行🔴"
+	# 		fi
+	# 	else
+	# 		local V2RAY=$(pidof v2ray)
+	# 		if [ -n "${V2RAY}" ]; then
+	# 			echo "v2ray		运行中🟢		透明代理		${V2RAY}"
+	# 		else
+	# 			echo "v2ray		未运行🔴		透明代理"
+	# 		fi
+	# 	fi
+	# elif [ "${ss_basic_type}" == "4" -o "${ss_basic_type}" == "5" ]; then
+	# 	# xray
+	# 	local XRAY=$(pidof xray)
+	# 	if [ -n "${XRAY}" ];then
+	# 		local xray_time=$(perpls|grep xray|grep -Eo "uptime.+-s\ " | awk -F" |:|/" '{print $3}')
+	# 		if [ -n "${xray_time}" ];then
+	# 			echo "Xray		运行中🟢		透明代理		${XRAY}	工作时长: ${xray_time}"
+	# 		else
+	# 			echo "Xray		运行中🟢		透明代理		${XRAY}"
+	# 		fi
+	# 	else
+	# 		echo "Xray	未运行🔴		透明代理"
+	# 	fi
+	# elif [ "${ss_basic_type}" == "6" ]; then
+	# 	# naive
+	# 	local NAIVE=$(pidof naive)
+	# 	if [ -n "${NAIVE}" ]; then
+	# 		echo "naive		运行中🟢		socks5		${NAIVE}"
+	# 	else
+	# 		echo "naive		未运行🔴		socks5"
+	# 	fi
+	# 	local IPT2SOCKS=$(pidof ipt2socks)
+	# 	if [ -n "${IPT2SOCKS}" ]; then
+	# 		echo "ipt2socks	运行中🟢		透明代理		${IPT2SOCKS}"
+	# 	else
+	# 		echo "ipt2socks	未运行🔴		透明代理"
+	# 	fi
+	# elif [ "${ss_basic_type}" == "7" ]; then
+	# 	# tuic
+	# 	local TUIC=$(pidof tuic-client)
+	# 	if [ -n "${TUIC}" ]; then
+	# 		echo "tuic-client	运行中🟢		socks5		${TUIC}"
+	# 	else
+	# 		echo "tuic-client	未运行🔴		socks5"
+	# 	fi
+	# 	local IPT2SOCKS=$(pidof ipt2socks)
+	# 	if [ -n "${IPT2SOCKS}" ]; then
+	# 		echo "ipt2socks	运行中🟢		透明代理		${IPT2SOCKS}"
+	# 	else
+	# 		echo "ipt2socks	未运行🔴		透明代理"
+	# 	fi
+	# elif [ "${ss_basic_type}" == "8" ]; then
+	# 	# tuic
+	# 	local HY2=$(pidof hysteria2)
+	# 	if [ -n "${HY2}" ]; then
+	# 		echo "hysteria2	运行中🟢		透明代理		${HY2}"
+	# 	else
+	# 		echo "hysteria2	未运行🔴		透明代理"
+	# 	fi
+	# fi
 
 	# DNS program
 	if [ "${ss_basic_advdns}" != "1" ]; then

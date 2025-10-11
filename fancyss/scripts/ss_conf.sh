@@ -27,12 +27,12 @@ backup_tar(){
 	mkdir shadowsocks/webs
 	mkdir shadowsocks/res
 	echo_date "请等待一会儿..."
-	local pkg_name=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_NAME=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
-	local pkg_arch=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_ARCH=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
-	local pkg_type=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_TYPE=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
-	local pkg_exta=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_EXTA=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
-	local pkg_vers=$(dbus get ss_basic_version_local)
-	local _pkg_name=${pkg_name}_${pkg_arch}_${pkg_type}${pkg_exta}
+	pkg_name=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_NAME=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
+	pkg_arch=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_ARCH=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
+	pkg_type=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_TYPE=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
+	pkg_exta=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_EXTA=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
+	pkg_vers=$(dbus get ss_basic_version_local)
+	_pkg_name=${pkg_name}_${pkg_arch}_${pkg_type}${pkg_exta}
 	TARGET_FOLDER=/tmp/shadowsocks
 	cp /koolshare/scripts/ss_install.sh ${TARGET_FOLDER}/install.sh
 	cp /koolshare/scripts/uninstall_shadowsocks.sh ${TARGET_FOLDER}/uninstall.sh
@@ -74,7 +74,7 @@ backup_tar(){
 		cp /koolshare/bin/haveged ${TARGET_FOLDER}/bin/
 		cp /koolshare/bin/ipt2socks ${TARGET_FOLDER}/bin/
 		cp /koolshare/bin/naive ${TARGET_FOLDER}/bin/
-		cp /koolshare/bin/tuic-client ${TARGET_FOLDER}/bin/
+		# cp /koolshare/bin/tuic-client ${TARGET_FOLDER}/bin/
 		cp /koolshare/bin/hysteria2 ${TARGET_FOLDER}/bin/
 	fi
 	cp /koolshare/webs/Module_shadowsocks*.asp ${TARGET_FOLDER}/webs/
@@ -124,7 +124,7 @@ remove_now(){
 
 	# default values
 	eval $(dbus export ss)
-	local PKG_TYPE=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_TYPE=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
+	PKG_TYPE=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_TYPE=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
 	# 3.0.4：国内DNS默认使用运营商DNS
 	[ -z "${ss_china_dns}" ] && dbus set ss_china_dns="1"
 	# 3.0.4 从老版本升级到3.0.4，原部分方案需要切换到进阶方案，因为这些方案已经不存在
@@ -403,7 +403,7 @@ download_ssc(){
 
 restart_dnsmasq(){
 	echo_date "重启dnsmasq..."
-	local OLD_PID=$(pidof dnsmasq)
+	OLD_PID=$(pidof dnsmasq)
 	if [ -n "${OLD_PID}" ];then
 		echo_date "当前dnsmasq正常运行中，pid: ${OLD_PID}，准备重启！"
 	else
@@ -412,8 +412,8 @@ restart_dnsmasq(){
 	
 	service restart_dnsmasq >/dev/null 2>&1
 
-	local DPID
-	local i=50
+	DPID
+	i=50
 	until [ -n "${DPID}" ]; do
 		i=$(($i - 1))
 		DPID=$(pidof dnsmasq)
@@ -430,8 +430,8 @@ download_resv_log(){
 	rm -rf /koolshare/webs/files
 	mkdir -p /tmp/files
 	ln -sf /tmp/files /koolshare/webs/files
-	local FILE_NAME=$(dbus get ss_basic_logname)
-	local TIME_NOW=$(date -R +%Y%m%d_%H%M%S)
+	FILE_NAME=$(dbus get ss_basic_logname)
+	TIME_NOW=$(date -R +%Y%m%d_%H%M%S)
 	cp -rf /tmp/upload/${FILE_NAME}.txt /tmp/files/${FILE_NAME}.txt
 }
 

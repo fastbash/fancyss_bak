@@ -17,8 +17,8 @@ run_bg(){
 }
 
 get_model(){
-	local ODMPID=$(nvram get odmpid)
-	local PRODUCTID=$(nvram get productid)
+	ODMPID=$(nvram get odmpid)
+	PRODUCTID=$(nvram get productid)
 	if [ -n "${ODMPID}" ];then
 		MODEL="${ODMPID}"
 	else
@@ -27,7 +27,7 @@ get_model(){
 }
 
 get_fw_type() {
-	local KS_TAG=$(nvram get extendno|grep -E "_kool")
+	KS_TAG=$(nvram get extendno|grep -E "_kool")
 	if [ -d "/koolshare" ];then
 		if [ -n "${KS_TAG}" ];then
 			FW_TYPE_NAME="koolcenter官改固件"
@@ -45,7 +45,7 @@ get_fw_type() {
 
 platform_test(){
 	# 带koolshare文件夹，有httpdb和skipdb的固件位支持固件
-	if [ -d "/koolshare" -a -x "/koolshare/bin/httpdb" -a -x "/usr/bin/skipd" ];then
+	if [ -d "/koolshare" ] && [ -x "/koolshare/bin/httpdb" ] && [ -x "/usr/bin/skipd" ];then
 		echo_date "机型：${MODEL} ${FW_TYPE_NAME} 符合安装要求，开始安装插件！"
 	else
 		exit_install 1
@@ -60,10 +60,10 @@ platform_test(){
 	PKG_TYPE=$(cat /tmp/shadowsocks/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_TYPE=.+" | awk -F"=" '{print $2}' | sed 's/"//g')
 
 	# fancyss_arm
-	if [ "${PKG_ARCH}" == "arm" ]; then
+	if [ "${PKG_ARCH}" = "arm" ]; then
 		case "${LINUX_VER}" in
 			"26")
-				if [ "${ROT_ARCH}" == "armv7l" ]; then
+				if [ "${ROT_ARCH}" = "armv7l" ]; then
 					echo_date "内核：${KEL_VERS}，架构：${ROT_ARCH}，安装fancyss_${PKG_ARCH}_${PKG_TYPE}！"
 				else
 					echo_date "架构：${ROT_ARCH}，fancyss_${PKG_ARCH}_${PKG_TYPE}不适用于该架构！退出！"
@@ -71,12 +71,12 @@ platform_test(){
 				fi
 				;;
 			"41"|"419")
-				if [ "${ROT_ARCH}" == "armv7l" ]; then
+				if [ "${ROT_ARCH}" = "armv7l" ]; then
 					echo_date "内核：${KEL_VERS}，架构：${ROT_ARCH}，fancyss_${PKG_ARCH}_${PKG_TYPE}不适用于该内核版本！"
 					echo_date "建议使用fancyss_hnd_full或者fancyss_hnd_lite！"
 					echo_date "下载地址：https://github.com/hq450/fancyss_history_package/tree/master/fancyss_hnd"
 					exit_install 1
-				elif [ "${ROT_ARCH}" == "aarch64" ]; then
+				elif [ "${ROT_ARCH}" = "aarch64" ]; then
 					echo_date "内核：${KEL_VERS}，架构：${ROT_ARCH}，fancyss_${PKG_ARCH}_${PKG_TYPE}不适用于该内核版本！"
 					echo_date "建议使用fancyss_hnd_v8_full或者fancyss_hnd_v8_lite！"
 					echo_date "下载地址：https://github.com/hq450/fancyss_history_package/tree/master/fancyss_hnd"
@@ -308,7 +308,7 @@ platform_test(){
 	fi
 
 	# fancyss_mtk
-	if [ "${PKG_ARCH}" == "mtk" ]; then
+	if [ "${PKG_ARCH}" = "mtk" ]; then
 		case "${LINUX_VER}" in
 			"54")
 				case "${MODEL}" in
@@ -338,12 +338,12 @@ platform_test(){
 				exit_install 1
 				;;
 			"41"|"419")
-				if [ "${ROT_ARCH}" == "armv7l" ]; then
+				if [ "${ROT_ARCH}" = "armv7l" ]; then
 					echo_date "内核：${KEL_VERS}，架构：${ROT_ARCH}，fancyss_${PKG_ARCH}_${PKG_TYPE}不适用于该内核版本！"
 					echo_date "建议使用fancyss_hnd_full或者fancyss_hnd_lite！"
 					echo_date "下载地址：https://github.com/hq450/fancyss_history_package/tree/master/fancyss_hnd"
 					exit_install 1
-				elif [ "${ROT_ARCH}" == "aarch64" ]; then
+				elif [ "${ROT_ARCH}" = "aarch64" ]; then
 					echo_date "内核：${KEL_VERS}，架构：${ROT_ARCH}，fancyss_${PKG_ARCH}_${PKG_TYPE}不适用于该内核版本！"
 					echo_date "建议使用fancyss_hnd_v8_full或者fancyss_hnd_v8_lite！"
 					echo_date "下载地址：https://github.com/hq450/fancyss_history_package/tree/master/fancyss_hnd"
@@ -486,12 +486,12 @@ platform_test(){
 }
 
 set_skin(){
-	local UI_TYPE=ASUSWRT
-	local SC_SKIN=$(nvram get sc_skin)
-	local TS_FLAG=$(grep -o "2ED9C3" /www/css/difference.css 2>/dev/null|head -n1)
-	local ROG_FLAG=$(cat /www/form_style.css|grep -A1 ".tab_NW:hover{"|grep "background"|sed 's/,//g'|grep -o "2071044")
-	local TUF_FLAG=$(cat /www/form_style.css|grep -A1 ".tab_NW:hover{"|grep "background"|sed 's/,//g'|grep -o "D0982C")
-	local WRT_FLAG=$(cat /www/form_style.css|grep -A1 ".tab_NW:hover{"|grep "background"|sed 's/,//g'|grep -o "4F5B5F")
+	UI_TYPE=ASUSWRT
+	SC_SKIN=$(nvram get sc_skin)
+	TS_FLAG=$(grep -o "2ED9C3" /www/css/difference.css 2>/dev/null|head -n1)
+	ROG_FLAG=$(cat /www/form_style.css|grep -A1 ".tab_NW:hover{"|grep "background"|sed 's/,//g'|grep -o "2071044")
+	TUF_FLAG=$(cat /www/form_style.css|grep -A1 ".tab_NW:hover{"|grep "background"|sed 's/,//g'|grep -o "D0982C")
+	WRT_FLAG=$(cat /www/form_style.css|grep -A1 ".tab_NW:hover{"|grep "background"|sed 's/,//g'|grep -o "4F5B5F")
 	if [ -n "${TS_FLAG}" ];then
 		UI_TYPE="TS"
 	else
@@ -505,15 +505,15 @@ set_skin(){
 			UI_TYPE="ASUSWRT"
 		fi
 	fi
-	if [ -z "${SC_SKIN}" -o "${SC_SKIN}" != "${UI_TYPE}" ];then
+	if [ -z "${SC_SKIN}" ] || [ "${SC_SKIN}" != "${UI_TYPE}" ];then
 		nvram set sc_skin="${UI_TYPE}"
 		nvram commit
 	fi
 }
 
 exit_install(){
-	local state=$1
-	local PKG_ARCH=$(cat ${DIR}/.valid)
+	state=$1
+	PKG_ARCH=$(cat ${DIR}/.valid)
 	case $state in
 		1)
 			echo_date "fancyss项目地址：https://github.com/fastbash/fancyss_bak"
@@ -551,8 +551,8 @@ full2lite(){
 		mkdir -p /koolshare/configs/fanyss
 		for NODE_INFO in ${NODES_INFO}
 		do
-			local NU=$(echo "${NODE_INFO}" | awk -F"=" '{print $1}')
-			local TY=$(echo "${NODE_INFO}" | awk -F"=" '{print $2}')
+			NU=$(echo "${NODE_INFO}" | awk -F"=" '{print $1}')
+			TY=$(echo "${NODE_INFO}" | awk -F"=" '{print $2}')
 			echo_date "备份并从节点列表里移除第$NU个$(__get_name_by_type ${TY})节点：【$(dbus get ssconf_basic_name_${NU})】"
 			# 备份
 			cat /tmp/fancyss_kv.txt | grep "_${NU}=" | sed "s/_${NU}=/\":\"/" | sed 's/^/"/;s/$/\"/;s/$/,/g;1 s/^/{/;$ s/,$/}/' | tr -d '\n' | sed 's/$/\n/' >>/koolshare/configs/fanyss/fancyss_kv.json
@@ -576,7 +576,7 @@ lite2full(){
 	fi
 	
 	echo_date "检测到上次安装fancyss lite备份的不支持节点，准备恢复！"
-	local file_name=fancyss_nodes_restore
+	file_name=fancyss_nodes_restore
 	cat > /tmp/${file_name}.sh <<-EOF
 		#!/bin/sh
 		source /koolshare/scripts/base.sh
@@ -584,7 +584,7 @@ lite2full(){
 	EOF
 	NODE_INDEX=$(dbus list ssconf_basic_name_ | sed -n 's/^.*_\([0-9]\+\)=.*/\1/p' | sort -rn | sed -n '1p')
 	[ -z "${NODE_INDEX}" ] && NODE_INDEX="0"
-	local count=$(($NODE_INDEX + 1))
+	count=$(($NODE_INDEX + 1))
 	while read nodes; do
 		echo ${nodes} | sed 's/\",\"/\"\n\"/g;s/^{//;s/}$//' | sed 's/^\"/dbus set ssconf_basic_/g' | sed "s/\":/_${count}=/g" >>/tmp/${file_name}.sh
 		let count+=1
@@ -601,7 +601,7 @@ lite2full(){
 check_empty_node(){
 	# 从full版本切换为lite版本后，部分不支持节点将会被删除，比如naive，tuic，hysteria2节点
 	# 如果安装lite版本的时候，full版本使用的是以上节点，则这些节点可能是空的，此时应该切换为下一个不为空的节点，或者关闭插件（没有可用节点的情况）
-	local NODES_SEQ=$(dbus list ssconf_basic_name_ | sed -n 's/^.*_\([0-9]\+\)=.*/\1/p' | sort -n)
+	NODES_SEQ=$(dbus list ssconf_basic_name_ | sed -n 's/^.*_\([0-9]\+\)=.*/\1/p' | sort -n)
 	if [ -z "${NODES_SEQ}" ];then
 		# 没有任何节点，可能是新安装插件，可能是full安装lite被删光了
 		dbus set ss_basic_enable="0"
@@ -609,7 +609,7 @@ check_empty_node(){
 		return 0
 	fi
 	
-	local CURR_NODE=$(dbus get ssconf_basic_node)
+	CURR_NODE=$(dbus get ssconf_basic_node)
 	if [ -z "${CURR_NODE}" ];then
 		# 有节点，但是没有没有选择节点
 		dbus set ss_basic_enable="0"
@@ -617,9 +617,9 @@ check_empty_node(){
 		return 0
 	fi
 	
-	local NODE_INDEX=$(echo ${NODES_SEQ} | sed 's/.*[[:space:]]//')
-	local NODE_FIRST=$(echo ${NODES_SEQ} | awk '{print $1}')
-	local CURR_TYPE=$(dbus get ssconf_basic_type_${CURR_NODE})
+	NODE_INDEX=$(echo ${NODES_SEQ} | sed 's/.*[[:space:]]//')
+	NODE_FIRST=$(echo ${NODES_SEQ} | awk '{print $1}')
+	CURR_TYPE=$(dbus get ssconf_basic_type_${CURR_NODE})
 	if [ -z "${CURR_TYPE}" ];then
 		# 有节点，选择了节点，但是节点是空的，此时选择最后一个节点作为默认节点
 		echo_date "检测到当前节点为空，调整默认节点为节点列表内的第一个节点!"
@@ -634,7 +634,7 @@ check_device(){
 		return "1"
 	fi
 	
-	mkdir -p $1/rw_test 2>/dev/null
+	mkdir -p "$1/rw_test" 2>/dev/null
 	sync
 	if [ -d "$1/rw_test" ]; then
 		echo "rwTest=OK" >"$1/rw_test/rw_test.txt"
@@ -660,20 +660,20 @@ check_device(){
 
 install_now(){
 	# default value
-	local PLVER=$(cat ${DIR}/ss/version)
+	PLVER=$(cat ${DIR}/ss/version)
 
-	#local PKG_ARCH_OLD=$(cat /koolshare/webs/Module_shadowsocks.asp 2>/dev/null | grep -Eo "PKG_ARCH=.+" | awk -F"=" '{print $2}' |sed 's/"//g')
-	#local PKG_TYPE_OLD=$(cat /koolshare/webs/Module_shadowsocks.asp 2>/dev/null | grep -Eo "PKG_TYPE=.+" | awk -F"=" '{print $2}' |sed 's/"//g')
-	local TITLE_OLD=$(dbus get softcenter_module_shadowsocks_title)
+	#PKG_ARCH_OLD=$(cat /koolshare/webs/Module_shadowsocks.asp 2>/dev/null | grep -Eo "PKG_ARCH=.+" | awk -F"=" '{print $2}' |sed 's/"//g')
+	#PKG_TYPE_OLD=$(cat /koolshare/webs/Module_shadowsocks.asp 2>/dev/null | grep -Eo "PKG_TYPE=.+" | awk -F"=" '{print $2}' |sed 's/"//g')
+	TITLE_OLD=$(dbus get softcenter_module_shadowsocks_title)
 
 	# print message
-	local TITLE_NEW="科学上网 ${PKG_TYPE}"
-	local DESCR="科学上网 ${PKG_TYPE} for AsusWRT/Merlin platform"
+	TITLE_NEW="科学上网 ${PKG_TYPE}"
+	DESCR="科学上网 ${PKG_TYPE} for AsusWRT/Merlin platform"
 	echo_date "安装版本：${PKG_NAME}_${PKG_ARCH}_${PKG_TYPE}_${PLVER}"
 	
 	# stop first
-	local ENABLE=$(dbus get ss_basic_enable)
-	if [ "${ENABLE}" == "1" -a -f "/koolshare/ss/ssconfig.sh" ];then
+	ENABLE=$(dbus get ss_basic_enable)
+	if [ "${ENABLE}" = "1" ] && [ -f "/koolshare/ss/ssconfig.sh" ];then
 		echo_date "安装前先关闭${TITLE_OLD}插件，保证文件更新成功！"
 		sh /koolshare/ss/ssconfig.sh stop >/dev/null 2>&1
 	fi
@@ -682,12 +682,13 @@ install_now(){
 	if [ -n "$(ls /koolshare/ss/postscripts/P*.sh 2>/dev/null)" ];then
 		echo_date "备份触发脚本!"
 		mkdir /tmp/ss_backup
-		find /koolshare/ss/postscripts -name "P*.sh" | xargs -i mv {} -f /tmp/ss_backup
+		# find /koolshare/ss/postscripts -name "P*.sh" | xargs -i mv {} -f /tmp/ss_backup
+		find /koolshare/ss/postscripts -name "P*.sh" -exec mv -f {} /tmp/ss_backup/ \;
 	fi
 
 	# check old version type
 	if [ -f "/koolshare/webs/Module_shadowsocks.asp" ];then
-		local IS_LITE=$(cat /koolshare/webs/Module_shadowsocks.asp | grep "lite")
+		IS_LITE=$(grep "lite" /koolshare/webs/Module_shadowsocks.asp)
 		# 已经安装，此次为升级
 		if [ -n "${IS_LITE}" ];then
 			OLD_TYPE="lite"
@@ -700,13 +701,13 @@ install_now(){
 	fi
 
 	# full → lite, backup nodes
-	if [ "${PKG_TYPE}" == "lite" -a "${OLD_TYPE}" == "full" ];then
+	if [ "${PKG_TYPE}" = "lite" ] && [ "${OLD_TYPE}" = "full" ];then
 		echo_date "当前版本：full，即将安装：lite"
 		full2lite
 	fi
 	
 	# lite → full, restore nodes
-	if [ "${PKG_TYPE}" == "full" -a "${OLD_TYPE}" == "lite" ];then
+	if [ "${PKG_TYPE}" = "full" ] && [ "${OLD_TYPE}" = "lite" ];then
 		# only restore backup node when upgrade fancyss from lite to full
 		echo_date "当前版本：lite，即将安装：full"
 		lite2full
@@ -720,6 +721,7 @@ install_now(){
 	rm -rf /koolshare/ss/*
 	rm -rf /koolshare/scripts/ss_*
 	rm -rf /koolshare/webs/Module_shadowsocks*
+	rm -rf /koolshare/bin/clash-fancyss
 	rm -rf /koolshare/bin/rss-redir
 	rm -rf /koolshare/bin/rss-tunnel
 	rm -rf /koolshare/bin/rss-local
@@ -752,8 +754,8 @@ install_now(){
 	rm -rf /koolshare/res/tablednd.js
 	rm -rf /koolshare/res/shadowsocks.css
 	rm -rf /koolshare/res/fancyss.css
-	find /koolshare/init.d/ -name "*shadowsocks.sh" | xargs rm -rf
-	find /koolshare/init.d/ -name "*socks5.sh" | xargs rm -rf
+	find /koolshare/init.d/ -name "*shadowsocks.sh" -exec rm -rf {} \;
+	find /koolshare/init.d/ -name "*socks5.sh" -exec rm -rf {} \;
 
 	# optional file maybe exist should be removed, but no need remove on install/upgrade
 	# rm -rf /koolshare/bin/sslocal
@@ -763,11 +765,12 @@ install_now(){
 
 	# some file may exist in /data
 	if [ -d "/data" ];then
+		rm -rf /data/clash-fancyss >/dev/null 2>&1
 		rm -rf /data/xray >/dev/null 2>&1
 		rm -rf /data/v2ray >/dev/null 2>&1
 		rm -rf /data/hysteria2 >/dev/null 2>&1
 		rm -rf /data/naive >/dev/null 2>&1
-		rm -rf /data/sslocal >/dev/null 2>&1
+		rm -rf /data/ss >/dev/null 2>&1
 		rm -rf /data/rss-local >/dev/null 2>&1
 		rm -rf /data/rss-redir >/dev/null 2>&1
 		# legacy since 3.3.6
@@ -777,6 +780,7 @@ install_now(){
 	fi
 	
 	# legacy files should be removed
+	rm -rf /koolshare/bin/clash-fancyss
 	rm -rf /koolshare/bin/trojan
 	rm -rf /koolshare/bin/haproxy
 	rm -rf /koolshare/bin/smartdns
@@ -808,7 +812,7 @@ install_now(){
 	# rm -rf /koolshare/bin/isutf8
 	
 	# small jffs router should remove more existing files
-	if [ "${MODEL}" == "RT-AX56U_V2" -o "${MODEL}" == "RT-AX57" ];then
+	if [ "${MODEL}" = "RT-AX56U_V2" ] || [ "${MODEL}" = "RT-AX57" ];then
 		rm -rf /jffs/syslog.log
 		rm -rf /jffs/syslog.log-1
 		rm -rf /jffs/wglist*
@@ -816,7 +820,7 @@ install_now(){
 		# make a dummy
 		rm -rf /jffs/uu.tar.gz*
 		touch /jffs/uu.tar.gz
-	elif [ "${MODEL}" == "ZenWiFi_BD4" ];then
+	elif [ "${MODEL}" = "ZenWiFi_BD4" ];then
 		rm -rf /jffs/ahs
 		rm -rf /jffs/asd
 		rm -rf /jffs/syslog.log*
@@ -836,10 +840,10 @@ install_now(){
 	# package modify
 
 	# curl-fancyss is not needed when curl in system support proxy (102 official mod and merlin mod have proxy enabled)
-	local CURL_PROXY_FLAG=$(curl -V|grep -Eo proxy)
+	CURL_PROXY_FLAG=$(curl -V|grep -Eo proxy)
 	if [ -n "${CURL_PROXY_FLAG}" ];then
 		rm -rf /tmp/shadowsocks/bin/curl-fancyss
-		ln -sf $(which curl) /koolshare/bin/curl-fancyss
+		ln -sf "$(which curl)" /koolshare/bin/curl-fancyss
 	fi
 
 	# jq is included in official 102 stock firmware higher version(RT-BE86U)
@@ -864,18 +868,18 @@ install_now(){
 	# 2. 打包的时候应该用/data分区内的二进制
 	# 3. 更新二进制的时候应该检测/koolshare/bin下的是否为软连接，是的话应该更新真实位置的二进制
 	check_device "/data"
-	if [ "$?" == "0" ];then
+	if [ "$?" = "0" ];then
 		# 检测data分区剩余空间
 		echo_date "检测/data分区剩余空间..."
-		local SPACE_DATA_AVAL1=$(df | grep -w "/data" | awk '{print $4}')
+		SPACE_DATA_AVAL1=$(df | grep -w "/data" | awk '{print $4}')
 		echo_date "/data分区剩余空间为：${SPACE_DATA_AVAL1}KB"
-		local _BINS="xray v2ray hysteria2 naive sslocal rss-local rss-tunnel rss-redir"
+		_BINS="xray v2ray hysteria2 naive sslocal rss-local rss-tunnel rss-redir"
 		for _BIN in ${_BINS}
 		do
 			if [ -f "/tmp/shadowsocks/bin/${_BIN}" ];then
-				local SPACE_DATA_AVAL1=$(df | grep -w "/data" | awk '{print $4}')
-				local SPACE_DATA_AVAL2=$((${SPACE_DATA_AVAL1} - 256))
-				local BIN_SIZE=$(du /tmp/shadowsocks/bin/${_BIN} | awk '{print $1}')
+				SPACE_DATA_AVAL1=$(df | grep -w "/data" | awk '{print $4}')
+				SPACE_DATA_AVAL2=$((SPACE_DATA_AVAL1 - 256))
+				BIN_SIZE=$(du /tmp/shadowsocks/bin/${_BIN} | awk '{print $1}')
 				if [ "${BIN_SIZE}" -lt "${SPACE_DATA_AVAL2}" ];then
 					echo_date "将${_BIN}安装到/data分区..."
 					mv /tmp/shadowsocks/bin/${_BIN} /data/
@@ -922,13 +926,15 @@ install_now(){
 	
 	echo_date "复制相关的网页文件！"
 	cp -rf /tmp/shadowsocks/webs/* /koolshare/webs/
-	local _LAYJS_MD5=$(md5sum /koolshare/res/layer/layer.js | awk '{print $1}')
-	if [ -f "/koolshare/res/layer/layer.js" -a "${_LAYJS_MD5}" == "9d72838d6f33e45f058cc1fa00b7a5c7" ];then
+	_LAYJS_MD5=$(md5sum /koolshare/res/layer/layer.js | awk '{print $1}')
+	if [ -f "/koolshare/res/layer/layer.js" ] && [ "${_LAYJS_MD5}" = "9d72838d6f33e45f058cc1fa00b7a5c7" ];then
 		mv -f /tmp/shadowsocks/res/layer.js /koolshare/res/layer/
 	else
 		rm /tmp/shadowsocks/res/layer.js >/dev/null 2>&1
 	fi
 	cp -rf /tmp/shadowsocks/res/* /koolshare/res/
+	cp -rf /tmp/shadowsocks/clash-dashboard /koolshare/ss/
+
 	sync
 
 	# Permissions
@@ -947,7 +953,7 @@ install_now(){
 	fi
 
 	# start some process before fancyss start
-	if [ -x "/koolshare/bin/websocketd" -a -f "/koolshare/ss/websocket" ];then
+	if [ -x "/koolshare/bin/websocketd" ] && [ -f "/koolshare/ss/websocket" ];then
 		if [ -z "$(pidof websocketd)" ];then
 			run_bg websocketd --port=803 /koolshare/ss/websocket
 		fi
@@ -960,7 +966,7 @@ install_now(){
 	if [ -n "$(ls /tmp/ss_backup/P*.sh 2>/dev/null)" ];then
 		echo_date "恢复触发脚本!"
 		mkdir -p /koolshare/ss/postscripts
-		find /tmp/ss_backup -name "P*.sh" | xargs -i mv {} -f /koolshare/ss/postscripts
+		find /tmp/ss_backup -name "P*.sh" -exec mv -f {} /koolshare/ss/postscripts/ \;
 	fi
 
 	# soft links
@@ -972,11 +978,11 @@ install_now(){
 
 	# default values
 	eval $(dbus export ss)
-	local PKG_TYPE=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_TYPE=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
+	PKG_TYPE=$(cat /koolshare/webs/Module_shadowsocks.asp | tr -d '\r' | grep -Eo "PKG_TYPE=.+"|awk -F "=" '{print $2}'|sed 's/"//g')
 	# 3.0.4：国内DNS默认使用运营商DNS
 	[ -z "${ss_china_dns}" ] && dbus set ss_china_dns="1"
 	# 3.0.4 从老版本升级到3.0.4，原部分方案需要切换到进阶方案，因为这些方案已经不存在
-	if [ -z "${ss_basic_advdns}" -a -z "${ss_basic_olddns}" ];then
+	if [ -z "${ss_basic_advdns}" ] && [ -z "${ss_basic_olddns}" ];then
 		# 全新安装的 3.0.4+，或者从3.0.3及其以下版本升级而来
 		if [ -z "${ss_foreign_dns}" ];then
 			# 全新安装的 3.0.4
@@ -985,12 +991,12 @@ install_now(){
 		else
 			# 从3.0.3及其以下版本升级而来
 			# 因为一些dns选项已经不存在，所以更改一下
-			if [ "${ss_foreign_dns}" == "2" -o "${ss_foreign_dns}" == "5" -o "${ss_foreign_dns}" == "10" -o "${ss_foreign_dns}" == "1" -o "${ss_foreign_dns}" == "6" ];then
+			if [ "${ss_foreign_dns}" = "2" ] || [ "${ss_foreign_dns}" = "5" ] || [ "${ss_foreign_dns}" = "10" ] || [ "${ss_foreign_dns}" = "1" ] || [ "${ss_foreign_dns}" = "6" ];then
 				# 原chinands2、chinadns1、chinadns-ng、cdns、https_dns_proxy已经不存在, 更改为进阶DNS设定：chinadns-ng
 				dbus set ss_basic_advdns="1"
 				dbus set ss_basic_olddns="0"
-			elif [ "${ss_foreign_dns}" == "4" -o "${ss_foreign_dns}" == "9" ];then
-				if [ "${PKG_TYPE}" == "lite" ];then
+			elif [ "${ss_foreign_dns}" = "4" ] || [ "${ss_foreign_dns}" = "9" ];then
+				if [ "${PKG_TYPE}" = "lite" ];then
 					# ss-tunnel、SmartDNS方案在lite版本中不存在
 					dbus set ss_basic_advdns="1"
 					dbus set ss_basic_olddns="0"
@@ -1005,18 +1011,18 @@ install_now(){
 				dbus set ss_basic_olddns="1"
 			fi
 		fi
-	elif [ -z "${ss_basic_advdns}" -a -n "${ss_basic_olddns}" ];then
+	elif [ -z "${ss_basic_advdns}" ] && [ -n "${ss_basic_olddns}" ];then
 		# 不正确，ss_basic_advdns和ss_basic_olddns必须值相反
-		[ "${ss_basic_olddns}" == "0" ] && dbus set ss_basic_advdns="1"
-		[ "${ss_basic_olddns}" == "1" ] && dbus set ss_basic_advdns="0"
-	elif [ -n "${ss_basic_advdns}" -a -z "${ss_basic_olddns}" ];then
+		[ "${ss_basic_olddns}" = "0" ] && dbus set ss_basic_advdns="1"
+		[ "${ss_basic_olddns}" = "1" ] && dbus set ss_basic_advdns="0"
+	elif [ -n "${ss_basic_advdns}" ] && [ -z "${ss_basic_olddns}" ];then
 		# 不正确，ss_basic_advdns和ss_basic_olddns必须值相反
-		[ "${ss_basic_advdns}" == "0" ] && dbus set ss_basic_olddns="1"
-		[ "${ss_basic_advdns}" == "1" ] && dbus set ss_basic_olddns="0"
-	elif [ -n "${ss_basic_advdns}" -a -n "${ss_basic_olddns}" ];then
-		if [ "${ss_basic_advdns}" == "${ss_basic_olddns}" ];then
-			[ "${ss_basic_olddns}" == "0" ] && dbus set ss_basic_advdns="1"
-			[ "${ss_basic_olddns}" == "1" ] && dbus set ss_basic_advdns="0"
+		[ "${ss_basic_advdns}" = "0" ] && dbus set ss_basic_olddns="1"
+		[ "${ss_basic_advdns}" = "1" ] && dbus set ss_basic_olddns="0"
+	elif [ -n "${ss_basic_advdns}" ] && [ -n "${ss_basic_olddns}" ];then
+		if [ "${ss_basic_advdns}" = "${ss_basic_olddns}" ];then
+			[ "${ss_basic_olddns}" = "0" ] && dbus set ss_basic_advdns="1"
+			[ "${ss_basic_olddns}" = "1" ] && dbus set ss_basic_advdns="0"
 		fi
 	fi
 
@@ -1043,14 +1049,14 @@ install_now(){
 	[ -z "$(dbus get ss_basic_wt_curl)" ] && dbus set ss_basic_wt_curl="http://www.baidu.com"
 
 	# 延迟测试需要较多性能，默认只有aarch64机型才开启
-	if [ "${ROT_ARCH}" == "aarch64" ]; then
+	if [ "${ROT_ARCH}" = "aarch64" ]; then
 		[ -z "${ss_basic_latency_val}" ] && dbus set ss_basic_latency_val="2"
 	else
 		[ -z "${ss_basic_latency_val}" ] && dbus set ss_basic_latency_val="0"
 	fi
 
 	# 因版本变化导致一些值没有了，更改一下
-	if [ "${ss_basic_chng_china_2_tcp}" == "5" ];then
+	if [ "${ss_basic_chng_china_2_tcp}" = "5" ];then
 		dbus set ss_basic_chng_china_2_tcp="6"
 	fi
 
@@ -1075,10 +1081,13 @@ install_now(){
 	dbus set ss_basic_latency_opt=0
 	dbus set ss_basic_latency_val=0
 	# 打开订阅高级设定
-	dbus set ss_adv_sub=1
+	[ -z "$(dbus get ss_adv_sub)" ] && dbus set ss_adv_sub=0
 	# 打开时间同步检测
 	dbus set ss_basic_notimecheck=0
-	# 默认打开规则更新任务
+	# 规则
+	# [ -z "$(dbus get ss_basic_mode)" ] && dbus set ss_basic_mode=2
+	[ -z "$(dbus get ss_basic_action)" ] && dbus set ss_basic_action=2
+	# 规则更新任务
 	if [ "$(dbus get ss_basic_rule_update)" != "1" ];then
 		dbus set ss_basic_rule_update=1
 		dbus set ss_basic_rule_update_time=3
@@ -1091,7 +1100,6 @@ install_now(){
 	fi
 	# 默认打开订阅更新任务
 	if [ "$(dbus get ss_basic_node_update)" != "1" ];then
-		dbus set ss_adv_sub=1
 		dbus set ss_basic_node_update=1
 		dbus set ss_basic_node_update_day=0
 		dbus set ss_basic_node_update_hr=4
@@ -1113,7 +1121,7 @@ install_now(){
 	echo_date "${TITLE_NEW}插件安装安装成功！"
 
 	# restart
-	if [ "${ENABLE}" == "1" -a -f "/koolshare/ss/ssconfig.sh" ];then
+	if [ "${ENABLE}" = "1" ] && [ -f "/koolshare/ss/ssconfig.sh" ];then
 		echo_date 重启科学上网插件！
 		sh /koolshare/ss/ssconfig.sh restart
 	fi

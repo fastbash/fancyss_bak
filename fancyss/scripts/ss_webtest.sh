@@ -44,8 +44,8 @@ webtest_web(){
 	fi
 
 	# 3. 如果有结果该文件，且没有lock（webtest完成了的），需要检测下节点数量和webtest数量是否一致，避免新增节点没有webtest
-	local webtest_nu=$(cat /tmp/upload/webtest.txt | awk -F ">" '{print $1}' | sort -un | sed '/stop/d' | wc -l)
-	local node_nu=$(dbus list ssconf_basic_ | grep _name_ | wc -l)
+	webtest_nu=$(cat /tmp/upload/webtest.txt | awk -F ">" '{print $1}' | sort -un | sed '/stop/d' | wc -l)
+	node_nu=$(dbus list ssconf_basic_ | grep _name_ | wc -l)
 	if [ "${webtest_nu}" -ne "${node_nu}" ];then
 		clean_webtest
 		start_webtest
@@ -104,25 +104,25 @@ sort_nodes(){
 	# 08 hysteria2
 
 	# sort by type first
-	local count=1
+	count=1
 	dbus list ssconf_basic_type_|sort -t "_" -nk4|sed 's/^ssconf_basic_type_//'|awk -F"=" '{printf $1 " "; printf "%02d\n", $2}' >${TMP2}/nodes_index.txt
 	cat ${TMP2}/nodes_index.txt|awk '{print $2}'|uniq -c|sed 's/^[[:space:]]\+//g' | while read gp
 	do
-		local _type=$(echo "$gp" | awk '{print $2}')
-		local _line=$(echo "$gp" | awk '{print $1}')
+		_type=$(echo "$gp" | awk '{print $2}')
+		_line=$(echo "$gp" | awk '{print $1}')
 		sed -n "1,${_line}p" ${TMP2}/nodes_index.txt | awk '{print $1}' >>${TMP2}/wt_${count}_${_type}.txt
 		sed -i "1,${_line}d" ${TMP2}/nodes_index.txt
 		let count++
 	done
 
 	# then sort shadowsocks
-	local wt_flies=$(find ${TMP2}/wt_*.txt|sort -t "/" -nk5)
+	wt_flies=$(find ${TMP2}/wt_*.txt|sort -t "/" -nk5)
 	for file in ${wt_flies}
 	do
-		local file_name=${file##*/}
-		local node_type=${file_name##*_}
-		local node_type=${node_type%%.*}
-		local pref_name=${file_name%_*}
+		file_name=${file##*/}
+		node_type=${file_name##*_}
+		node_type=${node_type%%.*}
+		pref_name=${file_name%_*}
 		if [ ${node_type} == "00" ];then
 			# echo $file
 			# echo $file_name
@@ -131,13 +131,13 @@ sort_nodes(){
 			cat $file | while read ss_nu
 			do
 				# echo $ss_nu
-				local _obfs=$(dbus get ssconf_basic_ss_obfs_${ss_nu})
-				local _method=$(dbus get ssconf_basic_method_${ss_nu})
-				local ss_2022=$(echo ${_method} | grep "2022-blake")
+				_obfs=$(dbus get ssconf_basic_ss_obfs_${ss_nu})
+				_method=$(dbus get ssconf_basic_method_${ss_nu})
+				ss_2022=$(echo ${_method} | grep "2022-blake")
 				if [ -z "${_obfs}" -o "${_obfs}" == "0" ];then
-					local _obfs_enable="0"
+					_obfs_enable="0"
 				else
-					local _obfs_enable="1"
+					_obfs_enable="1"
 				fi
 				if [ -z "${ss_2022}" ];then
 					if [ "${_obfs_enable}" == "0" ];then
@@ -163,7 +163,7 @@ test_nodes(){
 	LINUX_VER=$(uname -r|awk -F"." '{print $1$2}')
 
 	# 优先测试当前节点及其附近的同类型节点，重排生成节点序号储存文件
-	local CURR_NODE=$(dbus get ssconf_basic_node)
+	CURR_NODE=$(dbus get ssconf_basic_node)
 	[ -z "${CURR_NODE}" ] && CURR_NODE=1
 	MAX_SHOW=$(dbus get ss_basic_row)
 	if [ "${MAX_SHOW}" -gt "1" ];then 
@@ -172,9 +172,9 @@ test_nodes(){
 		BEGN_NODE=$((${CURR_NODE} - 10))
 	fi
 
-	local CURR_FILE=$(find ${TMP2}/ -name "wt_*.txt" | xargs grep -Ew "^${CURR_NODE}" | awk -F ":" '{print $1}')
+	CURR_FILE=$(find ${TMP2}/ -name "wt_*.txt" | xargs grep -Ew "^${CURR_NODE}" | awk -F ":" '{print $1}')
 	if [ -f "${CURR_FILE}" ];then
-		local FIRST_BGN=$(cat ${CURR_FILE}|head -n1)
+		FIRST_BGN=$(cat ${CURR_FILE}|head -n1)
 		if [ -f "${CURR_FILE}" -a "${BEGN_NODE}" -gt "${FIRST_BGN}" ];then
 			sed -n "/${BEGN_NODE}/,\$p" ${CURR_FILE} > ${TMP2}/re-arrange-1.txt 
 			sed -n "1,/^${BEGN_NODE}\$/p" ${CURR_FILE} | sed '$d' > ${TMP2}/re-arrange-2.txt
@@ -189,11 +189,11 @@ test_nodes(){
 
 	# 优先测试当前节点所属的节点类型
 	find ${TMP2}/wt_*.txt|sort -t"/" -n > ${TMP2}/nodes_file_name.txt
-	local CURR_FILE=$(find ${TMP2} -name "wt_*.txt" | xargs grep -Ew "^${CURR_NODE}" | awk -F ":" '{print $1}')
-	local CURR_FILE=${CURR_FILE##*/}
-	local CURR_FILE=${CURR_FILE%%.*}
-	local TOTA_LINE=$(cat ${TMP2}/nodes_file_name.txt | wc -l)
-	local CURR_LINE=$(sed -n "/${CURR_FILE}/=" ${TMP2}/nodes_file_name.txt)
+	CURR_FILE=$(find ${TMP2} -name "wt_*.txt" | xargs grep -Ew "^${CURR_NODE}" | awk -F ":" '{print $1}')
+	CURR_FILE=${CURR_FILE##*/}
+	CURR_FILE=${CURR_FILE%%.*}
+	TOTA_LINE=$(cat ${TMP2}/nodes_file_name.txt | wc -l)
+	CURR_LINE=$(sed -n "/${CURR_FILE}/=" ${TMP2}/nodes_file_name.txt)
 	if [ "${CURR_LINE}" -gt "1" ];then
 		sed -n "${CURR_LINE},\$p" ${TMP2}/nodes_file_name.txt > ${TMP2}/nodes_file_name-1.txt
 		sed -n "1,${CURR_LINE}p" ${TMP2}/nodes_file_name.txt | sed '$d' > ${TMP2}/nodes_file_name-2.txt
@@ -208,10 +208,10 @@ test_nodes(){
 	
 	cat ${TMP2}/nodes_file_name.txt | while read test_file
 	do
-		local file_name=${test_file##*/}
-		local node_type=${file_name#wt_*_}
-		local node_type=${node_type%%.*}
-		local pref_name=${file_name%_*}
+		file_name=${test_file##*/}
+		node_type=${file_name#wt_*_}
+		node_type=${node_type%%.*}
+		pref_name=${file_name%_*}
 
 		#echo -----------------
 		#echo test_file $test_file
@@ -276,7 +276,7 @@ test_nodes(){
 	echo -en "stop>stop\n" >>/tmp/upload/webtest.txt
 
 	# record timestamp
-	local TS_LOG=$(date -r /tmp/upload/webtest.txt "+%Y/%m/%d %X")
+	TS_LOG=$(date -r /tmp/upload/webtest.txt "+%Y/%m/%d %X")
 	dbus set ss_basic_webtest_ts="${TS_LOG}"
 
 	# copy webtest.txt for other useage
@@ -288,7 +288,7 @@ test_nodes(){
 
 test_01_ss_new(){
 	# test ss nodes by ss-libev
-	local file=$1
+	file=$1
 
 	# multi thread
 	[ -e /tmp/fd1 ] || mknod /tmp/fd1 p
@@ -305,13 +305,13 @@ test_01_ss_new(){
 	killall wt-ss-local >/dev/null 2>&1
 
 	# get extra option for shadowsocks-libev
-	local ARG_1 ARG_2
+	ARG_1 ARG_2
 	if [ "$(dbus get ss_basic_tfo)" == "1" -a "${LINUX_VER}" != "26" ]; then
-		local ARG_1="--fast-open"
+		ARG_1="--fast-open"
 		echo 3 >/proc/sys/net/ipv4/tcp_fastopen
 	fi
 	if [ "$(dbus get ss_basic_tnd)" == "1" ]; then
-		local ARG_2="--no-delay"
+		ARG_2="--no-delay"
 	fi
 
 	# start to test
@@ -323,14 +323,14 @@ test_01_ss_new(){
 			cat ${TMP2}/results/*.txt > /tmp/upload/webtest.txt
 			
 			# 1. resolve server
-			local _server_ip=$(_get_server_ip $(dbus get ssconf_basic_server_${nu}))
+			_server_ip=$(_get_server_ip $(dbus get ssconf_basic_server_${nu}))
 			if [ -z "${_server_ip}" ];then
 				echo -en "${nu}:\t解析失败！\n"
 				continue
 			fi
 			
 			# 2. start ss-local
-			local socks5_port=$(get_rand_port)
+			socks5_port=$(get_rand_port)
 			run_bg ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${socks5_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) ${ARG_1} ${ARG_2}
 			sleep 1
 			wait_program wt-ss-local
@@ -342,7 +342,7 @@ test_01_ss_new(){
 			cat ${TMP2}/results/*.txt > /tmp/upload/webtest.txt
 			
 			# 5. stop ss-local
-			local _pid=$(ps -w | grep "wt-ss-local" | grep -w "${_server_ip}" | grep -w "$(dbus get ssconf_basic_port_${nu})" | grep -w "${socks5_port}" | awk '{print $1}' | head -n1)
+			_pid=$(ps -w | grep "wt-ss-local" | grep -w "${_server_ip}" | grep -w "$(dbus get ssconf_basic_port_${nu})" | grep -w "${socks5_port}" | awk '{print $1}' | head -n1)
 			if [ -n "${_pid}" ];then
 				kill -9 ${_pid} >/dev/null 2>&1
 			fi
@@ -361,21 +361,21 @@ test_01_ss_new(){
 
 test_01_ss_old(){
 	# test ss nodes by ss-libev
-	local file=$1
-	local mark=$2
+	file=$1
+	mark=$2
 
 	# alisa binary
 	ln -sf /koolshare/bin/ss-local ${TMP2}/wt-ss-local
 	killall wt-ss-local >/dev/null 2>&1
 
 	# get extra option for shadowsocks-libev
-	local ARG_1 ARG_2
+	ARG_1 ARG_2
 	if [ "$(dbus get ss_basic_tfo)" == "1" -a "${LINUX_VER}" != "26" ]; then
-		local ARG_1="--fast-open"
+		ARG_1="--fast-open"
 		echo 3 >/proc/sys/net/ipv4/tcp_fastopen
 	fi
 	if [ "$(dbus get ss_basic_tnd)" == "1" ]; then
-		local ARG_2="--no-delay"
+		ARG_2="--no-delay"
 	fi
 
 	# start to test
@@ -386,14 +386,14 @@ test_01_ss_old(){
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 				
 				# 1. resolve server
-				local _server_ip=$(_get_server_ip $(dbus get ssconf_basic_server_${nu}))
+				_server_ip=$(_get_server_ip $(dbus get ssconf_basic_server_${nu}))
 				if [ -z "${_server_ip}" ];then
 					echo -en "${nu}:\t解析失败！\n"
 					continue
 				fi
 				
 				# 2. start ss-local
-				local socks5_port=$(get_rand_port)
+				socks5_port=$(get_rand_port)
 				run_bg ${TMP2}/wt-ss-local -s ${_server_ip} -p $(dbus get ssconf_basic_port_${nu}) -b 0.0.0.0 -l ${socks5_port} -k $(dbus get ssconf_basic_password_${nu} | base64_decode) -m $(dbus get ssconf_basic_method_${nu}) ${ARG_1} ${ARG_2}
 
 				sleep 1
@@ -403,7 +403,7 @@ test_01_ss_old(){
 				curl_test ${nu} ${socks5_port}
 				
 				# 4. stop ss-local
-				local _pid=$(ps -w | grep "wt-ss-local" | grep -w "${_server_ip}" | grep -w "$(dbus get ssconf_basic_port_${nu})" | grep -w "${socks5_port}" | awk '{print $1}' | head -n1)
+				_pid=$(ps -w | grep "wt-ss-local" | grep -w "${_server_ip}" | grep -w "$(dbus get ssconf_basic_port_${nu})" | grep -w "${socks5_port}" | awk '{print $1}' | head -n1)
 				if [ -n "${_pid}" ];then
 					kill -9 ${_pid} >/dev/null 2>&1
 				fi
@@ -421,12 +421,12 @@ test_01_ss_old(){
 
 test_01_ss_fake_multi(){
 	# test ss nodes by xray fake multi thread
-	local file=$1
-	local mark=$2
-	local count=$(cat ${TMP2}/$file | wc -l)
+	file=$1
+	mark=$2
+	count=$(cat ${TMP2}/$file | wc -l)
 	
 	# show info to web as soon as possible
-	cat ${TMP2}/${file} | xargs -n 8 | head -n1 | while read nus; do
+	cat "${TMP2}/${file}" | xargs -n 8 | head -n1 | while read -r nus; do
 		for nu in $nus; do
 			echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 		done
@@ -447,7 +447,7 @@ test_01_ss_fake_multi(){
 	rm -rf ${TMP2}/logs_${mark}/*
 
 	# gen all xray conf at once
-	cat ${TMP2}/${file} | xargs -n 16 | while read nus; do
+	cat "${TMP2}/${file}" | xargs -n 16 | while read -r nus; do
 		for nu in $nus; do
 			{
 				creat_xray_ss_json ${nu} ${mark}
@@ -485,7 +485,7 @@ test_01_ss_fake_multi(){
 				fi
 				
 				# 2. start curl test
-				local socks5_port=$(eval echo \$socks5_port_${nu})
+				socks5_port=$(eval echo \$socks5_port_${nu})
 				curl_test ${nu} ${socks5_port}
 				
 				# 3. stop obfs-local
@@ -510,9 +510,9 @@ test_01_ss_fake_multi(){
 
 test_01_ss_real_multi(){
 	# test ss nodes by xray real multi thread
-	local file=$1
-	local mark=$2
-	local count=$(cat ${TMP2}/$file | wc -l)
+	file=$1
+	mark=$2
+	count=$(cat ${TMP2}/$file | wc -l)
 	
 	# show info to web as soon as possible
 	cat ${TMP2}/${file} | xargs -n 8 | head -n1 | while read nus; do
@@ -585,7 +585,7 @@ test_01_ss_real_multi(){
 			fi
 			
 			# 2. start curl test
-			local socks5_port=$(eval echo \$socks5_port_${nu})
+			socks5_port=$(eval echo \$socks5_port_${nu})
 			curl_test ${nu} ${socks5_port}
 
 			# 4. write tested info
@@ -614,7 +614,7 @@ test_01_ss_real_multi(){
 
 test_03_ss(){
 	# not used since 3.3.6
-	local file=$1
+	file=$1
 
 	cat ${TMP2}/${file} | xargs -n 8 | while read nus; do
 		for nu in $nus; do
@@ -631,8 +631,8 @@ test_03_ss(){
 }
 
 test_07_sr(){
-	local file=$1
-	local mark=$2
+	file=$1
+	mark=$2
 	
 	# alisa binary
 	killall wt-rss-local >/dev/null 2>&1
@@ -647,14 +647,14 @@ test_07_sr(){
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 				
 				# 1. resolve server
-				local _server_ip=$(_get_server_ip $(dbus get ssconf_basic_server_${nu}))
+				_server_ip=$(_get_server_ip $(dbus get ssconf_basic_server_${nu}))
 				if [ -z "${_server_ip}" ];then
 					# use domain
 					_server_ip=$(dbus get ssconf_basic_server_${nu})
 				fi
 
 				# 2. gen json conf
-				local socks5_port=$(get_rand_port)
+				socks5_port=$(get_rand_port)
 				cat >${TMP2}/conf_${mark}/${nu}.json <<-EOF
 					{
 					    "server":"${_server_ip}",
@@ -694,7 +694,7 @@ test_07_sr(){
 }
 
 test_08_vr(){
-	local file=$1
+	file=$1
 
 	# alisa binary
 	killall wt-v2ray >/dev/null 2>&1
@@ -741,7 +741,7 @@ test_08_vr(){
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 
 				# 2. start curl test
-				local socks5_port=$(eval echo \$socks5_port_${nu})
+				socks5_port=$(eval echo \$socks5_port_${nu})
 				curl_test ${nu} ${socks5_port}
 			} &
 		done
@@ -761,7 +761,7 @@ test_08_vr(){
 }
 
 test_09_xr(){
-	local file=$1
+	file=$1
 
 	# alisa binary
 	killall wt-xray >/dev/null 2>&1
@@ -806,7 +806,7 @@ test_09_xr(){
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 				
 				# 2. start curl test
-				local socks5_port=$(eval echo \$socks5_port_${nu})
+				socks5_port=$(eval echo \$socks5_port_${nu})
 				curl_test ${nu} ${socks5_port}
 			} &
 		done
@@ -826,7 +826,7 @@ test_09_xr(){
 }
 
 test_10_tj(){
-	local file=$1
+	file=$1
 
 	# alisa binary
 	killall wt-trojan >/dev/null 2>&1
@@ -869,7 +869,7 @@ test_10_tj(){
 				echo -en "${nu}>testing...\n" >>/tmp/upload/webtest.txt
 
 				# 2. start curl test
-				local socks5_port=$(eval echo \$socks5_port_${nu})
+				socks5_port=$(eval echo \$socks5_port_${nu})
 				curl_test ${nu} ${socks5_port}
 			} &
 		done
@@ -889,7 +889,7 @@ test_10_tj(){
 }
 
 test_11_nv(){
-	local file=$1
+	file=$1
 
 	# alisa binary
 	ln -sf /koolshare/bin/naive ${TMP2}/wt-naive
@@ -899,10 +899,10 @@ test_11_nv(){
 		for nu in $nus; do
 			{
 				# 1. resolve server
-				local _server_ip=$(_get_server_ip $(dbus get ssconf_basic_naive_server_${nu}))
+				_server_ip=$(_get_server_ip $(dbus get ssconf_basic_naive_server_${nu}))
 
 				# 2. start naiveproxy
-				local socks5_port=$(get_rand_port)
+				socks5_port=$(get_rand_port)
 				if [ -z "${_server_ip}" ];then
 					run ${TMP2}/wt-naive --listen=socks://127.0.0.1:${socks5_port} --proxy=$(dbus get ssconf_basic_naive_prot_${nu})://$(dbus get ssconf_basic_naive_user_${nu}):$(dbus get ssconf_basic_naive_pass_${nu} | base64_decode)@$(dbus get ssconf_basic_naive_server_${nu}):$(dbus get ssconf_basic_naive_port_${nu}) >/dev/null 2>&1 &
 				else
@@ -915,7 +915,7 @@ test_11_nv(){
 				curl_test ${nu} ${socks5_port}
 
 				# 5. stop naive
-				local _pid=$(ps | grep wt-naive | grep ${socks5_port} | awk '{print $1}')
+				_pid=$(ps | grep wt-naive | grep ${socks5_port} | awk '{print $1}')
 				if [ -n "${_pid}" ];then
 					kill -9 ${_pid} >/dev/null 2>&1
 				fi
@@ -932,7 +932,7 @@ test_11_nv(){
 }
 
 test_12_tc(){
-	local file=$1
+	file=$1
 
 	# alisa binary
 	ln -sf /koolshare/bin/tuic-client ${TMP2}/wt-tuic
@@ -942,8 +942,8 @@ test_12_tc(){
 		for nu in $nus; do
 			{
 				# 1. gen json
-				local socks5_port=$(get_rand_port)
-				local new_addr="127.0.0.1:${socks5_port}"
+				socks5_port=$(get_rand_port)
+				new_addr="127.0.0.1:${socks5_port}"
 				dbus get ssconf_basic_tuic_json_${nu} | base64_decode | run jq --arg addr "$new_addr" '.local.server = $addr' >${TMP2}/conf/tuic-${socks5_port}.json
 
 				# 2. start tuic
@@ -955,7 +955,7 @@ test_12_tc(){
 				curl_test ${nu} ${socks5_port}
 
 				# 5. stop tuic
-				local _pid=$(ps | grep "wt-tuic" | grep -v grep | grep ${socks5_port} | awk '{print $1}')
+				_pid=$(ps | grep "wt-tuic" | grep -v grep | grep ${socks5_port} | awk '{print $1}')
 				if [ -n "${_pid}" ];then
 					kill -9 ${_pid} >/dev/null 2>&1
 				fi
@@ -972,8 +972,8 @@ test_12_tc(){
 }
 
 test_13_h2(){
-	local file=$1
-	local mark=$2
+	file=$1
+	mark=$2
 	
 	# alisa binary
 	killall wt-hy2 >/dev/null 2>&1
@@ -1011,7 +1011,7 @@ test_13_h2(){
 				sleep 2
 
 				# 2. start curl test
-				local socks5_port=$(eval echo \$socks5_port_${nu})
+				socks5_port=$(eval echo \$socks5_port_${nu})
 				curl_test ${nu} ${socks5_port}
 
 				# 3. stop hy2
@@ -1029,79 +1029,79 @@ test_13_h2(){
 }
 
 creat_v2ray_json() {
-	local nu=$1
-	local v2ray_use_json=$(dbus get ssconf_basic_v2ray_use_json_${nu})
+	nu=$1
+	v2ray_use_json=$(dbus get ssconf_basic_v2ray_use_json_${nu})
 	# regular format
 	if [ "${v2ray_use_json}" != "1" ]; then
-		local v2ray_server=$(dbus get ssconf_basic_server_${nu})
-		local _server_ip=$(_get_server_ip ${v2ray_server})
+		v2ray_server=$(dbus get ssconf_basic_server_${nu})
+		_server_ip=$(_get_server_ip ${v2ray_server})
 		if [ -z "${_server_ip}" ];then
 			_server_ip=${v2ray_server}
 		fi
 	
-		local tcp="null"
-		local kcp="null"
-		local ws="null"
-		local h2="null"
-		local qc="null"
-		local gr="null"
-		local tls="null"
+		tcp="null"
+		kcp="null"
+		ws="null"
+		h2="null"
+		qc="null"
+		gr="null"
+		tls="null"
 		
-		local v2ray_network_host=$(dbus get ssconf_basic_v2ray_network_host_${nu} | sed 's/,/", "/g')
-		local v2ray_network_path=$(dbus get ssconf_basic_v2ray_network_path_${nu})
-		local v2ray_network_security="none"
-		local v2ray_network_security=$(dbus get ssconf_basic_v2ray_network_security_${nu})
+		v2ray_network_host=$(dbus get ssconf_basic_v2ray_network_host_${nu} | sed 's/,/", "/g')
+		v2ray_network_path=$(dbus get ssconf_basic_v2ray_network_path_${nu})
+		v2ray_network_security="none"
+		v2ray_network_security=$(dbus get ssconf_basic_v2ray_network_security_${nu})
 		if [ "${v2ray_network_security}" == "tls" ];then
-			local v2ray_network_security_ai=$(dbus get ssconf_basic_v2ray_network_security_ai_${nu})
-			local v2ray_network_security_alpn_h2=$(dbus get ssconf_basic_v2ray_network_security_alpn_h2_${nu})
-			local v2ray_network_security_alpn_http=$(dbus get ssconf_basic_v2ray_network_security_alpn_http_${nu})
+			v2ray_network_security_ai=$(dbus get ssconf_basic_v2ray_network_security_ai_${nu})
+			v2ray_network_security_alpn_h2=$(dbus get ssconf_basic_v2ray_network_security_alpn_h2_${nu})
+			v2ray_network_security_alpn_http=$(dbus get ssconf_basic_v2ray_network_security_alpn_http_${nu})
 
 			if [ "${v2ray_network_security_alpn_h2}" == "1" -a "${v2ray_network_security_alpn_http}" == "1" ];then
-				local apln="[\"h2\",\"http/1.1\"]"
+				apln="[\"h2\",\"http/1.1\"]"
 			elif [ "${v2ray_network_security_alpn_h2}" != "1" -a "${v2ray_network_security_alpn_http}" == "1" ];then
-				local apln="[\"http/1.1\"]"
+				apln="[\"http/1.1\"]"
 			elif [ "${v2ray_network_security_alpn_h2}" == "1" -a "${v2ray_network_security_alpn_http}" != "1" ];then
-				local apln="[\"h2\"]"
+				apln="[\"h2\"]"
 			elif [ "${v2ray_network_security_alpn_h2}" != "1" -a "${v2ray_network_security_alpn_http}" != "1" ];then
-				local apln="null"
+				apln="null"
 			fi
 
 			# sni is sni
-			local v2ray_network_security_sni=$(dbus get ssconf_basic_v2ray_network_security_sni_${nu})
+			v2ray_network_security_sni=$(dbus get ssconf_basic_v2ray_network_security_sni_${nu})
 			
 			# sni is server
 			if [ -z "${v2ray_network_security_sni}" ];then
 				__valid_ip "${v2ray_server}"
 				if [ "$?" != "0" ]; then
 					# likely to be domain
-					local v2ray_network_security_sni="$(dbus get ssconf_basic_server_${nu})"
+					v2ray_network_security_sni="$(dbus get ssconf_basic_server_${nu})"
 				fi
 			fi
 
 			# sni is host
 			if [ -z "${v2ray_network_security_sni}" -a -n "${v2ray_network_host}" ];then
-				local v2ray_network_security_sni=$(echo "${v2ray_network_host}" | sed 's/", "/\n/g' | head -n1)
+				v2ray_network_security_sni=$(echo "${v2ray_network_host}" | sed 's/", "/\n/g' | head -n1)
 			fi
 
 			# gather
-			local tls="{
+			tls="{
 				\"allowInsecure\": $(get_function_switch ${v2ray_network_security_ai})
 				,\"alpn\": ${apln}
 				,\"serverName\": $(get_value_null ${v2ray_network_security_sni})
 				}"		
 		fi
-		local v2ray_headtype_tcp=$(dbus get ssconf_basic_v2ray_headtype_tcp_${nu})
-		local v2ray_headtype_kcp=$(dbus get ssconf_basic_v2ray_headtype_kcp_${nu})
-		local v2ray_kcp_seed=$(dbus get ssconf_basic_v2ray_kcp_seed_${nu})
-		local v2ray_headtype_quic=$(dbus get ssconf_basic_v2ray_headtype_quic_${nu})
-		local v2ray_grpc_mode=$(dbus get ssconf_basic_v2ray_grpc_mode_${nu})
+		v2ray_headtype_tcp=$(dbus get ssconf_basic_v2ray_headtype_tcp_${nu})
+		v2ray_headtype_kcp=$(dbus get ssconf_basic_v2ray_headtype_kcp_${nu})
+		v2ray_kcp_seed=$(dbus get ssconf_basic_v2ray_kcp_seed_${nu})
+		v2ray_headtype_quic=$(dbus get ssconf_basic_v2ray_headtype_quic_${nu})
+		v2ray_grpc_mode=$(dbus get ssconf_basic_v2ray_grpc_mode_${nu})
 		
-		local v2ray_network=$(dbus get ssconf_basic_v2ray_network_${nu})
+		v2ray_network=$(dbus get ssconf_basic_v2ray_network_${nu})
 		[ -z "${v2ray_network}" ] && v2ray_network="tcp"
 		case "${v2ray_network}" in
 		tcp)
 			if [ "${v2ray_headtype_tcp}" == "http" ]; then
-				local tcp="{
+				tcp="{
 					\"header\": {
 					\"type\": \"http\"
 					,\"request\": {
@@ -1124,7 +1124,7 @@ creat_v2ray_json() {
 			fi
 			;;
 		kcp)
-			local kcp="{
+			kcp="{
 				\"mtu\": 1350
 				,\"tti\": 50
 				,\"uplinkCapacity\": 12
@@ -1140,30 +1140,30 @@ creat_v2ray_json() {
 			;;
 		ws)
 			if [ -z "${v2ray_network_path}" -a -z "${v2ray_network_host}" ]; then
-				local ws="{}"
+				ws="{}"
 			elif [ -z "${v2ray_network_path}" -a -n "${v2ray_network_host}" ]; then
-				local ws="{
+				ws="{
 					\"headers\": $(get_ws_header ${v2ray_network_host})
 					}"
 			elif [ -n "${v2ray_network_path}" -a -z "${v2ray_network_host}" ]; then
-				local ws="{
+				ws="{
 					\"path\": $(get_value_null ${v2ray_network_path})
 					}"
 			elif [ -n "${v2ray_network_path}" -a -n "${v2ray_network_host}" ]; then
-				local ws="{
+				ws="{
 					\"path\": $(get_value_null ${v2ray_network_path}),
 					\"headers\": $(get_ws_header ${v2ray_network_host})
 					}"
 			fi
 			;;
 		h2)
-			local h2="{
+			h2="{
 				\"path\": $(get_value_empty ${v2ray_network_path})
 				,\"host\": $(get_host ${v2ray_network_host})
 				}"
 			;;
 		quic)
-			local qc="{
+			qc="{
 				\"security\": $(get_value_empty ${v2ray_network_host}),
 				\"key\": $(get_value_empty ${v2ray_network_path}),
 				\"header\": {
@@ -1172,17 +1172,17 @@ creat_v2ray_json() {
 				}"
 			;;
 		grpc)
-			local gr="{
+			gr="{
 				\"serviceName\": $(get_value_empty ${v2ray_network_path}),
 				\"multiMode\": $(get_grpc_multimode ${v2ray_grpc_mode})
 				}"
 			;;
 		esac
 
-		local v2ray_port=$(dbus get ssconf_basic_port_${nu})
-		local v2ray_uuid=$(dbus get ssconf_basic_v2ray_uuid_${nu})
-		local v2ray_alterid=$(dbus get ssconf_basic_v2ray_alterid_${nu})
-		local v2ray_security=$(dbus get ssconf_basic_v2ray_security_${nu})
+		v2ray_port=$(dbus get ssconf_basic_port_${nu})
+		v2ray_uuid=$(dbus get ssconf_basic_v2ray_uuid_${nu})
+		v2ray_alterid=$(dbus get ssconf_basic_v2ray_alterid_${nu})
+		v2ray_security=$(dbus get ssconf_basic_v2ray_security_${nu})
 		[ -z "${xray_alterid}" ] && xray_alterid="0"
 		[ -z "${v2ray_security}" ] && v2ray_security="auto"
 	
@@ -1230,8 +1230,8 @@ creat_v2ray_json() {
 		sed -i '/null/d' ${TMP2}/conf/${nu}_outbounds.json 2>/dev/null
 	else
 		dbus get ssconf_basic_v2ray_json_${nu} | base64_decode >${TMP2}/v2ray_user.json
-		local OB=$(cat ${TMP2}/v2ray_user.json | run jq .outbound)
-		local OBS=$(cat ${TMP2}/v2ray_user.json | run jq .outbounds)
+		OB=$(cat ${TMP2}/v2ray_user.json | run jq .outbound)
+		OBS=$(cat ${TMP2}/v2ray_user.json | run jq .outbounds)
 
 		# 兼容旧格式：outbound
 		if [ "$OB" != "null" ]; then
@@ -1246,7 +1246,7 @@ creat_v2ray_json() {
 	fi
 
 	# inbounds
-	local socks5_port=$(get_rand_port)
+	socks5_port=$(get_rand_port)
 	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
 	cat >>${TMP2}/conf/${nu}_inbounds.json <<-EOF
 		{
@@ -1281,31 +1281,31 @@ creat_v2ray_json() {
 }
 
 creat_xray_ss_json() {
-	local nu=$1
-	local mark=$2
+	nu=$1
+	mark=$2
 
 	# gen xray outbound
-	local ss_server=$(dbus get ssconf_basic_server_${nu})
-	local _server_ip=$(_get_server_ip ${ss_server})
+	ss_server=$(dbus get ssconf_basic_server_${nu})
+	_server_ip=$(_get_server_ip ${ss_server})
 	if [ -z "${_server_ip}" ];then
 		_server_ip=${ss_server}
 	fi
-	local ss_port=$(dbus get ssconf_basic_port_${nu})
-	local ss_pass=$(dbus get ssconf_basic_password_${nu} | base64_decode)
-	local ss_meth=$(dbus get ssconf_basic_method_${nu})
+	ss_port=$(dbus get ssconf_basic_port_${nu})
+	ss_pass=$(dbus get ssconf_basic_password_${nu} | base64_decode)
+	ss_meth=$(dbus get ssconf_basic_method_${nu})
 	
 	if [ "${ss_basic_tfo}" == "1" -a "${LINUX_VER}" != "26" ]; then
-		local OBFS_ARG="--fast-open"
+		OBFS_ARG="--fast-open"
 		echo 3 >/proc/sys/net/ipv4/tcp_fastopen
 	else
-		local OBFS_ARG=""
+		OBFS_ARG=""
 	fi
 
 	# obfs
 	if [ "$(dbus get ssconf_basic_ss_obfs_${nu})" == "http" -o "$(dbus get ssconf_basic_ss_obfs_${nu})" == "tls" ]; then
-		local obfs_port=$(get_rand_port)
-		local _server_ip_tmp="127.0.0.1"
-		local _server_port_tmp="${obfs_port}"
+		obfs_port=$(get_rand_port)
+		_server_ip_tmp="127.0.0.1"
+		_server_port_tmp="${obfs_port}"
 		if [ -n "$(dbus get ssconf_basic_ss_obfs_host_${nu})" ]; then
 			cat >>"${TMP2}/bash_${mark}/start_${nu}.sh" <<-EOF
 				#!/bin/sh
@@ -1328,8 +1328,8 @@ creat_xray_ss_json() {
 		chmod +x ${TMP2}/bash_${mark}/start_${nu}.sh
 		chmod +x ${TMP2}/bash_${mark}/stop_${nu}.sh
 	else
-		local _server_ip_tmp="${_server_ip}"
-		local _server_port_tmp="${ss_port}"
+		_server_ip_tmp="${_server_ip}"
+		_server_port_tmp="${ss_port}"
 	fi
 	
 	cat >>${TMP2}/conf_${mark}/${nu}_outbounds.json <<-EOF
@@ -1364,7 +1364,7 @@ creat_xray_ss_json() {
 	fi
 
 	# inbounds
-	local socks5_port=$(get_rand_port)
+	socks5_port=$(get_rand_port)
 	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
 	cat >>${TMP2}/conf_${mark}/${nu}_inbounds.json <<-EOF
 		{
@@ -1399,64 +1399,64 @@ creat_xray_ss_json() {
 }
 
 creat_xray_json() {
-	local nu=$1
-	local xray_use_json=$(dbus get ssconf_basic_xray_use_json_${nu})
+	nu=$1
+	xray_use_json=$(dbus get ssconf_basic_xray_use_json_${nu})
 
 	if [ "${xray_use_json}" != "1" ]; then
-		local xray_server=$(dbus get ssconf_basic_server_${nu})
-		local _server_ip=$(_get_server_ip ${xray_server})
+		xray_server=$(dbus get ssconf_basic_server_${nu})
+		_server_ip=$(_get_server_ip ${xray_server})
 		if [ -z "${_server_ip}" ];then
 			_server_ip=${xray_server}
 		fi
 
-		local tcp="null"
-		local kcp="null"
-		local ws="null"
-		local h2="null"
-		local qc="null"
-		local gr="null"
-		local tls="null"
-		local xtls="null"
-		local reali="null"
+		tcp="null"
+		kcp="null"
+		ws="null"
+		h2="null"
+		qc="null"
+		gr="null"
+		tls="null"
+		xtls="null"
+		reali="null"
 
-		local xray_network_host=$(dbus get ssconf_basic_xray_network_host_${nu} | sed 's/,/", "/g')
-		local xray_network_path=$(dbus get ssconf_basic_xray_network_path_${nu})
+		xray_network_host=$(dbus get ssconf_basic_xray_network_host_${nu} | sed 's/,/", "/g')
+		xray_network_path=$(dbus get ssconf_basic_xray_network_path_${nu})
 		# sni is sni
-		local xray_network_security_sni=$(dbus get ssconf_basic_xray_network_security_sni_${nu})
+		xray_network_security_sni=$(dbus get ssconf_basic_xray_network_security_sni_${nu})
 		# sni is server
 		if [ -z "${xray_network_security_sni}" ];then
 			__valid_ip "${xray_server}"
 			if [ "$?" != "0" ]; then
 				# likely to be domain
-				local xray_network_security_sni="$(dbus get ssconf_basic_server_${nu})"
+				xray_network_security_sni="$(dbus get ssconf_basic_server_${nu})"
 			fi
 		fi
 		# sni is host
 		if [ -z "${xray_network_security_sni}" -a -n "${xray_network_host}" ];then
-			local xray_network_security_sni=$(echo "${xray_network_host}" | sed 's/", "/\n/g' | head -n1)
+			xray_network_security_sni=$(echo "${xray_network_host}" | sed 's/", "/\n/g' | head -n1)
 		fi
-		local xray_flow=$(dbus get ssconf_basic_xray_flow_${nu})
-		local xray_fingerprint=$(dbus get ssconf_basic_xray_fingerprint_${nu})
+		xray_flow=$(dbus get ssconf_basic_xray_flow_${nu})
+		xray_fingerprint=$(dbus get ssconf_basic_xray_fingerprint_${nu})
 		[ -z "${xray_fingerprint}" ] && xray_fingerprint="chrome"
-		local xray_network_security="none"
-		local xray_network_security=$(dbus get ssconf_basic_xray_network_security_${nu})
+		xray_network_security="none"
+		xray_network_security=$(dbus get ssconf_basic_xray_network_security_${nu})
 
 		if [ "${xray_network_security}" == "tls" -o "${xray_network_security}" == "xtls" ];then
-			local xray_network_security_ai=$(dbus get ssconf_basic_xray_network_security_ai_${nu})
-			local xray_network_security_alpn_h2=$(dbus get ssconf_basic_xray_network_security_alpn_h2_${nu})
-			local xray_network_security_alpn_ht=$(dbus get ssconf_basic_xray_network_security_alpn_http_${nu})
+			xray_network_security_ai=$(dbus get ssconf_basic_xray_network_security_ai_${nu})
+			xray_network_security_alpn_h2=$(dbus get ssconf_basic_xray_network_security_alpn_h2_${nu})
+			xray_network_security_alpn_ht=$(dbus get ssconf_basic_xray_network_security_alpn_http_${nu})
 			if [ "${xray_network_security_alpn_h2}" == "1" -a "${xray_network_security_alpn_ht}" == "1" ];then
-				local apln="[\"h2\",\"http/1.1\"]"
+				apln="[\"h2\",\"http/1.1\"]"
 			elif [ "${xray_network_security_alpn_h2}" != "1" -a "${xray_network_security_alpn_ht}" == "1" ];then
-				local apln="[\"http/1.1\"]"
+				apln="[\"http/1.1\"]"
 			elif [ "${xray_network_security_alpn_h2}" == "1" -a "${xray_network_security_alpn_ht}" != "1" ];then
-				local apln="[\"h2\"]"
+				apln="[\"h2\"]"
 			elif [ "${xray_network_security_alpn_h2}" != "1" -a "${xray_network_security_alpn_ht}" != "1" ];then
-				local apln="null"
+				apln="null"
 			fi
 
 			# gather
-			local _tmp="{
+			_tmp="{
 					\"allowInsecure\": $(get_function_switch ${xray_network_security_ai})
 					,\"alpn\": ${apln}
 					,\"serverName\": $(get_value_null ${xray_network_security_sni})
@@ -1465,20 +1465,20 @@ creat_xray_json() {
 
 			# tls or xtls
 			if [ "${xray_network_security}" == "tls" ];then
-				local tls="${_tmp}"
+				tls="${_tmp}"
 			elif [ "${xray_network_security}" == "xtls" ];then
-				local xtls="${_tmp}"
+				xtls="${_tmp}"
 			fi
 		fi
 
 		if [ "${xray_network_security}" == "reality" ];then
-			local xray_show=$(dbus get ssconf_basic_xray_show_${nu})
-			local xray_fingerprint=$(dbus get ssconf_basic_xray_fingerprint_${nu})
+			xray_show=$(dbus get ssconf_basic_xray_show_${nu})
+			xray_fingerprint=$(dbus get ssconf_basic_xray_fingerprint_${nu})
 			[ -z "${xray_fingerprint}" ] && xray_fingerprint="chrome"
-			local xray_publickey=$(dbus get ssconf_basic_xray_publickey_${nu})
-			local xray_shortid=$(dbus get ssconf_basic_xray_shortid_${nu})
-			local xray_spiderx=$(dbus get ssconf_basic_xray_spiderx_${nu})
-			local reali="{
+			xray_publickey=$(dbus get ssconf_basic_xray_publickey_${nu})
+			xray_shortid=$(dbus get ssconf_basic_xray_shortid_${nu})
+			xray_spiderx=$(dbus get ssconf_basic_xray_spiderx_${nu})
+			reali="{
 					\"show\": $(get_function_switch ${xray_show})
 					,\"fingerprint\": $(get_value_empty ${xray_fingerprint})
 					,\"serverName\": $(get_value_null ${xray_network_security_sni})
@@ -1489,21 +1489,21 @@ creat_xray_json() {
 		fi
 
 		if [ "${xray_network_security}" == "none" ];then
-			local xray_flow=""
+			xray_flow=""
 		fi
 
-		local xray_headtype_tcp=$(dbus get ssconf_basic_xray_headtype_tcp_${nu})
-		local xray_headtype_kcp=$(dbus get ssconf_basic_xray_headtype_kcp_${nu})
-		local xray_kcp_seed=$(dbus get ssconf_basic_xray_kcp_seed_${nu})
-		local xray_headtype_quic=$(dbus get ssconf_basic_xray_headtype_quic_${nu})
-		local xray_grpc_mode=$(dbus get ssconf_basic_xray_grpc_mode_${nu})
+		xray_headtype_tcp=$(dbus get ssconf_basic_xray_headtype_tcp_${nu})
+		xray_headtype_kcp=$(dbus get ssconf_basic_xray_headtype_kcp_${nu})
+		xray_kcp_seed=$(dbus get ssconf_basic_xray_kcp_seed_${nu})
+		xray_headtype_quic=$(dbus get ssconf_basic_xray_headtype_quic_${nu})
+		xray_grpc_mode=$(dbus get ssconf_basic_xray_grpc_mode_${nu})
 		
-		local xray_network=$(dbus get ssconf_basic_xray_network_${nu})
+		xray_network=$(dbus get ssconf_basic_xray_network_${nu})
 		[ -z "${xray_network}" ] && xray_network="tcp"
 		case "${xray_network}" in
 		tcp)
 			if [ "${xray_headtype_tcp}" == "http" ]; then
-				local tcp="{
+				tcp="{
 					\"header\": {
 					\"type\": \"http\"
 					,\"request\": {
@@ -1526,7 +1526,7 @@ creat_xray_json() {
 			fi
 			;;
 		kcp)
-			local kcp="{
+			kcp="{
 				\"mtu\": 1350
 				,\"tti\": 50
 				,\"uplinkCapacity\": 12
@@ -1542,30 +1542,30 @@ creat_xray_json() {
 			;;
 		ws)
 			if [ -z "${xray_network_path}" -a -z "${xray_network_host}" ]; then
-				local ws="{}"
+				ws="{}"
 			elif [ -z "${xray_network_path}" -a -n "${xray_network_host}" ]; then
-				local ws="{
+				ws="{
 					\"headers\": $(get_ws_header ${xray_network_host})
 					}"
 			elif [ -n "${xray_network_path}" -a -z "${xray_network_host}" ]; then
-				local ws="{
+				ws="{
 					\"path\": $(get_value_null ${xray_network_path})
 					}"
 			elif [ -n "${xray_network_path}" -a -n "${xray_network_host}" ]; then
-				local ws="{
+				ws="{
 					\"path\": $(get_value_null ${xray_network_path}),
 					\"headers\": $(get_ws_header ${xray_network_host})
 					}"
 			fi
 			;;
 		h2)
-			local h2="{
+			h2="{
 				\"path\": $(get_value_empty ${xray_network_path})
 				,\"host\": $(get_host ${xray_network_host})
 				}"
 			;;
 		quic)
-			local qc="{
+			qc="{
 				\"security\": $(get_value_empty ${xray_network_host}),
 				\"key\": $(get_value_empty ${xray_network_path}),
 				\"header\": {
@@ -1574,18 +1574,18 @@ creat_xray_json() {
 				}"
 			;;
 		grpc)
-			local gr="{
+			gr="{
 				\"serviceName\": $(get_value_empty ${xray_network_path}),
 				\"multiMode\": $(get_grpc_multimode ${xray_grpc_mode})
 				}"
 			;;
 		esac
 
-		local xray_port=$(dbus get ssconf_basic_port_${nu})
-		local xray_uuid=$(dbus get ssconf_basic_xray_uuid_${nu})
-		local xray_prot=$(dbus get ssconf_basic_xray_prot_${nu})
-		local xray_alterid=$(dbus get ssconf_basic_xray_alterid_${nu})
-		local xray_encryption=$(dbus get ssconf_basic_xray_encryption_${nu})
+		xray_port=$(dbus get ssconf_basic_port_${nu})
+		xray_uuid=$(dbus get ssconf_basic_xray_uuid_${nu})
+		xray_prot=$(dbus get ssconf_basic_xray_prot_${nu})
+		xray_alterid=$(dbus get ssconf_basic_xray_alterid_${nu})
+		xray_encryption=$(dbus get ssconf_basic_xray_encryption_${nu})
 		[ -z "${xray_prot}" ] && xray_prot="vless"
 		[ -z "${xray_alterid}" ] && xray_alterid="0"
 
@@ -1644,8 +1644,8 @@ creat_xray_json() {
 		fi
 	else
 		dbus get ssconf_basic_xray_json_${nu} | base64_decode >${TMP2}/xray_user.json
-		local OB=$(cat ${TMP2}/xray_user.json | run jq .outbound)
-		local OBS=$(cat ${TMP2}/xray_user.json | run jq .outbounds)
+		OB=$(cat ${TMP2}/xray_user.json | run jq .outbound)
+		OBS=$(cat ${TMP2}/xray_user.json | run jq .outbounds)
 
 		# 兼容旧格式：outbound
 		if [ "$OB" != "null" ]; then
@@ -1660,7 +1660,7 @@ creat_xray_json() {
 	fi
 
 	# inbounds
-	local socks5_port=$(get_rand_port)
+	socks5_port=$(get_rand_port)
 	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
 	cat >>${TMP2}/conf/${nu}_inbounds.json <<-EOF
 		{
@@ -1695,18 +1695,18 @@ creat_xray_json() {
 }
 
 creat_trojan_json(){
-	local nu=$1
-	local trojan_server=$(dbus get ssconf_basic_server_${nu})
-	local trojan_port=$(dbus get ssconf_basic_port_${nu})
-	local trojan_uuid=$(dbus get ssconf_basic_trojan_uuid_${nu})
-	local trojan_sni=$(dbus get ssconf_basic_trojan_sni_${nu})
-	local trojan_ai=$(dbus get ssconf_basic_trojan_ai_${nu})
-	local trojan_ai_global=$(dbus get ss_basic_tjai${nu})
+	nu=$1
+	trojan_server=$(dbus get ssconf_basic_server_${nu})
+	trojan_port=$(dbus get ssconf_basic_port_${nu})
+	trojan_uuid=$(dbus get ssconf_basic_trojan_uuid_${nu})
+	trojan_sni=$(dbus get ssconf_basic_trojan_sni_${nu})
+	trojan_ai=$(dbus get ssconf_basic_trojan_ai_${nu})
+	trojan_ai_global=$(dbus get ss_basic_tjai${nu})
 	if [ "${trojan_ai_global}" == "1" ];then
-		local trojan_ai="1"
+		trojan_ai="1"
 	fi
-	local trojan_tfo=$(dbus get ssconf_basic_trojan_tfo_${nu})
-	local _server_ip=$(_get_server_ip ${trojan_server})
+	trojan_tfo=$(dbus get ssconf_basic_trojan_tfo_${nu})
+	_server_ip=$(_get_server_ip ${trojan_server})
 	if [ -z "${_server_ip}" ];then
 		_server_ip=${trojan_server}
 	fi
@@ -1743,7 +1743,7 @@ creat_trojan_json(){
 		sed -i '/tcpFastOpen/d' ${TMP2}/conf/${nu}_outbounds.json
 	fi
 	# inbounds
-	local socks5_port=$(get_rand_port)
+	socks5_port=$(get_rand_port)
 	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
 	cat >>${TMP2}/conf/${nu}_inbounds.json <<-EOF
 		{
@@ -1777,21 +1777,21 @@ creat_trojan_json(){
 }
 
 creat_hy2_yaml(){
-	local nu=$1
-	local mark=$2
+	nu=$1
+	mark=$2
 	if [ -z "$(dbus get ssconf_basic_hy2_sni_${nu})" ];then
 		__valid_ip_silent "$(dbus get ssconf_basic_hy2_server_${nu})"
 		if [ "$?" != "0" ];then
 			# not ip, should be a domain
-			local hy2_sni=$(dbus get ssconf_basic_hy2_server_${nu})
+			hy2_sni=$(dbus get ssconf_basic_hy2_server_${nu})
 		else
-			local hy2_sni=""
+			hy2_sni=""
 		fi
 	else
-		local hy2_sni="$(dbus get ssconf_basic_hy2_sni_${nu})"
+		hy2_sni="$(dbus get ssconf_basic_hy2_sni_${nu})"
 	fi
 
-	local _server_ip=$(_get_server_ip $(dbus get ssconf_basic_hy2_server_${nu}))
+	_server_ip=$(_get_server_ip $(dbus get ssconf_basic_hy2_server_${nu}))
 	if [ -z "${_server_ip}" ];then
 		# use domain
 		_server_ip=$(dbus get ssconf_basic_hy2_server_${nu})
@@ -1831,7 +1831,7 @@ creat_hy2_yaml(){
 		EOF
 	fi
 
-	local socks5_port=$(get_rand_port)
+	socks5_port=$(get_rand_port)
 	echo "export socks5_port_${nu}=${socks5_port}" >> ${TMP2}/socsk5_ports.txt
 	cat >> ${TMP2}/conf_${mark}/${nu}.yaml <<-EOF
 		transport:
@@ -1844,25 +1844,25 @@ creat_hy2_yaml(){
 }
 
 curl_test(){
-	local nu=$1
-	local port=$2
+	nu=$1
+	port=$2
 
 	# curl-fancyss -o /dev/null -s -I -x socks5h://127.0.0.1:23456 --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" http://www.google.com.tw
 	
 	# test multiple time and get the best one
 	# echo ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} >> ${TMP2}/curl_test_log.txt
-	local ret=$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
+	ret=$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
 	usleep 250000
-	local ret=${ret}@$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
+	ret=${ret}@$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
 	usleep 250000
-	local ret=${ret}@$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
-	local ret=$(echo ${ret} | sed 's/@/\n/g' | sort -n | head -n1)
-	local _match=$(echo "${ret}"|grep -E "\|")
+	ret=${ret}@$(run ${TMP2}/curl-webtest -o /dev/null -s -I -x socks5h://127.0.0.1:${port} --connect-timeout 5 -m 10 -w "%{time_total}|%{response_code}\n" ${ss_basic_wt_furl} 2>/dev/null)
+	ret=$(echo ${ret} | sed 's/@/\n/g' | sort -n | head -n1)
+	_match=$(echo "${ret}"|grep -E "\|")
 	if [ -z ${_match} ];then
 		echo -en "${nu}>failed\n" >>${TMP2}/results/${nu}.txt
 	else
-		local ret_time=$(echo $ret | awk -F "|" '{printf "%.0f\n", $1 * 1000}')
-		local ret_code=$(echo $ret | awk -F "|" '{print $2}')
+		ret_time=$(echo $ret | awk -F "|" '{printf "%.0f\n", $1 * 1000}')
+		ret_code=$(echo $ret | awk -F "|" '{print $2}')
 
 		# 5. show result
 		if [ "${ret_code}" == "200" -o "${ret_code}" == "204" ];then
@@ -1874,9 +1874,9 @@ curl_test(){
 }
 
 _get_server_ip() {
-	local SERVER_IP
-	local domain1=$(echo "$1" | grep -E "^https://|^http://|/")
-	local domain2=$(echo "$1" | grep -E "\.")
+	SERVER_IP
+	domain1=$(echo "$1" | grep -E "^https://|^http://|/")
+	domain2=$(echo "$1" | grep -E "\.")
 	if [ -n "${domain1}" -o -z "${domain2}" ]; then
 		echo "$1 不是域名也不是ip" >>${TMP2}/webtest_log.txt
 		echo ""
@@ -1890,10 +1890,10 @@ _get_server_ip() {
 		return 0
 	fi
 
-	local count=0
-	local current=${ss_basic_lastru}
+	count=0
+	current=${ss_basic_lastru}
 	if [ -z "${current}" ];then
-		local current=$(shuf -i 1-18 -n 1)
+		current=$(shuf -i 1-18 -n 1)
 	fi
 	if [ ${current} -lt 1 -o ${current} -gt 18 ];then
 		current=1
@@ -1941,8 +1941,8 @@ _get_server_ip() {
 }
 
 __get_server_resolver() {
-	local idx=$1
-	local res
+	idx=$1
+	res
 	# tcp/udp servers
 	# ------------------ 国内 -------------------
 	# 阿里dns
@@ -1982,9 +1982,9 @@ __get_server_resolver() {
 }
 
 wait_program(){
-	local BINNAME=$1
-	local PID1
-	local i=40
+	BINNAME=$1
+	PID1
+	i=40
 	until [ -n "${PID1}" ]; do
 		usleep 250000
 		i=$(($i - 1))
@@ -1997,13 +1997,13 @@ wait_program(){
 }
 
 wait_program2(){
-	local BINNAME=$1
-	local LOGFILE=$2
-	local CONTENT=$3
-	local MATCH
-	local PID1
+	BINNAME=$1
+	LOGFILE=$2
+	CONTENT=$3
+	MATCH
+	PID1
 	# wait for 4s
-	local i=16
+	i=16
 	# until [ -n "${PID1}" ]; do
 	# 	usleep 250000
 	# 	i=$(($i - 1))
@@ -2016,7 +2016,7 @@ wait_program2(){
 	until [ -n "${MATCH}" ]; do
 		usleep 250000
 		i=$(($i - 1))
-		local MATCH=$(cat $LOGFILE 2>/dev/null | grep -w $CONTENT)
+		MATCH=$(cat $LOGFILE 2>/dev/null | grep -w $CONTENT)
 		if [ "$i" -lt 1 ]; then
 			return 1
 		fi
@@ -2114,8 +2114,8 @@ clean_webtest(){
 	killall curl-webtest >/dev/null 2>&1
 
 	# 2. kill all other ss_webtest.sh
-	local current_pid=$$
-	local ss_webtest_pids=$(ps|grep -E "ss_webtest\.sh"|awk '{print $1}'|grep -v ${current_pid})
+	current_pid=$$
+	ss_webtest_pids=$(ps|grep -E "ss_webtest\.sh"|awk '{print $1}'|grep -v ${current_pid})
 	if [ -n "${ss_webtest_pids}" ];then
 		for ss_webtest_pid in ${ss_webtest_pids}
 		do

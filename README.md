@@ -4,23 +4,21 @@
 - 此项目提供用于asuswrt、asuswrt-merlin为基础的，带软件中心固件（≥384）路由器的科学上网功能。
 
 ---
+- 调整：使用clash作为核心客户端，显示切换线路到页面
 - 默认：不显示线路地址、关闭延时测试、打开订阅高级设定、打开时间同步检测、打开规则和订阅更新
-- 调整：第一次安装插件优先显示订阅、国内外状态区域不显示延时
+- 调整：国内外状态区域不显示延时
 - 增加：每小时订阅、规则测试、订阅时发送当前插件和软件中心版本
 ---
 
 ## 插件特色
 
 - 多平台支持：博通armv7，博通armv8，联发科Filogic 830 MT7986A，高通ipq系列
-- 多客户端支持：Shadowsocks、ShadowsocksR、V2ray、Xray、Trojan、NaïveProxy、TuicV5、Hysteria2
-- shadowsocks支持SIP003插件：simple-obfs；V2ray和Xray支持多种协议配置
+- 使用clash核心作为客户端
 - 多种模式支持：gfwlist模式、大陆白名单、游戏模式、全局模式、回国模式
 - 提供多种现成的DNS方案，并且可以自由方便的进行DNS方案自定义配置
-- 支持SS/SSR/V2ray/Xray/Trojan节点的在线订阅，支持节点生成二维码用以分享
-- 故障转移、主备切换、负载均衡、定时重启、定时订阅、规则更新、二进制更新
-- 支持kcptun、udpspeeder、udp2raw，可以实现代理加速，游戏加速，应对丢包等
+- 支持在线订阅
+- 定时重启、定时订阅、规则更新
 - 同时提供full版本和lite版本，hnd_lite版本安装后占用不到8MB的空间，适合小jffs机型
-- armv8机型支持tcp fast open和ss/ssr/trojan多核心运行
 
 ## 支持机型/固件
 
@@ -89,30 +87,6 @@
 ## 版本选择
 
 fancyss 3.0支持hnd、hnd_v8、qca、arm、mtk 、ipq32、ipq64七个平台，每个平台又有full版本和lite版本
-
-full版本为全功能版本，支持SS、 SSR、V2ray、 Xray、Trojan、NaïveProxy、TuicV5、Hysteria2 八种客户端，安装包体积较大
-
-1. full版本虽然支持tuic，但因作者已放弃项目，所以默认不自带tuic二进制
-2. full版本虽然支持kcptun，但不提供kcptun二进制，如果使用kcptun加速，会提示下载二进制
-3. full版本默认不提供udp2raw和udpspeeder二进制，如需要使用，会提示下载二进制
-
-lite版本为精简版本，支持SS、 SSR、 V2ray、 Xray、 Trojan 五种客户端，安装包小巧，以下为lite版本精简内容：
-
-1. lite版本移除了NaïveProxy支持及其相关二进制文件：naive、ipt2socks
-3. lite版本移除了UDP加速功能及其二进制文件：speederv1、speederv2、udp2raw
-4. lite版本移除了KCP加速功能及其二进制文件：kcptun
-6. lite版本移除了直连解析的DNS方案及其二进制：chinadns1、chinadns2、https_dns_proxy
-7. lite版本移除了haveged，因为现在较新的固件系统自带了熵增软件
-8. lite版本移除了shadowsocks-rust替换shadowsocks-libev功能，默认由shadowsocks-libev运行ss协议
-9. lite版本移除了socks5页面及其脚本及其acl规则文件
-
-如果是不折腾以上被精简功能的用户，完全可以使用体积更小的lite版本
-
-RT-AX56U_V2、RT-AX57 这种jffs分区极小(15MB)的机型，直接使用lite版本即可
-
-要切换为lite版本，直接安装lite版本的离线安装包即可，以后在线更新也会维持为lite版本
-
-要切换为full版本，直接安装full版本的离线安装包即可，以后在线更新也会维持为full版本
 
 RT-AX86U、GT-AX6000等armv8机型（见上表），从3.0.6开始建议安装fancyss_hnd_v8版本，当然fancyss_hnd同样兼容
 

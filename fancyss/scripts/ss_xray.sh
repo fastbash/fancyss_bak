@@ -35,7 +35,7 @@ if [ -z ${_TARGET_FILE} ];then
 fi
 
 get_latest_version(){
-	local VERSION_FILE=$1
+	VERSION_FILE=$1
 	rm -rf /tmp/xray_latest_info.txt
 	echo_date "检测Xray最新版本..."
 	curl --connect-timeout 8 -s ${url_main}/${VERSION_FILE}.txt > /tmp/xray_latest_info.txt
@@ -195,8 +195,8 @@ start_xray() {
 		cd /koolshare/bin
 		xray run -c $XRAY_CONFIG_FILE >/dev/null 2>&1 &
 	fi
-	local XPID
-	local i=25
+	XPID
+	i=25
 	until [ -n "$XPID" ]; do
 		i=$(($i - 1))
 		XPID=$(pidof xray)

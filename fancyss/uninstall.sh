@@ -17,8 +17,18 @@ rm -rf /koolshare/bin/websocketd >/dev/null 2>&1
 # remove files
 rm -rf /koolshare/scripts/ss_*
 rm -rf /koolshare/webs/Module_shadowsocks*
+rm -rf /koolshare/bin/clash-fancyss
+
+rm -rf /koolshare/bin/trojan
+rm -rf /koolshare/bin/tuic-client
+rm -rf /koolshare/bin/xray
+rm -rf /koolshare/bin/v2ray
+rm -rf /koolshare/bin/v2ray-plugin
 rm -rf /koolshare/bin/rss-tunnel
 rm -rf /koolshare/bin/rss-local
+rm -rf /koolshare/bin/naive
+rm -rf /koolshare/bin/ipt2socks
+
 rm -rf /koolshare/bin/obfs-local
 rm -rf /koolshare/bin/haproxy
 rm -rf /koolshare/bin/dns2socks
@@ -28,16 +38,9 @@ rm -rf /koolshare/bin/smartdns
 rm -rf /koolshare/bin/speederv1
 rm -rf /koolshare/bin/speederv2
 rm -rf /koolshare/bin/udp2raw
-rm -rf /koolshare/bin/trojan
-rm -rf /koolshare/bin/tuic-client
-rm -rf /koolshare/bin/xray
-rm -rf /koolshare/bin/v2ray
-rm -rf /koolshare/bin/v2ray-plugin
 rm -rf /koolshare/bin/curl-fancyss
 rm -rf /koolshare/bin/hysteria2
 rm -rf /koolshare/bin/haveged
-rm -rf /koolshare/bin/naive
-rm -rf /koolshare/bin/ipt2socks
 rm -rf /koolshare/bin/dnsclient
 rm -rf /koolshare/bin/dohclient
 rm -rf /koolshare/bin/dohclient-cache
@@ -94,10 +97,12 @@ rm -rf /koolshare/bin/koolgame
 rm -rf /koolshare/bin/dnscrypt-proxy
 rm -rf /koolshare/bin/resolveip
 rm -rf /koolshare/bin/httping
+
 rm -rf /koolshare/bin/ss-redir
 rm -rf /koolshare/bin/ss-tunnel
 rm -rf /koolshare/bin/ss-local
 rm -rf /koolshare/bin/rss-redir
+
 rm -rf /koolshare/res/all.png
 rm -rf /koolshare/res/gfw.png
 rm -rf /koolshare/res/chn.png

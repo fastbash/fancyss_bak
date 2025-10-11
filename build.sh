@@ -8,13 +8,13 @@ HOME_URL=Module_shadowsocks.asp
 CURR_PATH="$( cd "$( dirname "$0" )" && pwd )"
 
 cp_rules(){
-	cp -rf ${CURR_PATH}/rules/gfwlist.conf ${CURR_PATH}/fancyss/ss/rules/
-	cp -rf ${CURR_PATH}/rules/chnroute.txt ${CURR_PATH}/fancyss/ss/rules/
-	cp -rf ${CURR_PATH}/rules/cdn.txt ${CURR_PATH}/fancyss/ss/rules/
-	cp -rf ${CURR_PATH}/rules/cdn_test.txt ${CURR_PATH}/fancyss/ss/rules/
-	cp -rf ${CURR_PATH}/rules/apple_china.txt ${CURR_PATH}/fancyss/ss/rules/
-	cp -rf ${CURR_PATH}/rules/google_china.txt ${CURR_PATH}/fancyss/ss/rules/
-	cp -rf ${CURR_PATH}/rules/rules.json.js ${CURR_PATH}/fancyss/ss/rules/rules.json.js
+	cp -rf "${CURR_PATH}"/rules/gfwlist.conf "${CURR_PATH}"/fancyss/ss/rules/
+	cp -rf "${CURR_PATH}"/rules/chnroute.txt "${CURR_PATH}"/fancyss/ss/rules/
+	cp -rf "${CURR_PATH}"/rules/cdn.txt "${CURR_PATH}"/fancyss/ss/rules/
+	cp -rf "${CURR_PATH}"/rules/cdn_test.txt "${CURR_PATH}"/fancyss/ss/rules/
+	cp -rf "${CURR_PATH}"/rules/apple_china.txt "${CURR_PATH}"/fancyss/ss/rules/
+	cp -rf "${CURR_PATH}"/rules/google_china.txt "${CURR_PATH}"/fancyss/ss/rules/
+	cp -rf "${CURR_PATH}"/rules/rules.json.js "${CURR_PATH}"/fancyss/ss/rules/rules.json.js
 }
 
 sync_binary(){
@@ -22,54 +22,55 @@ sync_binary(){
 	for BIN_REMOVE in $BINS_REMOVE;
 	do
 		echo ">>> remove old bin $BIN_REMOVE"
-		rm -rf ${CURR_PATH}/fancyss/bin-mtk/${BIN_REMOVE}
-		rm -rf ${CURR_PATH}/fancyss/bin-hnd_v8/${BIN_REMOVE}
-		rm -rf ${CURR_PATH}/fancyss/bin-hnd/${BIN_REMOVE}
-		rm -rf ${CURR_PATH}/fancyss/bin-qca/${BIN_REMOVE}
-		rm -rf ${CURR_PATH}/fancyss/bin-arm/${BIN_REMOVE}
-		rm -rf ${CURR_PATH}/fancyss/bin-ipq32/${BIN_REMOVE}
-		rm -rf ${CURR_PATH}/fancyss/bin-ipq64/${BIN_REMOVE}
+		rm -rf "${CURR_PATH}"/fancyss/bin-mtk/"${BIN_REMOVE}"
+		rm -rf "${CURR_PATH}"/fancyss/bin-hnd_v8/"${BIN_REMOVE}"
+		rm -rf "${CURR_PATH}"/fancyss/bin-hnd/"${BIN_REMOVE}"
+		rm -rf "${CURR_PATH}"/fancyss/bin-qca/"${BIN_REMOVE}"
+		rm -rf "${CURR_PATH}"/fancyss/bin-arm/"${BIN_REMOVE}"
+		rm -rf "${CURR_PATH}"/fancyss/bin-ipq32/"${BIN_REMOVE}"
+		rm -rf "${CURR_PATH}"/fancyss/bin-ipq64/"${BIN_REMOVE}"
 	done
 	
-	BINS_COPY="v2ray xray naive ss_rust hysteria2"
+	# BINS_COPY="v2ray xray naive ss_rust hysteria2"
+	BINS_COPY="clash"
 	for BIN in $BINS_COPY;
 	do
-		local VERSION_FLAG="latest.txt"
-		if [ "${BIN}" == "v2ray" ];then
-			local VERSION_FLAG="latest_v5.txt"
-		fi
+		VERSION_FLAG="latest.txt"
+		# if [ "${BIN}" = "v2ray" ];then
+		# 	VERSION_FLAG="latest_v5.txt"
+		# fi
 
-		if [ "${BIN}" == "xray" ];then
-			local VERSION_FLAG="latest_2.txt"
-		fi
+		# if [ "${BIN}" = "xray" ];then
+		# 	VERSION_FLAG="latest_2.txt"
+		# fi
 
-		if [ "${BIN}" == "ss_rust" ];then
-			local REAL_BIN="sslocal"
-		else
-			local REAL_BIN="${BIN}"
-		fi
+		# if [ "${BIN}" = "ss_rust" ];then
+		# 	REAL_BIN="sslocal"
+		# else
+			REAL_BIN="${BIN}"
+		# fi
 	
-		local version=$(cat ${CURR_PATH}/binaries/${BIN}/${VERSION_FLAG})
+		version=$(cat "${CURR_PATH}/binaries/${BIN}/${VERSION_FLAG}")
 		echo ">>> start to copy latest ${BIN}, version: ${version}"
-		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_arm64 ${CURR_PATH}/fancyss/bin-mtk/${REAL_BIN}
-		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_arm64 ${CURR_PATH}/fancyss/bin-hnd_v8/${REAL_BIN}
-		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7 ${CURR_PATH}/fancyss/bin-ipq32/${REAL_BIN}
-		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7 ${CURR_PATH}/fancyss/bin-hnd/${REAL_BIN}
-		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7 ${CURR_PATH}/fancyss/bin-qca/${REAL_BIN}
-		cp -rf ${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv5 ${CURR_PATH}/fancyss/bin-arm/${REAL_BIN}
+		cp -rf "${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_arm64" "${CURR_PATH}/fancyss/bin-mtk/${REAL_BIN}"
+		cp -rf "${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_arm64" "${CURR_PATH}/fancyss/bin-hnd_v8/${REAL_BIN}"
+		cp -rf "${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7" "${CURR_PATH}/fancyss/bin-ipq32/${REAL_BIN}"
+		cp -rf "${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7" "${CURR_PATH}/fancyss/bin-hnd/${REAL_BIN}"
+		cp -rf "${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv7" "${CURR_PATH}/fancyss/bin-qca/${REAL_BIN}"
+		cp -rf "${CURR_PATH}/binaries/${BIN}/${version}/${REAL_BIN}_armv5" "${CURR_PATH}/fancyss/bin-arm/${REAL_BIN}"
 	done
 }
 
 gen_folder(){
-	local platform=$1
-	local pkgtype=$2
-	local release_type=$3
-	cd ${CURR_PATH}
+	platform=$1
+	pkgtype=$2
+	release_type=$3
+	cd "${CURR_PATH}"
 	rm -rf shadowsocks
 	cp -rf fancyss shadowsocks
 
 	# different platform	
-	if [ "${platform}" == "hnd" ];then
+	if [ "${platform}" = "hnd" ];then
 		rm -rf ./shadowsocks/bin-arm
 		rm -rf ./shadowsocks/bin-hnd_v8
 		rm -rf ./shadowsocks/bin-qca
@@ -81,7 +82,7 @@ gen_folder(){
 		echo hnd > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"hnd\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-	if [ "${platform}" == "hnd_v8" ];then
+	if [ "${platform}" = "hnd_v8" ];then
 		rm -rf ./shadowsocks/bin-arm
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-qca
@@ -93,7 +94,7 @@ gen_folder(){
 		echo hnd_v8 > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"hnd_v8\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-	if [ "${platform}" == "qca" ];then
+	if [ "${platform}" = "qca" ];then
 		rm -rf ./shadowsocks/bin-arm
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-hnd_v8
@@ -105,7 +106,7 @@ gen_folder(){
 		echo qca > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"qca\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-	if [ "${platform}" == "arm" ];then
+	if [ "${platform}" = "arm" ];then
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-hnd_v8
 		rm -rf ./shadowsocks/bin-qca
@@ -119,7 +120,7 @@ gen_folder(){
 		sed -i 's/\,\s\"ss_basic_tfo\"//g' ./shadowsocks/webs/Module_shadowsocks.asp
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"arm\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-	if [ "${platform}" == "mtk" ];then
+	if [ "${platform}" = "mtk" ];then
 		rm -rf ./shadowsocks/bin-arm
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-hnd_v8
@@ -132,7 +133,7 @@ gen_folder(){
 		echo mtk > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"mtk\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-	if [ "${platform}" == "ipq32" ];then
+	if [ "${platform}" = "ipq32" ];then
 		rm -rf ./shadowsocks/bin-arm
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-hnd_v8
@@ -150,7 +151,7 @@ gen_folder(){
 		echo ipq32 > ./shadowsocks/.valid
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"ipq32\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-	if [ "${platform}" == "ipq64" ];then
+	if [ "${platform}" = "ipq64" ];then
 		rm -rf ./shadowsocks/bin-arm
 		rm -rf ./shadowsocks/bin-hnd
 		rm -rf ./shadowsocks/bin-hnd_v8
@@ -167,32 +168,32 @@ gen_folder(){
 		sed -i 's/PKG_ARCH=\"unknown\"/PKG_ARCH=\"ipq64\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
 	# remove some binary because it's not default provide by install packages
-	find ./shadowsocks/bin -name "speederv1" | xargs rm -rf
-	find ./shadowsocks/bin -name "speederv2" | xargs rm -rf
-	find ./shadowsocks/bin -name "udp2raw" | xargs rm -rf
-	find ./shadowsocks/bin -name "tuic-client" | xargs rm -rf
+	find ./shadowsocks/bin -name "speederv1" -exec rm -rf {} \;
+	find ./shadowsocks/bin -name "speederv2" -exec rm -rf {} \;
+	find ./shadowsocks/bin -name "udp2raw" -exec rm -rf {} \;
+	find ./shadowsocks/bin -name "tuic-client" -exec rm -rf {} \;
 
 	# wirte type string
 	if [ "${release_type}" != "debug" ];then
 		sed -i 's/PKG_EXTA=\"_debug\"/PKG_EXTA=\"\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
-	if [ "${pkgtype}" == "lite" ];then
+	if [ "${pkgtype}" = "lite" ];then
 		sed -i 's/var PKG_TYPE=\"full\"/var PKG_TYPE=\"lite\"/g' ./shadowsocks/webs/Module_shadowsocks.asp
 	fi
 	
-	# if [ "${pkgtype}" == "lite" -a "${platform}" == "hnd" ];then
+	# if [ "${pkgtype}" = "lite" ] && [ "${platform}" = "hnd" ];then
 	# 	# for small jffs router: RT-AX56U_V2 and RT-AX57, use smaller version of XRAY 1.8.3
 	# 	cp ./binaries/xray/v1.8.3/xray_armv7 ./shadowsocks/bin/xray
 	# fi
 
 	
-	if [ "${pkgtype}" == "full" ];then
+	if [ "${pkgtype}" = "full" ];then
 		# remove marked comment
 		# rm -rf ./shadowsocks/bin/sslocal
 		sed -i 's/#@//g' ./shadowsocks/scripts/ss_proc_status.sh
 		sed -i 's/#@//g' ./shadowsocks/scripts/ss_conf.sh
 		echo ".show-btn5, .show-btn6{display: inline; !important}" >> ./shadowsocks/res/shadowsocks.css
-	elif [ "${pkgtype}" == "lite" ];then
+	elif [ "${pkgtype}" = "lite" ];then
 		# remove binaries
 		rm -rf ./shadowsocks/bin/sslocal
 		rm -rf ./shadowsocks/bin/v2ray
@@ -205,7 +206,7 @@ gen_folder(){
 		rm -rf ./shadowsocks/bin/haveged
 		rm -rf ./shadowsocks/bin/hysteria2
 
-		if [ "${platform}" == "hnd" ];then
+		if [ "${platform}" = "hnd" ];then
 			rm -rf ./shadowsocks/bin/websocketd
 		fi
 		# remove scripts
@@ -325,7 +326,7 @@ gen_folder(){
 		sed -i 's/config\.json\.js/config_lite\.json\.js/g' ./shadowsocks/res/ss-menu.js
 	fi
 
-	if [ "${release_type}" == "release" ];then
+	if [ "${release_type}" = "release" ];then
 		# 移除注释
 		# remove match words: //fancyss-full //fancyss-full_1 //fancyss-full_2
 		sed -i 's/[ \t]*\/\/fancyss-full//g' ./shadowsocks/webs/Module_shadowsocks.asp
@@ -351,7 +352,7 @@ gen_folder(){
 
 	# when develop in other branch
 	# master/fancyss_hnd
-	# local CURRENT_BRANCH=$(git branch | head -n1 |awk '{print $2}')
+	# CURRENT_BRANCH=$(git branch | head -n1 |awk '{print $2}')
 	# if [ "${CURRENT_BRANCH}" != "master" ];then
 	# 	sed -i "s/master\/fancyss_hnd/${CURRENT_BRANCH}\/fancyss_hnd/g" ./shadowsocks/webs/Module_shadowsocks.asp
 	# 	sed -i "s/master\/fancyss_hnd/${CURRENT_BRANCH}\/fancyss_hnd/g" ./shadowsocks/res/ss-menu.js
@@ -359,38 +360,38 @@ gen_folder(){
 }
 
 build_pkg() {
-	local platform=$1
-	local pkgtype=$2
-	local release_type=$3
+	platform=$1
+	pkgtype=$2
+	release_type=$3
 	# different platform
-	if [ ${release_type} == "release" ];then
+	if [ ${release_type} = "release" ];then
 		echo "打包：fancyss_${platform}_${pkgtype}.tar.gz"
-		tar -zcf ${CURR_PATH}/packages/fancyss_${platform}_${pkgtype}.tar.gz shadowsocks >/dev/null
-		md5value=$(md5sum ${CURR_PATH}/packages/fancyss_${platform}_${pkgtype}.tar.gz|tr " " "\n"|sed -n 1p)
-		cat >>${CURR_PATH}/packages/version_tmp.json.js <<-EOF
+		tar -zcf "${CURR_PATH}"/packages/fancyss_${platform}_${pkgtype}.tar.gz shadowsocks >/dev/null
+		md5value=$(md5sum "${CURR_PATH}"/packages/fancyss_${platform}_${pkgtype}.tar.gz|tr " " "\n"|sed -n 1p)
+		cat >>"${CURR_PATH}"/packages/version_tmp.json.js <<-EOF
 			,"md5_${platform}_${pkgtype}":"${md5value}"
 		EOF
-	elif [ ${release_type} == "debug" ];then
+	elif [ ${release_type} = "debug" ];then
 		echo "打包：fancyss_${platform}_${pkgtype}_${release_type}.tar.gz"
-		tar -zcf ${CURR_PATH}/packages/fancyss_${platform}_${pkgtype}_${release_type}.tar.gz shadowsocks >/dev/null
+		tar -zcf "${CURR_PATH}"/packages/fancyss_${platform}_${pkgtype}_${release_type}.tar.gz shadowsocks >/dev/null
 	fi
 }
 
 do_backup(){
-	if [ -d "${CURR_PATH}/../fancyss_bak_history_package" ];then
-		local platform=$1
-		local pkgtype=$2
-		local release_type=$3
-		if [ ${release_type} == "release" ];then
-			cd ${CURR_PATH}
-			HISTORY_DIR="${CURR_PATH}/../fancyss_bak_history_package/fancyss_${platform}"
+	if [ -d ""${CURR_PATH}"/../fancyss_bak_history_package" ];then
+		platform=$1
+		pkgtype=$2
+		release_type=$3
+		if [ ${release_type} = "release" ];then
+			cd "${CURR_PATH}"
+			HISTORY_DIR=""${CURR_PATH}"/../fancyss_bak_history_package/fancyss_${platform}"
 			mkdir -p ${HISTORY_DIR}
 			# backup latested package after pack
-			local backup_version=${VERSION}
-			local backup_tar_md5=${md5value}
+			backup_version=${VERSION}
+			backup_tar_md5=${md5value}
 			
 			echo "备份：fancyss_${platform}_${pkgtype}_${backup_version}.tar.gz"
-			cp ${CURR_PATH}/packages/fancyss_${platform}_${pkgtype}.tar.gz ${HISTORY_DIR}/fancyss_${platform}_${pkgtype}_${backup_version}.tar.gz
+			cp "${CURR_PATH}"/packages/fancyss_${platform}_${pkgtype}.tar.gz ${HISTORY_DIR}/fancyss_${platform}_${pkgtype}_${backup_version}.tar.gz
 			sed -i "/fancyss_${platform}_${pkgtype}_${backup_version}/d" ${HISTORY_DIR}/md5sum.txt
 			if [ ! -f ${HISTORY_DIR}/md5sum.txt ];then
 				touch ${HISTORY_DIR}/md5sum.txt
@@ -401,10 +402,10 @@ do_backup(){
 }
 
 papare(){
-	rm -f ${CURR_PATH}/packages/*
+	rm -f "${CURR_PATH}"/packages/*
 	cp_rules
-	sync_binary
-	cat >${CURR_PATH}/packages/version_tmp.json.js <<-EOF
+	# sync_binary
+	cat >"${CURR_PATH}"/packages/version_tmp.json.js <<-EOF
 	{
 	"name":"fancyss"
 	,"version":"${VERSION}"
@@ -412,19 +413,19 @@ papare(){
 }
 
 finish(){
-	echo "}" >>${CURR_PATH}/packages/version_tmp.json.js
-	cat ${CURR_PATH}/packages/version_tmp.json.js | jq '.' >${CURR_PATH}/packages/version.json.js
-	rm -rf ${CURR_PATH}/packages/version_tmp.json.js
-	echo "完成！生成的离线安装包在：${CURR_PATH}/packages"
+	echo "}" >>"${CURR_PATH}"/packages/version_tmp.json.js
+	cat "${CURR_PATH}"/packages/version_tmp.json.js | jq '.' >"${CURR_PATH}"/packages/version.json.js
+	rm -rf "${CURR_PATH}"/packages/version_tmp.json.js
+	echo "完成！生成的离线安装包在："${CURR_PATH}"/packages"
 }
 
 pack(){
 	gen_folder $1 $2 $3
 	build_pkg $1 $2 $3
-	if [ "$3" == "release" ];then
+	if [ "$3" = "release" ];then
 		do_backup  $1 $2 $3
 	fi
-	rm -rf ${CURR_PATH}/shadowsocks/
+	rm -rf "${CURR_PATH}"/shadowsocks/
 }
 
 make(){
