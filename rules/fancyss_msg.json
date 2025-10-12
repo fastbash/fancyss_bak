@@ -14,9 +14,9 @@
   "ads_des_1": "",
   "note": "remote message for fancyss",
   "msg_1": "📢 通知：fancyss 规则日更版",
-  "msg_2": "📢 调整：使用 mihomo(clash) 作为客户端",
-  "msg_3": "📢 调整：订阅内容调整为 clash，去除订阅中的规则部分，仅获取代理组",
-  "msg_4": "",
+  "msg_2": "📢 ！！重要！！从3.3.9以下升级必须重新设置clash订阅！",
+  "msg_3": "📢 调整：使用 mihomo(clash) 作为客户端",
+  "msg_4": "📢 调整：订阅内容调整为 clash，去除订阅中的规则部分，仅获取代理组",
   "msg_5": "",
   "msg_6": ""
 }
