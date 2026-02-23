@@ -2914,7 +2914,7 @@ fire_redir() {
         i=1
         while [ $i -le $THREAD ]; do
             cmd $1 $ARG_1 $ARG_2 $ARG_3 -f /var/run/ss_$i.pid
-            let i++
+            i=$((i+1))
         done
     else
         cmd $1 -f /var/run/ss.pid
@@ -3057,17 +3057,21 @@ create_clash_yaml() {
         proxy_groups_end=$((proxy_groups_end-1))
     fi
     sed -n "${proxy_groups_start},${proxy_groups_end}p" $config_src > ${config_src%.*}.proxy_groups
-    # 获取第一个组名称
+    # # 获取第一个组名称
     proxy_groups_name="$(sed -n "${proxy_groups_start},${proxy_groups_end}p" $config_src | grep -wn name | head -n1)"
     proxy_groups_name="${proxy_groups_name##* }"
 
     # 组合新的配置文件
     config_dst=/koolshare/ss/clash.yaml
     echo_date "生成配置文件 $config_dst"
-    printf 'redir-port: 3333\nsocks-port: 23456\nallow-lan: true\nmode: Rule\nlog-level: info\nexternal-ui: clash-dashboard\nexternal-controller: :9091\nunified-delay: true\n' > /koolshare/ss/clash.yaml.tmp
+    if [ -f /koolshare/ss/clash.head ];then
+        sed "s#192.168.50.1#$(nvram get lan_ipaddr)#g" /koolshare/ss/clash.head > /koolshare/ss/clash.yaml.tmp
+    else
+        printf "redir-port: 3333\nsocks-port: 23456\nallow-lan: true\nmode: Rule\nlog-level: info\nexternal-ui: clash-dashboard\nexternal-controller: %s:9091\ntcp-concurrent: true\nunified-delay: true\n" "$(nvram get lan_ipaddr)" > /koolshare/ss/clash.yaml.tmp
+    fi
     cat ${config_src%.*}.proxies ${config_src%.*}.proxy_groups >> ${config_dst}.tmp
-    printf "\nrules:\n - MATCH,$proxy_groups_name\n" >> ${config_dst}.tmp
-    if /koolshare/bin/clash-fancyss -d /koolshare/ss/ -f ${config_dst}.tmp -t &>/dev/null;then
+    printf "\nrules:\n - MATCH,%s\n" "$proxy_groups_name" >> ${config_dst}.tmp
+    if /koolshare/bin/clash-fancyss -d /koolshare/ss/ -f ${config_dst}.tmp -t >/dev/null 2>&1;then
         cat ${config_dst}.tmp > ${config_dst}
     else
         echo_date "${config_dst}.tmp 测试不通过！"
@@ -5237,7 +5241,7 @@ apply_nat_rules() {
         for VLAN_INDEX in ${VLAN_INDEXS}
         do
             iptables -t nat -I PREROUTING "${INSET_NU_DNS}" -i br${VLAN_INDEX} -p udp -m udp --dport 53 -j SHADOWSOCKS_DNS_${VLAN_INDEX}
-            let INSET_NU_DNS+=1
+            INSET_NU_DNS=$((INSET_NU_DNS + 1))
         done
     else
         echo_date "DNS劫持功能未开启，建议开启！"
@@ -5360,7 +5364,7 @@ load_nat() {
     nat_ready=$(iptables -t nat -L PREROUTING -v -n --line-numbers | grep -v PREROUTING | grep -v destination)
     i=300
     until [ -n "$nat_ready" ]; do
-        i=$(($i - 1))
+        i=$((i - 1))
         if [ "$i" -lt 1 ]; then
             echo_date "错误：不能正确加载nat规则!"
             close_in_five

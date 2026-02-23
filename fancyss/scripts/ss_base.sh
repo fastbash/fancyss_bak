@@ -361,13 +361,13 @@ kill_used_port(){
 	used_ports=$(echo ${ports} ${LISTENS} | sed 's/\s/\n/g' | sort -n | uniq -d | tr '\n' ' ' | sed 's/\s$//g')
 	# kill ports taken program
 	if [ -n "${used_ports}" ];then
-		echo_date "检测到冲突端口：${used_ports}，尝试关闭占用端口的程序..."
+		echo_date "检测到已启动端口：${used_ports}，尝试关闭程序..."
 		for used_port in ${used_ports}
 		do
 			_ret=$(netstat -nlp 2>/dev/null | grep -E "^tcp|^udp|^raw" | grep -w "${used_port}" | awk '{print $NF}')
 			_conflic_prg=$(echo "${_ret}" | awk -F "/" '{print $2}' | sort -u | tr '\n' ' ' | sed 's/\s$//g' )
 			_conflic_pid=$(echo "${_ret}" | awk -F "/" '{print $1}' | sort -u | tr '\n' ' ' | sed 's/\s$//g' )
-			echo_date "关闭冲突端口 ${used_port} 占用程序：${_conflic_prg}，pid：${_conflic_pid}"
+			echo_date "关闭已启动程序：${_conflic_prg}，pid：${_conflic_pid}，端口 ${used_port}"
 			kill -9 "${_conflic_pid}" >/dev/null 2>&1
 		done
 	fi

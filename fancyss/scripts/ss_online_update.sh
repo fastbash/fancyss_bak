@@ -613,11 +613,15 @@ get_online_rule_now(){
     # 7. download sublink
     echo_date "📁准备下载订阅链接到本地临时文件，请稍等..."
     
-    if ! download_by_curl "$online_url" "$online_url_file_tmp"; then
-        echo_date "⚠️使用curl下载订阅失败，尝试更换wget进行下载..."
-        if ! download_by_wget "$online_url" "$online_url_file_tmp";then
-            download_by_aria2 "$online_url" "$online_url_file_tmp"
-        fi
+    # if ! download_by_curl "$online_url" "$online_url_file_tmp"; then
+    #     echo_date "⚠️使用curl下载订阅失败，尝试更换wget进行下载..."
+    #     if ! download_by_wget "$online_url" "$online_url_file_tmp";then
+    #         if ! download_by_aria2 "$online_url" "$online_url_file_tmp";then return 1;fi
+    #     fi
+    # fi
+    if ! download_by_fancyss "$online_url" "$online_url_file_tmp"; then
+        echo_date "⚠️下载失败！"
+        return 1
     fi
 
     echo_date "🆗下载成功，继续检测下载内容..."
@@ -627,8 +631,13 @@ get_online_rule_now(){
     fi
     
     echo_date "🆗下载内容检测完成！"
+    echo_date "**************************************************************"
+    echo_date "配置文件订阅成功！！！配置文件订阅成功！！！配置文件订阅成功！！！"
+    echo_date "**************************************************************"
 
-    cat /koolshare/ss/config.yaml > /koolshare/ss/config.yaml.old
+    if [ -f /koolshare/ss/config.yaml ];then
+        cat /koolshare/ss/config.yaml > /koolshare/ss/config.yaml.old
+    fi
     cat "${online_url_file_tmp}" > /koolshare/ss/config.yaml
     
 }

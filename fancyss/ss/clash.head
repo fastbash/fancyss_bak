@@ -1,0 +1,10 @@
+redir-port: 3333
+socks-port: 23456
+allow-lan: true
+mode: Rule
+log-level: info
+external-ui: clash-dashboard
+external-controller: 192.168.50.1:9091
+tcp-concurrent: true
+unified-delay: true
+global-client-fingerprint: chrome
