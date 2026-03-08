@@ -718,7 +718,13 @@ install_now(){
 
 	# remove some file first
 	echo_date "清理旧文件"
-	rm -rf /koolshare/ss/*
+	# rm -rf /koolshare/ss/*
+	for vals in /koolshare/ss/*;do
+		# 跳过 yaml 文件
+		for val in $(echo "$vals" | grep -v '.yaml');do
+			rm -rf "${val:?}"
+		done
+	done
 	rm -rf /koolshare/scripts/ss_*
 	rm -rf /koolshare/webs/Module_shadowsocks*
 	rm -rf /koolshare/bin/clash-fancyss
@@ -765,7 +771,7 @@ install_now(){
 
 	# some file may exist in /data
 	if [ -d "/data" ];then
-		rm -rf /data/clash-fancyss >/dev/null 2>&1
+		rm -rf /data/*fancyss* >/dev/null 2>&1
 		rm -rf /data/xray >/dev/null 2>&1
 		rm -rf /data/v2ray >/dev/null 2>&1
 		rm -rf /data/hysteria2 >/dev/null 2>&1
@@ -780,7 +786,7 @@ install_now(){
 	fi
 	
 	# legacy files should be removed
-	rm -rf /koolshare/bin/clash-fancyss
+	rm -rf /koolshare/bin/*fancyss*
 	rm -rf /koolshare/bin/trojan
 	rm -rf /koolshare/bin/haproxy
 	rm -rf /koolshare/bin/smartdns
@@ -873,7 +879,8 @@ install_now(){
 		echo_date "检测/data分区剩余空间..."
 		SPACE_DATA_AVAL1=$(df | grep -w "/data" | awk '{print $4}')
 		echo_date "/data分区剩余空间为：${SPACE_DATA_AVAL1}KB"
-		_BINS="xray v2ray hysteria2 naive sslocal rss-local rss-tunnel rss-redir"
+		# _BINS="xray v2ray hysteria2 naive sslocal rss-local rss-tunnel rss-redir"
+		_BINS="clash-fancyss curl-fancyss websocketd"
 		for _BIN in ${_BINS}
 		do
 			if [ -f "/tmp/shadowsocks/bin/${_BIN}" ];then
@@ -1107,6 +1114,9 @@ install_now(){
 	if ! cru l | grep -q ssnodeupdate;then
 		cru a ssnodeupdate "0 4 * * * /koolshare/scripts/ss_online_update.sh fancyss 3"
 	fi
+
+	# 关闭订阅额外设置
+	dbus set ss_adv_sub=0
 
 	# dbus value
 	echo_date "设置插件安装参数..."

@@ -2,7 +2,7 @@
 
 # fancyss script for asuswrt/merlin based router with software center
 
-source /koolshare/scripts/base.sh
+source /koolshare/scripts/ss_base.sh
 eval $(dbus export ss_basic_)
 alias echo_date='echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】:'
 V2RAY_CONFIG_FILE="/koolshare/ss/v2ray.json"
@@ -183,12 +183,12 @@ start_v2ray() {
 			# use perp to start xray
 			mkdir -p /koolshare/perp/xray/
 			cat >/koolshare/perp/xray/rc.main <<-EOF
-				#!/bin/sh
-				source /koolshare/scripts/base.sh
-				CMD="xray run -c /koolshare/ss/xray.json"
-				
-				exec 2>&1
-				exec \$CMD
+#!/bin/sh
+source /koolshare/scripts/base.sh
+CMD="xray run -c /koolshare/ss/xray.json"
+
+exec 2>&1
+exec \$CMD
 				
 			EOF
 			chmod +x /koolshare/perp/xray/rc.main

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-fancyss_agent="fancyss_bak/${fancyss} softcenter/${softcenter} ${model}"
-
 
 download_by_fancyss(){
     if [ -z "$1" ] || [ -z "$2" ];then
@@ -65,10 +63,10 @@ download_by_curl(){
     CURL_BIN="$(which curl-fancyss)"
     CURL_BIN="curl-fancyss"
     BIN_VER="$CURL_BIN/$($CURL_BIN --version | head -n1 | awk '{print $2}')"
-    UA_STRING="User-Agent: ${BIN_VER} ${fancyss_agent}"
+    UA_STRING="${BIN_VER} ${fancyss_agent}"
     _curl_arg="-4sSkL"
 
-    echo_date "ℹ️使用 curl-fancyss($BIN_VER)"
+    echo_date "ℹ️使用 $BIN_VER"
     echo_date "下载地址： ${_url}"
     echo_date "目标文件： ${_url_file_tmp}"
 
@@ -82,14 +80,14 @@ download_by_curl(){
         dnsmasq_rule add "${_url_domain}"
 
         echo_date "1️⃣第一次尝试下载..."
-        if run $CURL_BIN ${_curl_arg} -H "$UA_STRING" ${EXT_ARG} -x socks5://127.0.0.1:23456 --connect-timeout 6 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
+        if run $CURL_BIN ${_curl_arg} -A "$UA_STRING" ${EXT_ARG} -x socks5://127.0.0.1:23456 --connect-timeout 6 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
             if [ "$(wc -c < "${_url_file_tmp}")" -gt 0 ];then
                 return 0
             fi
         fi
 
         echo_date "2️⃣第二次尝试下载..."
-        if run $CURL_BIN ${_curl_arg} -H "$UA_STRING" ${EXT_ARG}  -x socks5://127.0.0.1:23456 --connect-timeout 10 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
+        if run $CURL_BIN ${_curl_arg} -A "$UA_STRING" ${EXT_ARG}  -x socks5://127.0.0.1:23456 --connect-timeout 10 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
             if [ "$(wc -c < "${_url_file_tmp}")" -gt 0 ];then
                 return 0
             fi
@@ -100,15 +98,15 @@ download_by_curl(){
     echo_date "⬇️使用常规网络下载..."
     dnsmasq_rule remove "${_url_domain}"
     
-    echo_date "1️⃣使第一次尝试下载..."
-    if run $CURL_BIN ${_curl_arg} -H "$UA_STRING" --connect-timeout 6 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
+    echo_date "1️⃣第一次尝试下载..."
+    if run $CURL_BIN ${_curl_arg} -A "$UA_STRING" --connect-timeout 6 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
         if [ "$(wc -c < "${_url_file_tmp}")" -gt 0 ];then
             return 0
         fi
     fi
     
     echo_date "2️⃣第二次尝试下载..."
-    if run $CURL_BIN ${_curl_arg} -H "$UA_STRING" --connect-timeout 10 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
+    if run $CURL_BIN ${_curl_arg} -A "$UA_STRING" --connect-timeout 10 "${_url_encode}" 2>/dev/null > "${_url_file_tmp}";then
         if [ "$(wc -c < "${_url_file_tmp}")" -gt 0 ];then
             return 0
         fi

@@ -2,7 +2,7 @@
 
 # fancyss script for asuswrt/merlin based router with software center
 
-source /koolshare/scripts/base.sh
+source /koolshare/scripts/ss_base.sh
 ss_basic_enable=$(dbus get ss_basic_enable)
 LOCK_FILE=/var/lock/fancyss.lock
 

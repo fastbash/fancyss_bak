@@ -51,6 +51,7 @@ rm -rf /koolshare/bin/uredir
 if [ -f /usr/bin/jq ];then
 	rm -r /koolshare/bin/jq >/dev/null 2>&1
 fi
+rm -rf /tmp/upload/*fancyss* >/dev/null 2>&1
 
 rm -rf /koolshare/res/icon-shadowsocks.png
 rm -rf /koolshare/res/arrow-down.gif

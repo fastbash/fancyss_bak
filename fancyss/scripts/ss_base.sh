@@ -11,6 +11,12 @@ export KSROOT=/koolshare
 source $KSROOT/scripts/base.sh
 NEW_PATH=$(echo $PATH|tr ':' '\n'|sed '/opt/d;/mmc/d'|awk '!a[$0]++'|tr '\n' ':'|sed '$ s/:$//')
 export PATH=${NEW_PATH}
+
+export model="$(nvram get model | tr -d '\r')"
+export fancyss="$(dbus get ss_basic_version_local | tr -d '\r')"
+export softcenter="$(dbus get softcenter_version | tr -d '\r')"
+export fancyss_agent="fancyss_bak/${fancyss} softcenter/${softcenter} ${model}"
+
 source helper.sh
 eval $(dbus export ss | sed 's/export //' | sed 's/;export /\n/g;' | sed '/ssconf_.*$/d'|sed 's/^/export /' | tr '\n' ';')
 unset usb2jffs_time_hour

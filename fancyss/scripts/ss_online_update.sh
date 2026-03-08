@@ -2,7 +2,7 @@
 
 # fancyss script for asuswrt/merlin based router with software center
 error_=0
-source_files="/koolshare/scripts/base.sh /koolshare/scripts/ss_download.sh"
+source_files="/koolshare/scripts/ss_base.sh /koolshare/scripts/ss_download.sh"
 for file in $source_files;do
     if [ ! -f "$file" ];then
         echo "missing file ${file##*/}"
@@ -35,9 +35,6 @@ KEY_WORDS_1=$(dbus get ss_basic_exclude | sed 's/,$//g' | sed 's/,/|/g')
 KEY_WORDS_2=$(dbus get ss_basic_include | sed 's/,$//g' | sed 's/,/|/g')
 alias urldecode='sed "s@+@ @g;s@%@\\\\x@g" | xargs -0 printf "%b"'
 
-model=$(nvram get model | tr -d '\r')
-fancyss=$(dbus get ss_basic_version_local | tr -d '\r')
-softcenter=$(dbus get softcenter_version | tr -d '\r')
 
 # 20230701, some vairiable should be unset
 unset usb2jffs_time_hour
@@ -268,9 +265,9 @@ dec64(){
 json2skipd(){
     file_name=$1
     cat > "$DIR/${file_name}.sh" <<-EOF
-        #!/bin/sh
-        source /koolshare/scripts/base.sh
-        #------------------------
+#!/bin/sh
+source /koolshare/scripts/base.sh
+#------------------------
 EOF
     NODE_INDEX=$(dbus list ssconf_basic_name_ | sed -n 's/^.*_\([0-9]\+\)=.*/\1/p' | sort -rn | sed -n '1p')
     [ -z "${NODE_INDEX}" ] && NODE_INDEX="0"
@@ -493,18 +490,18 @@ check_nodes(){
         echo_date "⌛如果节点数量过多，此处可能需要等待较长时间，请耐心等待..."
         rm -rf ${BACKUP_FILE}
         cat > ${BACKUP_FILE} <<-EOF
-            #!/bin/sh
-            source /koolshare/scripts/base.sh
-            #------------------------
-            # remove all nodes first
-            confs=\$(dbus list ssconf_basic_ | cut -d "=" -f 1)
-            for conf in \$confs
-            do
-                dbus remove \$conf
-            done
-            usleep 300000
-            #------------------------
-            # rewrite all node in order
+#!/bin/sh
+source /koolshare/scripts/base.sh
+#------------------------
+# remove all nodes first
+confs=\$(dbus list ssconf_basic_ | cut -d "=" -f 1)
+for conf in \$confs
+do
+    dbus remove \$conf
+done
+usleep 300000
+#------------------------
+# rewrite all node in order
 EOF
 
         # node to json file
@@ -632,7 +629,9 @@ get_online_rule_now(){
     
     echo_date "🆗下载内容检测完成！"
     echo_date "**************************************************************"
-    echo_date "配置文件订阅成功！！！配置文件订阅成功！！！配置文件订阅成功！！！"
+    echo_date "✅配置文件 订阅成功！！！"
+    echo_date "✅配置文件 订阅成功！！！"
+    echo_date "✅配置文件 订阅成功！！！"
     echo_date "**************************************************************"
 
     if [ -f /koolshare/ss/config.yaml ];then
@@ -683,11 +682,11 @@ start_online_update(){
     
     # 7. 下载/解析订阅节点
         # [ -z "${url}" ] && continue
-    echo_date "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖"
+    # echo_date "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖"
     echo_date "📢开始订阅！订阅链接如下："
     echo_date "🌎 ${online_url}"
     get_online_rule_now "${online_url}"
-    echo_date "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖"
+    # echo_date "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖"
 
     # 5. 写入所有节点
 

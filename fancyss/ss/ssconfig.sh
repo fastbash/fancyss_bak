@@ -381,10 +381,10 @@ check_chn_public_ip(){
             echo_date "路由WAN IPV4地址：${ROUTER_IP_WAN}，和公网出口地址相同，为海外公网IPV4地址！"
             if [ "${ss_basic_mode}" != "6" ];then
                 echo_date "检测到路由器公网出口IPV4地址为海外地址，可能是以下情况："
-                echo_date "-------------------------------"
+                echo_date "------------------------------------------------------------------------"
                 echo_date "1. 检测到路由器使用环境在海外，如果确实是这种情况，建议使用回国代理 + 回国模式"
                 echo_date "2. 可能你身在大陆，但是chnroute.txt没有收录你的公网出口IPV4地址，你可以自行将该IPV4地址加入到IP/CIDR黑名单"
-                echo_date "-------------------------------"
+                echo_date "------------------------------------------------------------------------"
             fi
         else
             echo_date "路由WAN IPV4地址：${ROUTER_IP_WAN}，和公网出口地址相同，为大陆公网IPV4地址！"
@@ -394,11 +394,11 @@ check_chn_public_ip(){
         if [ -z "${ISCHN_OUT}" ];then
             if [ "${ss_basic_mode}" != "6" ];then
                 echo_date "检测到路由器公网出口IPV4地址为海外地址，可能是以下情况："
-                echo_date "-------------------------------"
+                echo_date "------------------------------------------------------------------------"
                 echo_date "1. 可能你身在大陆，但是你的网络经过了多层代理，请检查是否有上游路由器开启了代理，特别是全局代理"
                 echo_date "2. 可能你身在海外，如果是这种情况，建议使用回国代理 + 回国模式"
                 echo_date "3. 可能你身在大陆，但是chnroute.txt没有收录你的公网出口IPV4地址，你可以自行将该IPV4地址加入到IP/CIDR黑名单"
-                echo_date "-------------------------------"
+                echo_date "------------------------------------------------------------------------"
             fi
         fi
     fi
@@ -603,7 +603,7 @@ close_in_five() {
         fi
         echo_date "科学上网插件已关闭！！"
     fi
-    echo_date "======================= 梅林固件 - 【科学上网】 ========================"
+    echo_date "======================= ASUS/Merlin - 【科学上网】 ========================"
     unset_lock
     exit
 }
@@ -1410,7 +1410,7 @@ start_dns_new(){
 
     # start_ss_local
 
-    echo_date "----------------------- start dns -----------------------"
+    echo_date "------------------------ start dns ------------------------"
     
     # 1. 中国DNS至少选择一个
     if [ "${ss_basic_chng_china_1_enable}" != "1" ] && [ "${ss_basic_chng_china_2_enable}" != "1" ];then
@@ -1901,7 +1901,7 @@ start_dns_new(){
         run_bg chinadns-ng ${EXT} -l 7913 -c ${CDNS} -t ${FDNS} -g /tmp/gfwlist.txt -m /tmp/cdn.txt -M
     fi
     detect_running_status chinadns-ng
-    echo_date "---------------------------------------------------------"
+    echo_date "------------------------------------------------------------------------"
 }
 
 start_dns_old() {
@@ -3008,7 +3008,11 @@ create_clash_yaml() {
     # 从订阅文件 /koolshare/ss/config.yaml 中获取 proxies 和 proxy-groups 写入到 /koolshare/ss/clash.yaml
     config_src=/koolshare/ss/config.yaml
     if [ ! -f /koolshare/ss/config.yaml ] || [ "$(wc -c < $config_src)" = "0" ] || ! grep -qw ^proxies $config_src || ! grep -qw ^proxy-groups $config_src;then
-        echo_date "$config_src 无效！ 请检查订阅是否成功！"
+        echo_date ""
+        echo_date "$config_src 无效！ ⚠️请检查配置文件是否订阅成功！"
+        echo_date "$config_src 无效！ ⚠️请检查配置文件是否订阅成功！"
+        echo_date "$config_src 无效！ ⚠️请检查配置文件是否订阅成功！"
+        echo_date ""
         dbus set ss_basic_enable="0"
         ss_basic_status=1
         disable_ss
@@ -3080,6 +3084,7 @@ create_clash_yaml() {
         disable_ss
         exit 1
     fi
+    ln -sf "$config_dst" /tmp/upload/fancyss_config.txt
 }
 
 start_clash() {
@@ -5379,29 +5384,27 @@ load_nat() {
 
 ss_post_start() {
     # 在SS插件启动成功后触发脚本
-    i
     mkdir -p /koolshare/ss/postscripts && cd /koolshare/ss/postscripts
     for i in $(find ./ -name 'P*' | sort); do
         trap "" INT QUIT TSTP EXIT
-        echo_date ------------- 【科学上网】 启动后触发脚本: $i -------------
+        echo_date ------------------------ 【科学上网】 启动后触发脚本: $i ------------------------
         if [ -r "$i" ]; then
             $i start
         fi
-        echo_date ----------------- 触发脚本: $i 运行完毕 -----------------
+        echo_date ------------------------ 触发脚本: $i 运行完毕 ------------------------
     done
 }
 
 ss_pre_stop() {
     # 在SS插件关闭前触发脚本
-    i
     mkdir -p /koolshare/ss/postscripts && cd /koolshare/ss/postscripts
     for i in $(find ./ -name 'P*' | sort -r); do
         trap "" INT QUIT TSTP EXIT
-        echo_date ------------- 【科学上网】 关闭前触发脚本: $i ------------
+        echo_date ------------------------ 【科学上网】 关闭前触发脚本: $i ------------------------
         if [ -r "$i" ]; then
             $i stop
         fi
-        echo_date ----------------- 触发脚本: $i 运行完毕 -----------------
+        echo_date ------------------------ 触发脚本: $i 运行完毕 ------------------------
     done
 }
 
@@ -5459,11 +5462,11 @@ check_chng_fdns(){
             FDNS_OK_FLAG_1=1
         else
             echo_date "可信DNS-1 ${TPORT}端口DNS服务工作异常，无法解析域名！可能是以下原因："
-            echo_date "---------------------------------------------------------"
+            echo_date "------------------------------------------------------------------------"
             echo_date "1. [大概率原因]：节点代理已经失效，请尝试更新订阅、更换可用节点"
             echo_date "2. [中概率原因]：国外DNS解析出现问题，请尝试更换其它的DNS方案"
             echo_date "3. [小概率原因]：节点延迟/丢包较高，请尝试更换低延迟/高质量节点"
-            echo_date "---------------------------------------------------------"
+            echo_date "------------------------------------------------------------------------"
             echo_date "如果插件启动完毕后国外不通，请检查可信DNS-1的配置！继续！"
             #echo_date "为了避免因代理失效对本地非代理网络也造成影响！将会关闭代理相关进程..."
             #close_in_five flag
@@ -5574,14 +5577,14 @@ check_frn_public_ip(){
         fi
     else
         echo_date "代理服务器出口地址检测失败！可能是以下原因："
-        echo_date "---------------------------------------------------------"
+        echo_date "------------------------------------------------------------------------"
         echo_date "1. 节点失效，请尝试更新订阅、更换节点"
         echo_date "2. 节点延迟较高，请尝试更换低延迟节点"
         if [ "${FDNS_OK_FLAG}" != "1" ];then
             echo_date "3. DNS解析失效，请尝试更换DNS方案"
         fi
         echo_date "插件将会继续运行，但是不保证代理工作正常！"
-        echo_date "---------------------------------------------------------"
+        echo_date "------------------------------------------------------------------------"
         # close_in_five flag
     fi
     
@@ -5604,7 +5607,7 @@ finish_start(){
     # something else need to do
 
     if [ "${ss_basic_nocdnscheck}" != "1" ] || [ "${ss_basic_nofdnscheck}" != "1" ] || [ "${ss_basic_nofrnipcheck}" != "1" ];then
-        echo_date "---------------------------------------------------------"
+        echo_date "------------------------------------------------------------------------"
         echo_date "所有服务和规则加载完毕，运行一些检测..."
     fi
 
@@ -5741,7 +5744,7 @@ check_status() {
 }
 
 disable_ss() {
-    echo_date ======================= 梅林固件 - 【科学上网】 ========================
+    echo_date ======================= ASUS/Merlin - 【科学上网】 ========================
     # if [ "${ss_basic_status}" = "0" ];then
     #     return
     # fi
@@ -5759,14 +5762,14 @@ disable_ss() {
     flush_iptables
     kill_cron_job
     dbus set ss_basic_status="0"
-    echo_date ------------------------ 【科学上网】已关闭 ----------------------------
+    echo_date ------------------------ 【科学上网】已关闭 ------------------------
 }
 
 apply_ss() {
-    echo_date ======================= 梅林固件 - 【科学上网】 ========================
+    echo_date ======================= ASUS/Merlin - 【科学上网】 ========================
     echo_date
     if [ "${ss_basic_status}" = "1" ];then
-        echo_date ------------------------- 关闭【科学上网】 -----------------------------
+        echo_date ------------------------ 关闭【科学上网】 ------------------------
         ss_pre_stop
         stop_status
         kill_process
@@ -5778,7 +5781,7 @@ apply_ss() {
         kill_cron_job
     fi
     # pre-start
-    echo_date ------------------------- 启动【科学上网】 -----------------------------
+    echo_date ------------------------ 启动【科学上网】 ------------------------
     # start
     prepare_system
     # resolv_server_ip
@@ -5823,7 +5826,7 @@ apply_ss() {
     check_status
     # store current status
     dbus set ss_basic_status="1"
-    echo_date ------------------------ 【科学上网】 启动完毕 ------------------------
+    echo_date "------------------------ 【科学上网】 启动完毕 ------------------------"
 }
 
 # for debug
@@ -5838,7 +5841,7 @@ get_status() {
     ps | grep $PPID | grep -v grep
     echo_date ========== 所有运行中的shell ==========
     ps | grep "\.sh" | grep -v grep
-    echo_date ------------------------------------
+    echo_date "------------------------------------------------"
 
     WAN_ACTION=$(ps | grep /jffs/scripts/wan-start | grep -v grep)
     NAT_ACTION=$(ps | grep /jffs/scripts/nat-start | grep -v grep)
@@ -5887,7 +5890,7 @@ stop)
     echo_date "你已经成功关闭科学上网服务~"
     echo_date "See you again!"
     echo_date
-    echo_date ======================= 梅林固件 - 【科学上网】 ========================
+    echo_date ======================= ASUS/Merlin - 【科学上网】 ========================
     unset_lock
     ;;
 restart)
@@ -5897,7 +5900,7 @@ restart)
     echo_date
     echo_date "Across the Great Wall we can reach every corner in the world!"
     echo_date
-    echo_date ======================= 梅林固件 - 【科学上网】 ========================
+    echo_date ======================= ASUS/Merlin - 【科学上网】 ========================
     unset_lock
     ;;
 flush_nat)

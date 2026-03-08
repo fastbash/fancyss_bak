@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source /koolshare/scripts/base.sh
+source /koolshare/scripts/ss_base.sh
 alias echo_date='echo 【$(TZ=UTC-8 date -R +%Y年%m月%d日\ %X)】:'
 rm -rf /tmp/upload/dns*.txt
 LOCK_FILE=/var/lock/koolss_dns.lock
